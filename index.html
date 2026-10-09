@@ -59,6 +59,30 @@ header .avs{font-size:20px;margin-right:2px}
 form{display:flex;gap:8px;padding:8px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
 form input{margin:0;border-radius:24px;flex:1}
 form button{width:48px;height:48px;border-radius:50%;margin:0;padding:0;font-size:18px;flex:none}
+form button.ic{width:42px;height:42px;background:var(--glass2);color:#fff;border:1px solid var(--bd);font-size:18px}
+form{gap:6px}
+.namerow{display:none;align-items:center;gap:8px;background:var(--glass2);border:1px solid var(--bd);border-radius:14px;padding:11px 14px;margin-bottom:10px}
+.namerow span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.namerow i{font-style:normal;color:var(--acc);font-weight:700;font-size:14px;cursor:pointer}
+.m img.media,.m video.media{display:block;max-width:100%;max-height:300px;border-radius:12px;margin:2px 0;background:#000}
+.m audio{display:block;width:230px;max-width:100%;height:40px}
+.dots{margin-left:8px;padding:0 6px;cursor:pointer;font-size:14px;color:var(--sub);font-weight:700}
+#menu{position:fixed;inset:0;z-index:20;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.45);padding:12px}
+.sheet{width:100%;max-width:380px;border-radius:22px;padding:14px;background:rgba(32,58,67,.95)}
+.sheet button{margin-bottom:8px}
+.sheet button:last-child{margin-bottom:0}
+.sheet button.danger{color:#ff8a8a}
+#viewer{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.93)}
+#viewer img{max-width:100%;max-height:100%}
+#rec{display:none;align-items:center;gap:10px;margin:0 8px 8px;padding:6px 8px 6px 16px;border-radius:28px}
+#rec .dot{width:12px;height:12px;border-radius:50%;background:#ff4d4d;animation:pulse 1s infinite}
+#rec .tmr{flex:1;font-weight:700}
+#rec button{width:44px;height:44px;border-radius:50%;margin:0;padding:0;font-size:18px;flex:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+#bugs{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:5}
+.bug{position:absolute;left:0;top:0;width:34px;height:34px;font-size:30px;line-height:34px;text-align:center;will-change:transform;filter:drop-shadow(0 3px 3px rgba(0,0,0,.45))}
+#bugPick{position:absolute;right:10px;top:calc(env(safe-area-inset-top,0px) + 66px);z-index:6;display:none;padding:6px;border-radius:16px;max-width:210px;flex-wrap:wrap}
+#bugPick button{width:44px;height:44px;padding:0;margin:0;background:transparent;border:0;font-size:26px}
 </style>
 </head>
 <body>
@@ -67,6 +91,7 @@ form button{width:48px;height:48px;border-radius:50%;margin:0;padding:0;font-siz
   <div class="card glass">
     <h1>💬 Simple Chat</h1>
     <p class="sub">Room banao ya code se join karo</p>
+    <div class="namerow" id="nameRow"><span>👋 <b id="nm"></b></span><i id="chgName">badlo</i></div>
     <input id="name" placeholder="Apna naam" maxlength="20" autocomplete="off">
     <button id="create">➕ Create Room</button>
     <div class="or">— ya —</div>
@@ -81,17 +106,31 @@ form button{width:48px;height:48px;border-radius:50%;margin:0;padding:0;font-siz
   <header class="glass">
     <button class="x" id="back">←</button>
     <div class="t"><b id="who">Room</b><small id="status">connecting...</small></div>
-    <button class="del" id="delAll" title="Chat delete karo">🗑</button>
+    <button class="del" id="bugBtn" title="Insect chhodo">🐞</button>
+    <button class="del" id="delAll" title="Meri chat clear karo">🧹</button>
     <div class="avs" id="hav"></div>
     <div class="code" id="codeBox" title="Copy code"></div>
   </header>
   <div id="msgs"></div>
   <div id="pres" class="glass"></div>
+  <div id="rec" class="glass">
+    <div class="dot"></div><div class="tmr" id="tmr">0:00</div>
+    <button type="button" class="alt" id="recCancel">✕</button>
+    <button type="button" id="recSend">➤</button>
+  </div>
   <form id="f" class="glass" style="margin:0 8px 8px;border-radius:28px">
+    <button type="button" class="ic" id="attach" title="Photo / Video">📎</button>
+    <input type="file" id="file" accept="image/*,video/*" style="display:none">
+    <button type="button" class="ic" id="mic" title="Voice message">🎤</button>
     <input id="txt" placeholder="Message likho" autocomplete="off" maxlength="1000" enterkeyhint="send">
     <button type="submit" id="send">➤</button>
   </form>
+  <div id="bugPick" class="glass"></div>
+  <div id="bugs"></div>
 </div>
+
+<div id="menu"><div class="sheet glass" id="sheet"></div></div>
+<div id="viewer"><img id="vimg" alt=""></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -161,7 +200,51 @@ var firebaseConfig = {
     var d=document.createElement("div");d.className="sys";d.textContent=t;
     $("msgs").appendChild(d);scroll();
   }
-  var els={}, info={}, sentMark={}, presRef=null, pres={};
+  var els={}, info={}, sentMark={}, presRef=null, pres={}, hidden={};
+
+  // ---- naam ek baar save ----
+  function savedName(){try{return localStorage.getItem("chatName")||""}catch(e){return""}}
+  function showName(){
+    var s=savedName();
+    if(s){$("name").style.display="none";$("nameRow").style.display="flex";$("nm").textContent=s}
+    else{$("name").style.display="block";$("nameRow").style.display="none"}
+  }
+  $("chgName").onclick=function(){
+    $("nameRow").style.display="none";$("name").style.display="block";
+    $("name").value=savedName();$("name").focus();
+  };
+  showName();
+
+  // ---- delete for me ----
+  function loadHidden(code){
+    hidden={};
+    try{JSON.parse(localStorage.getItem("hid_"+code)||"[]").forEach(function(k){hidden[k]=1})}catch(e){}
+  }
+  function hideKey(k){
+    hidden[k]=1;
+    try{localStorage.setItem("hid_"+curCode,JSON.stringify(Object.keys(hidden).slice(-3000)))}catch(e){}
+  }
+  function removeEl(k){
+    var el=els[k];if(el&&el.parentNode)el.parentNode.removeChild(el);
+    delete els[k];delete info[k];
+  }
+
+  // ---- message menu ----
+  function closeMenu(){$("menu").style.display="none"}
+  $("menu").onclick=function(e){if(e.target===this)closeMenu()};
+  function openMenu(key){
+    var f=info[key];if(!f)return;
+    var sh=$("sheet");sh.innerHTML="";
+    function btn(label,cls,fn){
+      var b=document.createElement("button");b.type="button";b.textContent=label;b.className=cls||"alt";
+      b.onclick=function(){closeMenu();fn&&fn()};sh.appendChild(b);
+    }
+    btn("🗑 Delete for me","alt",function(){hideKey(key);removeEl(key)});
+    if(f.mine)btn("🗑 Delete for everyone","alt danger",function(){if(ref)ref.child(key).remove()});
+    btn("Cancel","alt");
+    $("menu").style.display="flex";
+  }
+  $("viewer").onclick=function(){this.style.display="none"};
   var AVS=["🦊","🐼","🐯","🦁","🐸","🐵","🐰","🐻","🐨","🦄","🐙","🐧","🦉","🐳","🦋","🐲"];
   function avatarFor(n){var h=0;n=String(n||"");for(var i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))>>>0;return AVS[h%AVS.length]}
   function cnt(o){return o&&typeof o==="object"?Object.keys(o).length:0}
@@ -173,10 +256,23 @@ var firebaseConfig = {
     else{sp.textContent="✓";sp.className="tick sent";f.stxt.textContent=""}
   }
   function addMsg(d,key){
+    if(key&&hidden[key])return;
     var mine=d.cid===cid;
     var el=document.createElement("div");el.className="m glass"+(mine?" me":"");
     if(!mine){var n=document.createElement("div");n.className="n";n.textContent=String(d.name||"Guest").slice(0,20);el.appendChild(n)}
-    var t=document.createElement("div");t.textContent=String(d.text||"").slice(0,1000);el.appendChild(t);
+    var data=typeof d.data==="string"?d.data:"";
+    if(d.type==="image"&&data.indexOf("data:image/")===0){
+      var im=document.createElement("img");im.className="media";im.src=data;im.alt="photo";
+      im.onclick=function(e){e.stopPropagation();$("vimg").src=data;$("viewer").style.display="flex"};
+      el.appendChild(im);
+    }else if(d.type==="video"&&data.indexOf("data:video/")===0){
+      var vd=document.createElement("video");vd.className="media";vd.src=data;vd.controls=true;
+      vd.setAttribute("playsinline","");vd.preload="metadata";el.appendChild(vd);
+    }else if(d.type==="audio"&&data.indexOf("data:audio/")===0){
+      var au=document.createElement("audio");au.src=data;au.controls=true;au.preload="metadata";el.appendChild(au);
+    }else{
+      var t=document.createElement("div");t.textContent=String(d.text||"").slice(0,1000);el.appendChild(t);
+    }
     var tm=document.createElement("div");tm.className="tm";
     tm.appendChild(document.createTextNode(new Date(d.t||Date.now()).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})));
     var tick=null,stxt=null;
@@ -185,14 +281,23 @@ var firebaseConfig = {
       stxt=document.createElement("span");stxt.className="seenTxt";
       tm.appendChild(tick);tm.appendChild(stxt);
     }
+    if(key){
+      var dots=document.createElement("span");dots.className="dots";dots.textContent="⋮";
+      dots.onclick=function(e){e.stopPropagation();openMenu(key)};
+      tm.appendChild(dots);
+    }
     el.appendChild(tm);
     if(key){
       els[key]=el;
       info[key]={mine:mine,d:d,tick:tick,stxt:stxt};
+      el.onclick=function(e){
+        var tg=e.target.tagName;
+        if(tg==="VIDEO"||tg==="AUDIO")return;
+        var sel=window.getSelection?String(window.getSelection()):"";
+        if(sel)return;
+        openMenu(key);
+      };
       if(mine){
-        el.onclick=function(){
-          if(confirm("Ye message delete karna hai?"))ref.child(key).remove();
-        };
         setTick(key);
       }else{
         markDelivered(key);
@@ -232,13 +337,29 @@ var firebaseConfig = {
     box.appendChild(a);box.appendChild(nm);
     if(av)av.textContent=p.av||"";
   }
+  function announce(){
+    if(!presRef)return;
+    var me=presRef.child(cid);
+    me.onDisconnect().remove();
+    me.set({name:myName,av:avatarFor(myName),t:firebase.database.ServerValue.TIMESTAMP}).catch(function(){});
+  }
+  function goAway(){
+    if(presRef)presRef.child(cid).remove().catch(function(){});
+  }
+  document.addEventListener("visibilitychange",function(){
+    if(!presRef)return;
+    if(document.visibilityState==="visible")announce();else goAway();
+  });
+  window.addEventListener("pageshow",function(){
+    if(presRef&&document.visibilityState==="visible")announce();
+  });
   function joinPresence(code){
     presRef=db.ref("rooms/"+code+"/presence");
     var me=presRef.child(cid);
     db.ref(".info/connected").on("value",function(s){
       if(s.val()){
         me.onDisconnect().remove();
-        me.set({name:myName,av:avatarFor(myName),t:firebase.database.ServerValue.TIMESTAMP});
+        if(document.visibilityState==="visible")announce();
       }
     });
     presRef.on("value",function(s){pres=s.val()||{};renderPres()});
@@ -250,16 +371,18 @@ var firebaseConfig = {
     }
     pres={};
   }
-  window.addEventListener("pagehide",leavePresence);
+  window.addEventListener("pagehide",goAway);
 
   function enter(code){
-    myName=$("name").value.trim();
-    if(!myName){err("Pehle apna naam likho");return}
+    myName=$("name").style.display!=="none"?$("name").value.trim():savedName();
+    if(!myName){err("Pehle apna naam likho");showName();return}
+    try{localStorage.setItem("chatName",myName)}catch(e){}
+    showName();
     code=clean(code);
     if(code.length<4){err("Code kam se kam 4 letters/numbers ka ho");return}
     if(!configured){err("Firebase config nahi daali. File me firebaseConfig bharo.");return}
     err("");
-    curCode=code;addRecent(code);els={};info={};sentMark={};
+    curCode=code;addRecent(code);els={};info={};sentMark={};loadHidden(code);
     $("home").style.display="none";$("chat").style.display="flex";
     fit();
     $("msgs").innerHTML="";
@@ -267,11 +390,9 @@ var firebaseConfig = {
     $("codeBox").textContent=code.toUpperCase();
     sys("Room ready. Code dusre ko do: "+code.toUpperCase());
     ref=db.ref("rooms/"+code+"/messages");
-    ref.limitToLast(500).on("child_added",function(s){ addMsg(s.val()||{},s.key); },
+    ref.limitToLast(100).on("child_added",function(s){ addMsg(s.val()||{},s.key); },
       function(e){ sys("Permission error: Firebase rules check karo"); });
-    ref.on("child_removed",function(s){
-      var el=els[s.key];if(el&&el.parentNode)el.parentNode.removeChild(el);delete els[s.key];delete info[s.key];
-    });
+    ref.on("child_removed",function(s){removeEl(s.key)});
     ref.on("child_changed",function(s){
       var f=info[s.key];if(!f)return;
       f.d=s.val()||f.d;setTick(s.key);
@@ -307,11 +428,150 @@ var firebaseConfig = {
 
   $("delAll").onclick=function(){
     if(!ref)return;
-    if(confirm("Is room ki poori chat sab ke liye delete kar du?"))ref.remove();
+    if(!confirm("Sirf aapki chat clear hogi. Dusre ki chat nahi udegi. Karu?"))return;
+    Object.keys(info).forEach(hideKey);
+    els={};info={};
+    $("msgs").innerHTML="";
+    sys("Chat clear ho gayi (sirf aapke liye)");
   };
+
+  // ---- photo / video bhejna ----
+  function blobToData(b){
+    return new Promise(function(res,rej){
+      var r=new FileReader();r.onload=function(){res(r.result)};r.onerror=rej;r.readAsDataURL(b);
+    });
+  }
+  function imgToData(file){
+    return new Promise(function(res,rej){
+      var u=URL.createObjectURL(file),im=new Image();
+      im.onload=function(){
+        var s=Math.min(1,1280/Math.max(im.width,im.height));
+        var c=document.createElement("canvas");
+        c.width=Math.max(1,Math.round(im.width*s));c.height=Math.max(1,Math.round(im.height*s));
+        c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+        URL.revokeObjectURL(u);
+        var q=.72,d=c.toDataURL("image/jpeg",q);
+        while(d.length>900000&&q>.3){q-=.1;d=c.toDataURL("image/jpeg",q)}
+        res(d);
+      };
+      im.onerror=function(){URL.revokeObjectURL(u);rej()};
+      im.src=u;
+    });
+  }
+  function sendMedia(type,data,dur){
+    if(!ref)return;
+    var o={cid:cid,name:myName,type:type,data:data,t:firebase.database.ServerValue.TIMESTAMP};
+    if(dur)o.dur=dur;
+    ref.push(o).catch(function(){sys("Bhejna fail ho gaya (file badi ho sakti hai)")});
+  }
+  $("attach").onclick=function(){$("file").click()};
+  $("file").onchange=function(){
+    var f=this.files&&this.files[0];this.value="";
+    if(!f||!ref)return;
+    if(f.type.indexOf("image/")===0){
+      sys("Photo bhej raha hoon...");
+      imgToData(f).then(function(d){sendMedia("image",d)}).catch(function(){sys("Photo nahi khuli")});
+    }else if(f.type.indexOf("video/")===0){
+      if(f.size>3*1024*1024){sys("Video badi hai. Max 3 MB (chhota clip) bhejo");return}
+      sys("Video bhej raha hoon...");
+      blobToData(f).then(function(d){sendMedia("video",d)}).catch(function(){sys("Video nahi padh paya")});
+    }else sys("Sirf photo ya video bhejo");
+  };
+
+  // ---- voice message ----
+  var mr=null,chunks=[],recT0=0,recTick=null,recCancel=false,recStream=null;
+  function fmt(s){return Math.floor(s/60)+":"+("0"+(s%60)).slice(-2)}
+  function recUI(on){
+    $("rec").style.display=on?"flex":"none";
+    $("f").style.display=on?"none":"flex";
+    if(!on&&recTick){clearInterval(recTick);recTick=null}
+  }
+  function startRec(){
+    if(!ref)return;
+    if(!navigator.mediaDevices||!window.MediaRecorder){sys("Is browser me voice record nahi hota");return}
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){
+      recStream=st;chunks=[];recCancel=false;
+      var rc;try{rc=new MediaRecorder(st,{audioBitsPerSecond:32000})}catch(e){rc=new MediaRecorder(st)}
+      mr=rc;
+      rc.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data)};
+      rc.onstop=function(){
+        recStream&&recStream.getTracks().forEach(function(t){t.stop()});recStream=null;
+        var dur=Math.round((Date.now()-recT0)/1000);
+        recUI(false);mr=null;
+        if(recCancel||!chunks.length)return;
+        var blob=new Blob(chunks,{type:rc.mimeType||"audio/webm"});
+        if(blob.size>2.5*1024*1024){sys("Voice bahut lambi hai");return}
+        blobToData(blob).then(function(d){sendMedia("audio",d,dur)});
+      };
+      recT0=Date.now();rc.start();
+      $("tmr").textContent="0:00";recUI(true);
+      recTick=setInterval(function(){
+        var s=Math.round((Date.now()-recT0)/1000);$("tmr").textContent=fmt(s);
+        if(s>=90)stopRec(false);
+      },300);
+    }).catch(function(){sys("Mic ki permission nahi mili")});
+  }
+  function stopRec(cancel){
+    recCancel=!!cancel;
+    if(mr&&mr.state!=="inactive")mr.stop();else recUI(false);
+  }
+  $("mic").onclick=startRec;
+  $("recSend").onclick=function(){stopRec(false)};
+  $("recCancel").onclick=function(){stopRec(true)};
+
+  // ---- fun: insect chat pe ghoomta hai ----
+  var BUGS=["🐛","🐜","🐞","🪲","🕷️","🦂","🐝","🦗"];
+  BUGS.forEach(function(b){
+    var x=document.createElement("button");x.type="button";x.textContent=b;
+    x.onclick=function(){$("bugPick").style.display="none";spawnBug(b)};
+    $("bugPick").appendChild(x);
+  });
+  $("bugBtn").onclick=function(){
+    var p=$("bugPick");p.style.display=p.style.display==="flex"?"none":"flex";
+  };
+  function spawnBug(emoji){
+    var L=$("bugs");if(L.children.length>=10)return;
+    var W=L.clientWidth,H=L.clientHeight;
+    var el=document.createElement("div");el.className="bug";el.textContent=emoji;L.appendChild(el);
+    function edge(side){
+      var r=Math.random();
+      return side===0?[r*W,-40]:side===1?[W+40,r*H]:side===2?[r*W,H+40]:[-40,r*H];
+    }
+    var s0=Math.floor(Math.random()*4),s1=(s0+1+Math.floor(Math.random()*3))%4;
+    var start=edge(s0),pts=[];
+    for(var i=0;i<5;i++)pts.push([40+Math.random()*(W-80),90+Math.random()*(H-180)]);
+    pts.push(edge(s1));
+    var cx=start[0],cy=start[1],ang=Math.atan2(pts[0][1]-cy,pts[0][0]-cx),idx=0,last=null,pause=0;
+    var speed=70+Math.random()*50;
+    var kill=setTimeout(function(){el.remove()},45000);
+    function step(ts){
+      if(!el.parentNode)return;
+      if(last===null)last=ts;
+      var dt=Math.min(.05,(ts-last)/1000);last=ts;
+      if(pause>ts){draw(ts);requestAnimationFrame(step);return}
+      var tx=pts[idx][0],ty=pts[idx][1],dx=tx-cx,dy=ty-cy,dist=Math.hypot(dx,dy);
+      if(dist<20){
+        idx++;
+        if(idx>=pts.length){clearTimeout(kill);el.remove();return}
+        if(Math.random()<.5)pause=ts+300+Math.random()*700;
+      }else{
+        var diff=Math.atan2(dy,dx)-ang;diff=Math.atan2(Math.sin(diff),Math.cos(diff));
+        ang+=diff*Math.min(1,dt*6);
+        cx+=Math.cos(ang)*speed*dt;cy+=Math.sin(ang)*speed*dt;
+      }
+      draw(ts);requestAnimationFrame(step);
+    }
+    function draw(ts){
+      var w=Math.sin(ts/70)*5;
+      el.style.transform="translate("+(cx-17)+"px,"+(cy-17)+"px) rotate("+(ang*180/Math.PI+90+w)+"deg)";
+    }
+    requestAnimationFrame(step);
+  }
 
   $("back").onclick=function(){
     $("txt").blur();
+    if(mr)stopRec(true);
+    closeMenu();$("bugPick").style.display="none";$("bugs").innerHTML="";
     leavePresence();
     if(ref){ref.off();ref=null}
     if(db)db.ref(".info/connected").off();
