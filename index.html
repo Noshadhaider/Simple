@@ -81,6 +81,12 @@ form{gap:6px}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
 #bugs{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:5}
 .bug{position:absolute;left:0;top:0;width:34px;height:34px;font-size:30px;line-height:34px;text-align:center;will-change:transform;filter:drop-shadow(0 3px 3px rgba(0,0,0,.45))}
+.m.nib{animation:nib .22s linear infinite}
+@keyframes nib{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-3px) rotate(-1deg)}75%{transform:translateX(3px) rotate(1deg)}}
+.m.eaten{-webkit-mask-image:radial-gradient(circle at 100% 18%,transparent 11px,#000 12px),radial-gradient(circle at 0% 75%,transparent 9px,#000 10px),radial-gradient(circle at 62% 100%,transparent 10px,#000 11px),radial-gradient(circle at 30% 0%,transparent 7px,#000 8px);
+-webkit-mask-composite:source-in;mask-image:radial-gradient(circle at 100% 18%,transparent 11px,#000 12px),radial-gradient(circle at 0% 75%,transparent 9px,#000 10px),radial-gradient(circle at 62% 100%,transparent 10px,#000 11px),radial-gradient(circle at 30% 0%,transparent 7px,#000 8px);mask-composite:intersect}
+.m.eaten>*:not(.n):not(.tm):not(.ate){display:none}
+.m .ate{font-style:italic;color:var(--sub);font-size:14px}
 #bugPick{position:absolute;right:10px;top:calc(env(safe-area-inset-top,0px) + 66px);z-index:6;display:none;padding:6px;border-radius:16px;max-width:210px;flex-wrap:wrap}
 #bugPick button{width:44px;height:44px;padding:0;margin:0;background:transparent;border:0;font-size:26px}
 </style>
@@ -211,7 +217,7 @@ var firebaseConfig = {
     var d=document.createElement("div");d.className="sys";d.textContent=t;
     $("msgs").appendChild(d);scroll();
   }
-  var els={}, info={}, sentMark={}, presRef=null, pres={}, hidden={}, bugRef=null, bugSeen={}, svOff=0;
+  var els={}, info={}, sentMark={}, presRef=null, pres={}, hidden={}, bugRef=null, bugSeen={}, svOff=0, eating={};
   if(db)db.ref(".info/serverTimeOffset").on("value",function(s){svOff=s.val()||0});
 
   // ---- naam ek baar save ----
@@ -252,6 +258,7 @@ var firebaseConfig = {
       b.onclick=function(){closeMenu();fn&&fn()};sh.appendChild(b);
     }
     btn("🗑 Delete for me","alt",function(){hideKey(key);removeEl(key)});
+    if(!(f.d&&f.d.eaten))btn("🐛 Insect se khilao","alt",function(){sendEat(key)});
     if(f.mine)btn("🗑 Delete for everyone","alt danger",function(){if(ref)ref.child(key).remove()});
     btn("Cancel","alt");
     $("menu").style.display="flex";
@@ -316,7 +323,14 @@ var firebaseConfig = {
         if(document.visibilityState==="visible")markSeen(key);
       }
     }
+    if(key&&d.eaten)applyEaten(key);
     $("msgs").appendChild(el);scroll();
+  }
+  function applyEaten(key){
+    var el=els[key];if(!el||el.classList.contains("eaten"))return;
+    el.classList.remove("nib");el.classList.add("eaten");
+    var a=document.createElement("div");a.className="ate";a.textContent="🕳️ Is msg ko insect kha gaya 😋";
+    var tm=el.querySelector(".tm");el.insertBefore(a,tm);
   }
   function markDelivered(key){
     if(!ref)return;
@@ -418,7 +432,7 @@ var firebaseConfig = {
     ref.on("child_removed",function(s){removeEl(s.key)});
     ref.on("child_changed",function(s){
       var f=info[s.key];if(!f)return;
-      f.d=s.val()||f.d;setTick(s.key);
+      f.d=s.val()||f.d;setTick(s.key);if(f.d.eaten&&!eating[s.key])applyEaten(s.key);
     });
     joinPresence(code);
     bugSeen={};
@@ -429,10 +443,11 @@ var firebaseConfig = {
       var t=typeof d.t==="number"?d.t:Date.now()+svOff;
       if(Date.now()+svOff-t>8000)return;
       if(BUGS.indexOf(d.e)<0)return;
+      if(d.eat){eatMsg(d.e,d.eat,d.cid===cid);return}
       spawnBug(d.e);
     });
     db.ref(".info/connected").on("value",function(s){
-      $("status").textContent=s.val()?"online":"connecting...";
+      $("status").textContent=s.val()?"online · v3":"connecting...";
     });
     $("txt").focus();
   }
@@ -577,6 +592,55 @@ var firebaseConfig = {
     var r=bugRef.push({cid:cid,e:e,t:firebase.database.ServerValue.TIMESTAMP});
     r.catch(function(){spawnBug(e)});
     setTimeout(function(){try{r.remove()}catch(x){}},20000);
+  }
+  function sendEat(key){
+    var opts=["🐛","🐜","🪲","🐞","🦗"],e=opts[Math.floor(Math.random()*opts.length)];
+    if(!bugRef){eatMsg(e,key,true);return}
+    var r=bugRef.push({cid:cid,e:e,eat:key,t:firebase.database.ServerValue.TIMESTAMP});
+    r.catch(function(){eatMsg(e,key,true)});
+    setTimeout(function(){try{r.remove()}catch(x){}},20000);
+  }
+  function eatMsg(emoji,key,starter){
+    var tg=els[key];
+    if(!tg||tg.classList.contains("eaten")||eating[key])return;
+    var L=$("bugs");if(L.children.length>=10)return;
+    eating[key]=1;
+    try{tg.scrollIntoView({block:"center"})}catch(e){}
+    var W=L.clientWidth,H=L.clientHeight;
+    var el=document.createElement("div");el.className="bug";el.textContent=emoji;L.appendChild(el);
+    var sides=[[Math.random()*W,-40],[W+40,Math.random()*H],[Math.random()*W,H+40],[-40,Math.random()*H]];
+    var st=sides[Math.floor(Math.random()*4)],ex=sides[Math.floor(Math.random()*4)];
+    var cx=st[0],cy=st[1],ang=Math.PI/2,phase=0,t0=0,last=null,done=false;
+    var ox=.2+Math.random()*.6,oy=.3+Math.random()*.4,speed=140;
+    function finish(){
+      if(done)return;done=true;delete eating[key];
+      tg.classList.remove("nib");applyEaten(key);
+      if(starter&&ref)ref.child(key).child("eaten").set(true).catch(function(){});
+    }
+    var kill=setTimeout(function(){finish();el.remove()},25000);
+    function step(ts){
+      if(!el.parentNode)return;
+      if(last===null)last=ts;
+      var dt=Math.min(.05,(ts-last)/1000);last=ts;
+      var tx,ty;
+      if(phase<2&&!tg.parentNode){finish();phase=2}
+      if(phase<2){
+        var r=tg.getBoundingClientRect(),lr=L.getBoundingClientRect();
+        tx=r.left-lr.left+r.width*ox;ty=r.top-lr.top+r.height*oy;
+      }else{tx=ex[0];ty=ex[1]}
+      var dx=tx-cx,dy=ty-cy,dist=Math.hypot(dx,dy);
+      if(phase===0&&dist<14){phase=1;t0=ts;tg.classList.add("nib")}
+      if(phase===1&&ts-t0>3200){finish();phase=2;return requestAnimationFrame(step)}
+      if(phase===2&&dist<20){clearTimeout(kill);el.remove();return}
+      var diff=Math.atan2(dy,dx)-ang;diff=Math.atan2(Math.sin(diff),Math.cos(diff));
+      ang+=diff*Math.min(1,dt*6);
+      if(phase===1){cx+=dx*Math.min(1,dt*8);cy+=dy*Math.min(1,dt*8)}
+      else{cx+=Math.cos(ang)*speed*dt;cy+=Math.sin(ang)*speed*dt}
+      var w=Math.sin(ts/(phase===1?45:70))*(phase===1?14:5);
+      el.style.transform="translate("+(cx-17)+"px,"+(cy-17)+"px) rotate("+(ang*180/Math.PI+90+w)+"deg)";
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
   }
   function spawnBug(emoji){
     var L=$("bugs");if(L.children.length>=10)return;
