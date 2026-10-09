@@ -120,7 +120,8 @@ form{gap:6px}
   </div>
   <form id="f" class="glass" style="margin:0 8px 8px;border-radius:28px">
     <button type="button" class="ic" id="attach" title="Photo / Video">📎</button>
-    <input type="file" id="file" accept="image/*,video/*" style="display:none">
+    <input type="file" id="fileImg" accept="image/*" style="display:none">
+    <input type="file" id="fileVid" accept="video/*" style="display:none">
     <button type="button" class="ic" id="mic" title="Voice message">🎤</button>
     <input id="txt" placeholder="Message likho" autocomplete="off" maxlength="1000" enterkeyhint="send">
     <button type="submit" id="send">➤</button>
@@ -210,7 +211,8 @@ var firebaseConfig = {
     var d=document.createElement("div");d.className="sys";d.textContent=t;
     $("msgs").appendChild(d);scroll();
   }
-  var els={}, info={}, sentMark={}, presRef=null, pres={}, hidden={};
+  var els={}, info={}, sentMark={}, presRef=null, pres={}, hidden={}, bugRef=null, bugSeen={}, svOff=0;
+  if(db)db.ref(".info/serverTimeOffset").on("value",function(s){svOff=s.val()||0});
 
   // ---- naam ek baar save ----
   function savedName(){try{return localStorage.getItem("chatName")||""}catch(e){return""}}
@@ -401,15 +403,34 @@ var firebaseConfig = {
     sys("Room ready. Code dusre ko do: "+code.toUpperCase());
     ref=db.ref("rooms/"+code+"/messages");
     if(msgQ){msgQ.off();msgQ=null}
-    msgQ=ref.limitToLast(100);
-    msgQ.on("child_added",function(s){ addMsg(s.val()||{},s.key); },
-      function(e){ sys("Permission error: Firebase rules check karo"); });
+    var q=ref.limitToLast(100);msgQ=q;
+    function tv(d){return typeof d.t==="number"?d.t:9e15}
+    q.once("value",function(snap){
+      if(msgQ!==q)return;
+      var arr=[];snap.forEach(function(c){arr.push({k:c.key,d:c.val()||{}})});
+      arr.sort(function(a,b){return tv(a.d)-tv(b.d)});
+      arr.forEach(function(x){addMsg(x.d,x.k)});
+      q.on("child_added",function(s){
+        if(info[s.key]||hidden[s.key])return;
+        addMsg(s.val()||{},s.key);
+      });
+    },function(e){ sys("Permission error: Firebase rules check karo"); });
     ref.on("child_removed",function(s){removeEl(s.key)});
     ref.on("child_changed",function(s){
       var f=info[s.key];if(!f)return;
       f.d=s.val()||f.d;setTick(s.key);
     });
     joinPresence(code);
+    bugSeen={};
+    bugRef=db.ref("rooms/"+code+"/bugs");
+    bugRef.limitToLast(10).on("child_added",function(s){
+      var d=s.val()||{};
+      if(bugSeen[s.key])return;bugSeen[s.key]=1;
+      var t=typeof d.t==="number"?d.t:Date.now()+svOff;
+      if(Date.now()+svOff-t>8000)return;
+      if(BUGS.indexOf(d.e)<0)return;
+      spawnBug(d.e);
+    });
     db.ref(".info/connected").on("value",function(s){
       $("status").textContent=s.val()?"online":"connecting...";
     });
@@ -476,8 +497,16 @@ var firebaseConfig = {
     if(dur)o.dur=dur;
     ref.push(o).catch(function(){sys("Bhejna fail ho gaya (file badi ho sakti hai)")});
   }
-  $("attach").onclick=function(){$("file").click()};
-  $("file").onchange=function(){
+  $("attach").onclick=function(){
+    var sh=$("sheet");sh.innerHTML="";
+    function b(l,fn){var x=document.createElement("button");x.type="button";x.textContent=l;x.className="alt";
+      x.onclick=function(){closeMenu();fn&&fn()};sh.appendChild(x)}
+    b("🖼 Photo (Gallery)",function(){$("fileImg").click()});
+    b("🎞 Video (Gallery)",function(){$("fileVid").click()});
+    b("Cancel");
+    $("menu").style.display="flex";
+  };
+  function onPick(){
     var f=this.files&&this.files[0];this.value="";
     if(!f||!ref)return;
     if(f.type.indexOf("image/")===0){
@@ -488,7 +517,9 @@ var firebaseConfig = {
       sys("Video bhej raha hoon...");
       blobToData(f).then(function(d){sendMedia("video",d)}).catch(function(){sys("Video nahi padh paya")});
     }else sys("Sirf photo ya video bhejo");
-  };
+  }
+  $("fileImg").onchange=onPick;
+  $("fileVid").onchange=onPick;
 
   // ---- voice message ----
   var mr=null,chunks=[],recT0=0,recTick=null,recCancel=false,recStream=null;
@@ -535,12 +566,18 @@ var firebaseConfig = {
   var BUGS=["🐛","🐜","🐞","🪲","🕷️","🦂","🐝","🦗"];
   BUGS.forEach(function(b){
     var x=document.createElement("button");x.type="button";x.textContent=b;
-    x.onclick=function(){$("bugPick").style.display="none";spawnBug(b)};
+    x.onclick=function(){$("bugPick").style.display="none";sendBug(b)};
     $("bugPick").appendChild(x);
   });
   $("bugBtn").onclick=function(){
     var p=$("bugPick");p.style.display=p.style.display==="flex"?"none":"flex";
   };
+  function sendBug(e){
+    if(!bugRef){spawnBug(e);return}
+    var r=bugRef.push({cid:cid,e:e,t:firebase.database.ServerValue.TIMESTAMP});
+    r.catch(function(){spawnBug(e)});
+    setTimeout(function(){try{r.remove()}catch(x){}},20000);
+  }
   function spawnBug(emoji){
     var L=$("bugs");if(L.children.length>=10)return;
     var W=L.clientWidth,H=L.clientHeight;
@@ -587,6 +624,7 @@ var firebaseConfig = {
     leavePresence();
     if(msgQ){msgQ.off();msgQ=null}
     if(ref){ref.off();ref=null}
+    if(bugRef){bugRef.off();bugRef=null}
     if(db)db.ref(".info/connected").off();
     $("chat").style.display="none";$("home").style.display="flex";renderRecent();
   };
