@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>Simple Chat</title>
+<style>
+:root{--text:#fff;--sub:rgba(255,255,255,.7);--glass:rgba(255,255,255,.16);--glass2:rgba(255,255,255,.1);--bd:rgba(255,255,255,.28);--me:rgba(37,211,102,.38);--acc:#25d366;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;overflow:hidden}
+body{color:var(--text);font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;
+background:#0f2027;background:linear-gradient(135deg,#0f2027 0%,#203a43 45%,#2c5364 100%)}
+body:before,body:after{content:"";position:fixed;border-radius:50%;filter:blur(60px);z-index:0;pointer-events:none}
+body:before{width:260px;height:260px;background:#25d366;opacity:.45;top:-60px;left:-60px}
+body:after{width:300px;height:300px;background:#7c3aed;opacity:.4;bottom:-80px;right:-80px}
+.glass{background:var(--glass);border:1px solid var(--bd);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%)}
+#home{position:relative;z-index:1;height:100%;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{border-radius:22px;padding:24px;width:100%;max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.35)}
+h1{margin:0 0 4px;font-size:24px}
+.sub{color:var(--sub);font-size:14px;margin:0 0 16px}
+input{width:100%;padding:13px 14px;border:1px solid var(--bd);border-radius:14px;background:var(--glass2);color:var(--text);font-size:16px;margin-bottom:10px;outline:none}
+input::placeholder{color:var(--sub)}
+button{width:100%;padding:13px;border:0;border-radius:14px;background:var(--acc);color:#063;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:10px}
+button.alt{background:var(--glass2);color:#fff;border:1px solid var(--bd)}
+.or{text-align:center;color:var(--sub);font-size:13px;margin:4px 0 10px}
+#err{color:#ff8a8a;font-size:14px;min-height:18px}
+#chat{position:fixed;left:0;right:0;top:0;z-index:1;display:none;flex-direction:column;height:100%;padding-top:env(safe-area-inset-top,0px)}
+header{margin:8px 8px 0;border-radius:18px;padding:10px 12px;display:flex;align-items:center;gap:8px}
+header .t{flex:1;min-width:0}
+header b{display:block;font-size:16px}
+header small{color:var(--sub);font-size:12px}
+header .code{background:var(--glass);border:1px solid var(--bd);border-radius:10px;padding:6px 10px;font-weight:700;letter-spacing:2px;font-size:14px;cursor:pointer}
+header .x{background:none;width:auto;margin:0;padding:6px 10px;font-size:20px;color:#fff}
+#msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:7px;-webkit-overflow-scrolling:touch}
+.m{max-width:80%;padding:8px 12px;border-radius:16px 16px 16px 4px;align-self:flex-start;word-wrap:break-word;overflow-wrap:anywhere}
+.m.me{background:var(--me);border-radius:16px 16px 4px 16px;align-self:flex-end}
+.m .n{font-size:12px;font-weight:700;color:#8dffb5;margin-bottom:2px}
+.m .tm{font-size:10px;color:var(--sub);text-align:right;margin-top:2px}
+.sys{align-self:center;color:var(--sub);font-size:12px;padding:4px 12px;border-radius:12px;background:var(--glass2)}
+.recent{margin-top:6px;max-height:34vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.recent h3{font-size:13px;color:var(--sub);margin:8px 0 6px;font-weight:600}
+.rc{display:flex;align-items:center;gap:8px;background:var(--glass2);border:1px solid var(--bd);border-radius:12px;padding:8px 12px;margin-bottom:6px;cursor:pointer}
+.rc span{flex:1;font-weight:700;letter-spacing:2px}
+.rc i{font-style:normal;padding:2px 8px;color:var(--sub)}
+header .del{background:none;width:auto;margin:0;padding:6px 8px;font-size:18px;color:#fff}
+form{display:flex;gap:8px;padding:8px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
+form input{margin:0;border-radius:24px;flex:1}
+form button{width:48px;height:48px;border-radius:50%;margin:0;padding:0;font-size:18px;flex:none}
+</style>
+</head>
+<body>
+
+<div id="home">
+  <div class="card glass">
+    <h1>💬 Simple Chat</h1>
+    <p class="sub">Room banao ya code se join karo</p>
+    <input id="name" placeholder="Apna naam" maxlength="20" autocomplete="off">
+    <button id="create">➕ Create Room</button>
+    <div class="or">— ya —</div>
+    <input id="code" placeholder="Room code likho" maxlength="12" autocomplete="off" autocapitalize="characters">
+    <button id="join" class="alt">Join Room</button>
+    <div id="err"></div>
+    <div class="recent" id="recent"></div>
+  </div>
+</div>
+
+<div id="chat">
+  <header class="glass">
+    <button class="x" id="back">←</button>
+    <div class="t"><b id="who">Room</b><small id="status">connecting...</small></div>
+    <button class="del" id="delAll" title="Chat delete karo">🗑</button>
+    <div class="code" id="codeBox" title="Copy code"></div>
+  </header>
+  <div id="msgs"></div>
+  <form id="f" class="glass" style="margin:0 8px 8px;border-radius:28px">
+    <input id="txt" placeholder="Message likho" autocomplete="off" maxlength="1000" enterkeyhint="send">
+    <button type="submit" id="send">➤</button>
+  </form>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+// ====== YAHAN APNI FIREBASE CONFIG PASTE KARO ======
+var firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT",
+  appId: "YOUR_APP_ID"
+};
+// ====================================================
+
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var cid=Math.random().toString(36).slice(2,10);
+  var db=null, ref=null, myName="", curCode="";
+  var configured = firebaseConfig.apiKey!=="YOUR_API_KEY";
+  if(configured){
+    try{ firebase.initializeApp(firebaseConfig); db=firebase.database(); }catch(e){ configured=false; }
+  }
+
+  function fit(){
+    var vv=window.visualViewport;
+    $("chat").style.height=(vv?vv.height:window.innerHeight)+"px";
+    if(vv)$("chat").style.top=vv.offsetTop+"px";
+    scroll();
+  }
+  if(window.visualViewport){
+    visualViewport.addEventListener("resize",fit);
+    visualViewport.addEventListener("scroll",fit);
+  }
+  window.addEventListener("resize",fit);
+
+  function getRecent(){try{return JSON.parse(localStorage.getItem("recentRooms")||"[]")}catch(e){return[]}}
+  function setRecent(a){try{localStorage.setItem("recentRooms",JSON.stringify(a))}catch(e){}}
+  function addRecent(c){var a=getRecent().filter(function(x){return x!==c});a.unshift(c);setRecent(a)}
+  function delRecent(c){setRecent(getRecent().filter(function(x){return x!==c}))}
+  function renderRecent(){
+    var box=$("recent"),a=getRecent();box.innerHTML="";
+    if(!a.length)return;
+    var h=document.createElement("h3");h.textContent="Purane rooms";box.appendChild(h);
+    a.forEach(function(c){
+      var r=document.createElement("div");r.className="rc";
+      var sp=document.createElement("span");sp.textContent=c.toUpperCase();
+      var x=document.createElement("i");x.textContent="✕";
+      r.appendChild(sp);r.appendChild(x);
+      r.onclick=function(){enter(c)};
+      x.onclick=function(e){e.stopPropagation();delRecent(c);renderRecent()};
+      box.appendChild(r);
+    });
+  }
+  renderRecent();
+
+  function newCode(){
+    var c="abcdefghjkmnpqrstuvwxyz23456789",s="";
+    for(var i=0;i<6;i++)s+=c[Math.floor(Math.random()*c.length)];
+    return s;
+  }
+  function clean(v){return (v||"").toLowerCase().replace(/[^a-z0-9]/g,"")}
+  function err(t){$("err").textContent=t||""}
+  function scroll(){var m=$("msgs");m.scrollTop=m.scrollHeight}
+  function sys(t){
+    var d=document.createElement("div");d.className="sys";d.textContent=t;
+    $("msgs").appendChild(d);scroll();
+  }
+  var els={};
+  function addMsg(d,key){
+    var mine=d.cid===cid;
+    var el=document.createElement("div");el.className="m glass"+(mine?" me":"");
+    if(!mine){var n=document.createElement("div");n.className="n";n.textContent=String(d.name||"Guest").slice(0,20);el.appendChild(n)}
+    var t=document.createElement("div");t.textContent=String(d.text||"").slice(0,1000);el.appendChild(t);
+    var tm=document.createElement("div");tm.className="tm";
+    tm.textContent=new Date(d.t||Date.now()).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+    el.appendChild(tm);
+    if(key){
+      els[key]=el;
+      if(mine)el.onclick=function(){
+        if(confirm("Ye message delete karna hai?"))ref.child(key).remove();
+      };
+    }
+    $("msgs").appendChild(el);scroll();
+  }
+
+  function enter(code){
+    myName=$("name").value.trim();
+    if(!myName){err("Pehle apna naam likho");return}
+    code=clean(code);
+    if(code.length<4){err("Code kam se kam 4 letters/numbers ka ho");return}
+    if(!configured){err("Firebase config nahi daali. File me firebaseConfig bharo.");return}
+    err("");
+    curCode=code;addRecent(code);els={};
+    $("home").style.display="none";$("chat").style.display="flex";
+    fit();
+    $("msgs").innerHTML="";
+    $("who").textContent="Room: "+myName;
+    $("codeBox").textContent=code.toUpperCase();
+    sys("Room ready. Code dusre ko do: "+code.toUpperCase());
+    ref=db.ref("rooms/"+code+"/messages");
+    ref.limitToLast(500).on("child_added",function(s){ addMsg(s.val()||{},s.key); },
+      function(e){ sys("Permission error: Firebase rules check karo"); });
+    ref.on("child_removed",function(s){
+      var el=els[s.key];if(el&&el.parentNode)el.parentNode.removeChild(el);delete els[s.key];
+    });
+    db.ref(".info/connected").on("value",function(s){
+      $("status").textContent=s.val()?"online":"connecting...";
+    });
+    $("txt").focus();
+  }
+
+  $("create").onclick=function(){enter(newCode())};
+  $("join").onclick=function(){enter($("code").value)};
+  $("code").addEventListener("keydown",function(e){if(e.key==="Enter")enter($("code").value)});
+
+  $("codeBox").onclick=function(){
+    try{navigator.clipboard.writeText(curCode.toUpperCase());sys("Code copy ho gaya")}catch(e){}
+  };
+
+  $("send").addEventListener("mousedown",function(e){e.preventDefault()});
+  $("send").addEventListener("pointerdown",function(e){e.preventDefault()});
+
+  function sendMsg(){
+    var v=$("txt").value.trim();
+    $("txt").focus();
+    if(!v||!ref)return;
+    $("txt").value="";
+    ref.push({cid:cid,name:myName,text:v,t:firebase.database.ServerValue.TIMESTAMP})
+      .catch(function(){sys("Message send nahi hua")});
+  }
+  $("f").addEventListener("submit",function(e){e.preventDefault();sendMsg()});
+  $("send").addEventListener("click",function(e){e.preventDefault();sendMsg()});
+
+  $("delAll").onclick=function(){
+    if(!ref)return;
+    if(confirm("Is room ki poori chat sab ke liye delete kar du?"))ref.remove();
+  };
+
+  $("back").onclick=function(){
+    $("txt").blur();
+    if(ref){ref.off();ref=null}
+    if(db)db.ref(".info/connected").off();
+    $("chat").style.display="none";$("home").style.display="flex";renderRecent();
+  };
+})();
+</script>
+</body>
+</html>
