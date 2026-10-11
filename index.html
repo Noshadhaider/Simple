@@ -137,6 +137,24 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
 .me i{font-style:normal;color:var(--acc);font-size:13px;font-weight:700}
 .rc i.ok{color:var(--acc);font-weight:700;font-size:20px;padding:2px 10px}
 .lnk{text-align:center;color:var(--acc);font-weight:700;font-size:14px;cursor:pointer;margin-bottom:8px}
+#home{flex-direction:column;padding:0;overflow:hidden}
+.top{display:flex;align-items:center;padding:14px 16px 6px;padding-top:calc(14px + env(safe-area-inset-top,0px))}
+.top h1{flex:1;margin:0;font-size:22px}
+.top .av{width:40px;height:40px;cursor:pointer;border:2px solid var(--bd)}
+.sbar{padding:6px 14px 8px}.sbar input{margin:0;border-radius:24px}
+#list{flex:1;overflow-y:auto;padding:0 14px 120px;-webkit-overflow-scrolling:touch}
+#list .rc{padding:10px 12px}
+#empty{display:none;text-align:center;color:var(--sub);font-size:14px;padding:40px 20px;line-height:1.5}
+#fabs{position:absolute;right:16px;bottom:calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px;align-items:center}
+.fab{width:56px;height:56px;border-radius:50%;margin:0;padding:0;font-size:26px;box-shadow:0 6px 18px rgba(0,0,0,.45)}
+.fab.alt{width:48px;height:48px;font-size:21px;background:rgba(32,58,67,.95)}
+#usList{max-height:50vh;overflow-y:auto;margin-bottom:12px}
+.pbox{padding:0!important;overflow:hidden;text-align:center}
+.pban{height:96px;background:linear-gradient(135deg,#25d366,#7c3aed)}
+.pbody{padding:0 18px 18px}
+#pvDp{width:104px;height:104px;font-size:52px;margin:-52px auto 10px;border:4px solid #203a43}
+.chip{display:inline-block;background:var(--glass2);border:1px solid var(--bd);border-radius:20px;padding:4px 14px;font-size:14px;color:var(--sub);margin-bottom:16px}
+#pvAct button{margin-bottom:8px}#lo{color:#ff8a8a}
 </style>
 </head>
 <body>
@@ -156,17 +174,15 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
   </div>
 </div>
 <div id="home">
-  <div class="card glass">
-    <div class="me" id="meRow"><div class="av" id="meDp"></div><b id="nm"></b><i id="lo">logout</i></div>
-    <div class="srow"><input id="sq" placeholder="🔍 Username search karo" maxlength="15" autocomplete="off" autocapitalize="none"><button id="sgo" class="alt">Search</button></div>
-    <div id="sres"></div>
-    <button id="create">➕ Create Room</button>
-    <button id="pcreate" class="alt">🔒 Create Private Room</button>
-    <input id="code" placeholder="Room code se join karo" maxlength="12" autocomplete="off" autocapitalize="characters">
-    <button id="join" class="alt">Join Room</button>
+  <b id="nm" style="display:none"></b>
+  <div class="top"><h1>💬 Simple Chat</h1><div class="av" id="meDp"></div></div>
+  <div class="sbar"><input id="sq" placeholder="🔍 Username se search karo" maxlength="15" autocomplete="off" autocapitalize="none"></div>
+  <div id="list">
+    <div id="sres"></div><div id="clist"></div><div id="recent"></div>
+    <div id="empty">Abhi koi chat nahi.<br>Upar search karo ya 👥 se kisi ko message karo.</div>
     <div id="err"></div>
-    <div class="recent" id="recentWrap"><div id="clist"></div><div id="recent"></div></div>
   </div>
+  <div id="fabs"><button class="fab alt" id="fUsers">👥</button><button class="fab" id="fPlus">＋</button></div>
 </div>
 
 <div id="chat">
@@ -202,7 +218,13 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
 
 <div id="menu"><div class="sheet glass" id="sheet"></div></div>
 <div id="dlg" class="ov"><div class="box glass"><h3 id="dT"></h3><p id="dP"></p><div class="db"><button class="alt" id="dNo">Cancel</button><button class="dng" id="dYes">OK</button></div></div></div>
-<div id="pv" class="ov"><div class="box glass" style="text-align:center"><div class="av" id="pvDp"></div><h3 id="pvN"></h3><p id="pvU"></p><button class="alt" id="pvEdit" style="display:none">✏️ Profile edit karo</button><button class="alt" id="pvX" style="margin:0">Close</button></div></div>
+<div id="pv" class="ov"><div class="box glass pbox"><div class="pban"></div><div class="pbody">
+  <div class="av" id="pvDp"></div><h3 id="pvN"></h3><div class="chip" id="pvU"></div>
+  <div id="pvAct"><button class="alt" id="pvEdit">✏️ Profile edit karo</button><button class="alt" id="lo">⎋ Logout</button></div>
+  <button class="alt" id="pvX" style="margin:0">Close</button>
+</div></div></div>
+<div id="us" class="ov"><div class="box glass"><h3>👥 Mere users</h3><div id="usList"></div><button class="alt" id="usX" style="margin:0">Close</button></div></div>
+<div id="jd" class="ov"><div class="box glass"><h3>🔑 Room join</h3><input id="code" placeholder="Room code" maxlength="12" autocomplete="off" autocapitalize="characters"><div class="db"><button class="alt" id="jNo">Cancel</button><button id="join">Join</button></div></div></div>
 <div id="ep" class="ov"><div class="box glass">
   <h3>✏️ Profile edit</h3>
   <div class="av" id="eDp" style="width:84px;height:84px;font-size:34px;margin:0 auto 6px;cursor:pointer"></div>
@@ -431,7 +453,11 @@ var firebaseConfig = {
   function renderContacts(){
     var box=$("clist");box.innerHTML="";
     var c=getC(),b=getB();
-    var ks=Object.keys(c).sort(function(x,y){return (c[y].t||0)-(c[x].t||0)});
+    var ks=Object.keys(c).filter(function(k){
+      var o=c[k];if(o.st!=="ok")return true;
+      var hc=lsGet("hc_"+k,null);return hc===null||(o.t||0)>hc;
+    }).sort(function(x,y){return (c[y].t||0)-(c[x].t||0)});
+    $("empty").style.display=(ks.length||getRecent().length)?"none":"block";
     if(!ks.length)return;
     var h=document.createElement("h3");h.textContent="Chats";box.appendChild(h);
     ks.forEach(function(k){
@@ -480,7 +506,7 @@ var firebaseConfig = {
   function sendReq(v){
     var t=ts();
     db.ref().update(conPaths(v.uid,[{un:v.un,name:v.name,st:"sent",t:t},{un:me.un,name:me.name,st:"req",t:t}]))
-      .then(function(){$("sres").innerHTML="";$("sq").value="";openDM(v.uid)})
+      .then(function(){sqReset();openDM(v.uid)})
       .catch(function(){toast("Request nahi gayi (rules/internet)")});
   }
 
@@ -500,14 +526,21 @@ var firebaseConfig = {
     if(isDM&&curOther===k)enterChat(dmId(k),{dm:true,other:k,title:nameOf(k)});
   }
   function askDelete(k){
-    confirmBox("🗑 Chat delete karo?","\""+nameOf(k)+"\" ke saath chat dono taraf se delete ho jayegi aur connection khatam. Dobara baat karne ke liye nayi request karni hogi.","Delete",function(){
-      var id=dmId(k);
-      var b=getB();delete b[k];setB(b);
-      try{localStorage.removeItem("gap_"+k)}catch(e){}
+    confirmBox("🗑 Chat delete karo?","Sirf aapki chat hategi. \""+nameOf(k)+"\" aapke users me rahega, 👥 se dobara message kar sakte ho.","Delete",function(){
+      try{localStorage.setItem("clr_"+dmId(k),String(now()))}catch(e){}
+      lsSet("hc_"+k,(getC()[k]||{}).t||0);
+      if(isDM&&curOther===k)goHome();
+      renderContacts();toast("Chat delete ho gayi");
+    });
+  }
+  function askRemove(k){
+    confirmBox("👤 Contact hatao?","\""+nameOf(k)+"\" aapke users se hat jayega aur chat dono taraf se delete hogi. Dobara baat ke liye nayi request karni hogi.","Hatao",function(){
+      var id=dmId(k),b=getB();delete b[k];setB(b);
+      try{localStorage.removeItem("gap_"+k);localStorage.removeItem("hc_"+k)}catch(e){}
       if(isDM&&curOther===k)goHome();
       var u=conPaths(k,null);u["rooms/"+id]=null;
       db.ref().update(u).catch(function(){});
-      toast("Chat delete ho gayi");
+      toast("Contact hata diya");
     });
   }
   function askClear(){
@@ -522,6 +555,7 @@ var firebaseConfig = {
     showSheet([
       [bl?"✅ Unblock karo":"🚫 Block karo",function(){bl?unblock(k):askBlock(k)}],
       ["🗑 Chat delete karo",function(){askDelete(k)},"danger"],
+        ["👤 Contact hatao",function(){askRemove(k)},"danger"],
       ["Cancel"]
     ]);
   }
@@ -533,6 +567,7 @@ var firebaseConfig = {
         ["🧹 Meri chat clear karo",askClear],
         [bl?"✅ Unblock karo":"🚫 Block karo",function(){bl?unblock(k):askBlock(k)}],
         ["🗑 Chat delete karo",function(){askDelete(k)},"danger"],
+        ["👤 Contact hatao",function(){askRemove(k)},"danger"],
         ["Cancel"]
       ]);
     }else{
@@ -611,6 +646,7 @@ var firebaseConfig = {
     aerr("Ek second...");
     hash(un+":"+pin).then(function(h){
       if(signup){
+        uid="u"+Math.random().toString(36).slice(2,12);try{localStorage.setItem("uid",uid)}catch(e){}
         db.ref("rooms/_n/"+un).transaction(function(cur){if(cur)return;return {uid:uid,name:name,dp:tmpDp||""}},function(e,ok){
           if(e){aerr("Firebase rules / internet check karo");return}
           if(!ok){aerr("Ye username pehle se kisi ka hai, dusra chuno");return}
@@ -627,7 +663,7 @@ var firebaseConfig = {
     });
   };
   $("lo").onclick=function(e){
-    e.stopPropagation();
+    e.stopPropagation();$("pv").style.display="none";
     confirmBox("Logout?","Dobara login ke liye username aur PIN chahiye.","Logout",function(){
       if(conMain){conMain.off();conMain=null}
       CON={};me=null;lsSet("me",null);myName="";
@@ -639,10 +675,10 @@ var firebaseConfig = {
   function showProfile(o){
     $("pvN").textContent=o.name||"Guest";
     $("pvU").textContent=o.st==="ok"?"@"+o.un:"Username accept hone ke baad dikhega";
-    fillAv($("pvDp"),o);$("pvEdit").style.display="none";$("pv").style.display="flex";
+    fillAv($("pvDp"),o);$("pvAct").style.display="none";$("pv").style.display="flex";
   }
   $("pv").onclick=function(e){if(e.target===this||e.target.id==="pvX")this.style.display="none"};
-  $("meRow").onclick=function(){showProfile({name:me.name,un:me.un,st:"ok"});$("pvEdit").style.display="block"};
+  $("meDp").onclick=function(){showProfile({name:me.name,un:me.un,st:"ok"});$("pvAct").style.display="block"};
   var epDp=null;
   function eerr(t){$("eErr").textContent=t||""}
   function eShow(){
@@ -701,12 +737,13 @@ var firebaseConfig = {
   function sMsg(t){$("sres").innerHTML="";var d=document.createElement("div");d.className="or";d.textContent=t;$("sres").appendChild(d)}
   function doSearch(){
     var un=clean($("sq").value);
-    if(un.length<3){sMsg("Poora username likho");return}
+    if(un.length<3){sMsg("Kam se kam 3 akshar likho");return}
     if(un===me.un){sMsg("Ye to aap khud ho 🙂");return}
     sMsg("Dhoond raha hoon...");
     db.ref("rooms/_n/"+un).once("value").then(function(s){
       var v=s.val();
       if(!v){sMsg("Is username ka koi nahi mila");return}
+      if(v.uid===uid){sMsg("Ye to aap khud ho 🙂");return}
       var box=$("sres");box.innerHTML="";
       var r=document.createElement("div");r.className="rc";
       var av=document.createElement("div");av.className="av";
@@ -721,7 +758,14 @@ var firebaseConfig = {
       box.appendChild(r);
     }).catch(function(){sMsg("Search nahi hua (internet / rules)")});
   }
-  $("sgo").onclick=doSearch;
+  var sT=null;
+  function sqReset(){$("sq").value="";$("sres").innerHTML="";$("clist").style.display=$("recent").style.display="block"}
+  $("sq").addEventListener("input",function(){
+    var v=this.value.trim();
+    $("clist").style.display=$("recent").style.display=v?"none":"block";
+    if(!v){$("sres").innerHTML="";return}
+    clearTimeout(sT);sT=setTimeout(doSearch,450);
+  });
   $("sq").addEventListener("keydown",function(e){if(e.key==="Enter")doSearch()});
 
   // ---- viewport ----
@@ -1057,10 +1101,10 @@ var firebaseConfig = {
     if(code.length<4){err("Code kam se kam 4 letters/numbers ka ho");return}
     enterChat(code,{dm:false});
   }
-  $("create").onclick=function(){enter(newCode())};
-  $("pcreate").onclick=function(){enter(newCode()+newCode().slice(0,3))};
-  $("join").onclick=function(){enter($("code").value)};
-  $("code").addEventListener("keydown",function(e){if(e.key==="Enter")enter($("code").value)});
+  $("jNo").onclick=function(){$("jd").style.display="none"};
+  $("fPlus").onclick=function(){showSheet([["➕ Create Room",function(){enter(newCode())}],["🔒 Create Private Room",function(){enter(newCode()+newCode().slice(0,3))}],["🔑 Room code se join",function(){$("code").value="";$("jd").style.display="flex";setTimeout(function(){$("code").focus()},50)}],["Cancel"]])};
+  $("join").onclick=function(){$("jd").style.display="none";enter($("code").value)};
+  $("code").addEventListener("keydown",function(e){if(e.key==="Enter"){$("jd").style.display="none";enter($("code").value)}});
 
   function enterChat(id,o){
     if(!myName)myName=savedName();
@@ -1355,6 +1399,27 @@ var firebaseConfig = {
     }
     requestAnimationFrame(step);
   }
+
+  // ---- users list ----
+  function openUsers(){
+    var b=$("usList");b.innerHTML="";
+    var c=getC(),ks=Object.keys(c).filter(function(k){return c[k].st==="ok"}).sort(function(x,y){return String(c[x].name).localeCompare(String(c[y].name))});
+    if(!ks.length){var d=document.createElement("div");d.className="or";d.textContent="Abhi koi accepted user nahi hai";b.appendChild(d)}
+    ks.forEach(function(k){
+      var o=c[k];loadDp(o);
+      var r=document.createElement("div");r.className="rc";
+      var av=document.createElement("div");av.className="av";fillAv(av,o);
+      var nn=document.createElement("div");nn.className="nn";var bn=document.createElement("b");bn.textContent=o.name||"Guest";nn.appendChild(bn);
+      r.appendChild(av);r.appendChild(nn);
+      r.onclick=function(){$("us").style.display="none";openDM(k)};
+      b.appendChild(r);
+    });
+    $("us").style.display="flex";
+  }
+  $("fUsers").onclick=openUsers;
+  $("usX").onclick=function(){$("us").style.display="none"};
+  $("us").onclick=function(e){if(e.target===this)this.style.display="none"};
+  $("jd").onclick=function(e){if(e.target===this)this.style.display="none"};
 
   // ---- start ----
   setMode(true);
