@@ -20,7 +20,7 @@ body:after{width:300px;height:300px;background:#7c3aed;opacity:.4;bottom:-80px;r
 img.emo{display:inline-block;width:1.22em;height:1.22em;vertical-align:-.26em;margin:0 .02em;pointer-events:none;-webkit-user-drag:none}
 
 /* ===== HOME (pehle jaisa) ===== */
-#home{position:relative;z-index:1;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;padding:16px}
+#home,#auth{position:relative;z-index:1;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;padding:16px}
 .card{border-radius:22px;padding:24px;width:100%;max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.35);margin:auto}
 h1{margin:0 0 4px;font-size:24px}
 .sub{color:var(--sub);font-size:14px;margin:0 0 16px}
@@ -74,9 +74,9 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
 #f button.ic{width:38px;height:38px;background:transparent;color:#fff;border:0;font-size:21px}
 #send{display:none;background:linear-gradient(135deg,#25d366,#12a37a)}
 #mic{background:linear-gradient(135deg,#25d366,#12a37a);color:#063}
-#blockBar{display:none;align-items:center;gap:8px;margin:0 8px 8px;padding:8px 8px 8px 16px;border-radius:24px;font-size:14px}
-#blockBar span{flex:1}
-#blockBar button{width:auto;margin:0;padding:9px 16px}
+#blockBar,#reqBar{display:none;align-items:center;gap:8px;margin:0 8px 8px;padding:8px 8px 8px 16px;border-radius:24px;font-size:14px}
+#blockBar span,#reqBar span{flex:1}
+#blockBar button,#reqBar button{width:auto;margin:0;padding:9px 16px}
 .m img.media,.m video.media{display:block;max-width:100%;max-height:300px;border-radius:12px;margin:2px 0;background:#000}
 .m audio{display:block;width:230px;max-width:100%;height:40px}
 .m{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -126,22 +126,44 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
 .m .ate{font-style:italic;color:var(--sub);font-size:14px}
 #bugPick{position:absolute;right:10px;top:calc(env(safe-area-inset-top,0px) + 62px);z-index:6;display:none;padding:6px;border-radius:16px;max-width:210px;flex-wrap:wrap}
 #bugPick button{width:44px;height:44px;padding:0;margin:0;background:transparent;border:0;font-size:26px}
+.av{width:42px;height:42px;border-radius:50%;background:var(--glass);display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;flex:none}
+.av img{width:100%;height:100%;object-fit:cover}
+#auth{display:none}#home{display:none}
+#aDp{width:84px;height:84px;font-size:30px;margin:0 auto 12px;border:2px dashed var(--bd);cursor:pointer}
+#pvDp{width:100px;height:100px;font-size:50px;margin:0 auto 10px}
+.srow{display:flex;gap:8px;margin-bottom:10px}.srow input{margin:0}.srow button{width:auto;margin:0;padding:0 16px}
+.me{display:flex;align-items:center;gap:10px;margin-bottom:14px;cursor:pointer}
+.me b{flex:1;min-width:0;font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.me i{font-style:normal;color:var(--acc);font-size:13px;font-weight:700}
+.rc i.ok{color:var(--acc);font-weight:700;font-size:20px;padding:2px 10px}
+.lnk{text-align:center;color:var(--acc);font-weight:700;font-size:14px;cursor:pointer;margin-bottom:8px}
 </style>
 </head>
 <body>
 
-<div id="home">
+<div id="auth">
   <div class="card glass">
     <h1>💬 Simple Chat</h1>
-    <p class="sub">Room banao ya code se join karo</p>
-    <div class="namerow" id="nameRow"><span>👋 <b id="nm"></b></span><i id="chgName">badlo</i></div>
-    <input id="name" placeholder="Apna naam" maxlength="20" autocomplete="off">
-    <div id="myCodeBox"><span>Mera code: <b id="myCode">......</b></span><i>copy</i></div>
+    <p class="sub" id="aSub">Apna profile banao</p>
+    <div class="av" id="aDp">📷</div>
+    <input type="file" id="aFile" accept="image/*" style="display:none">
+    <input id="aName" placeholder="Aapka naam" maxlength="20" autocomplete="off">
+    <input id="aUn" placeholder="Username (unique)" maxlength="15" autocomplete="off" autocapitalize="none">
+    <input id="aPin" type="password" inputmode="numeric" maxlength="6" placeholder="PIN (4-6 number)" autocomplete="off">
+    <button id="aGo">Profile banao</button>
+    <div class="lnk" id="aSwap">Pehle se account hai? Login</div>
+    <div id="aErr" style="color:#ff8a8a;font-size:14px;min-height:18px"></div>
+  </div>
+</div>
+<div id="home">
+  <div class="card glass">
+    <div class="me" id="meRow"><div class="av" id="meDp"></div><b id="nm"></b><i id="lo">logout</i></div>
+    <div class="srow"><input id="sq" placeholder="🔍 Username search karo" maxlength="15" autocomplete="off" autocapitalize="none"><button id="sgo" class="alt">Search</button></div>
+    <div id="sres"></div>
     <button id="create">➕ Create Room</button>
-    <div class="or">— ya —</div>
-    <input id="code" placeholder="Room code likho" maxlength="12" autocomplete="off" autocapitalize="characters">
+    <button id="pcreate" class="alt">🔒 Create Private Room</button>
+    <input id="code" placeholder="Room code se join karo" maxlength="12" autocomplete="off" autocapitalize="characters">
     <button id="join" class="alt">Join Room</button>
-    <button id="dm" class="alt">👤 Private Chat</button>
     <div id="err"></div>
     <div class="recent" id="recentWrap"><div id="clist"></div><div id="recent"></div></div>
   </div>
@@ -149,8 +171,8 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
 
 <div id="chat">
   <header class="glass">
-    <button class="hb" id="back">←</button>
-    <div class="t"><b id="who">Chat</b><small id="status">connecting...</small></div>
+    <button class="hb" id="back">←</button><div class="av" id="hdp" style="display:none;width:36px;height:36px;font-size:20px"></div>
+    <div class="t" id="hT" style="cursor:pointer"><b id="who">Chat</b><small id="status">connecting...</small></div>
     <button class="hb" id="bugBtn" title="Insect chhodo">🐞</button>
     <div class="avs" id="hav"></div>
     <div class="code" id="codeBox" title="Copy code"></div>
@@ -163,6 +185,7 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
     <button type="button" id="recSend">➤</button>
   </div>
   <div id="blockBar" class="glass"><span>🚫 Aapne ye contact block kiya hai</span><button type="button" id="unblockBtn">Unblock</button></div>
+  <div id="reqBar" class="glass"><span id="reqTxt"></span><button type="button" id="reqYes">Accept</button><button type="button" class="alt" id="reqNo">✕</button></div>
   <div id="emo" class="glass"><div class="cats" id="emoCats"></div><div class="grid" id="emoGrid"></div></div>
   <form id="f" class="glass">
     <button type="button" class="ic" id="emoBtn" title="Emoji">😊</button>
@@ -179,12 +202,17 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
 
 <div id="menu"><div class="sheet glass" id="sheet"></div></div>
 <div id="dlg" class="ov"><div class="box glass"><h3 id="dT"></h3><p id="dP"></p><div class="db"><button class="alt" id="dNo">Cancel</button><button class="dng" id="dYes">OK</button></div></div></div>
-<div id="fdlg" class="ov"><div class="box glass">
-  <h3>👤 Private Chat</h3>
-  <p>Dost ka code likho (uske "Mera code" me milega). Chat uske naam se save ho jayegi.</p>
-  <input id="fcode" placeholder="Dost ka code" maxlength="12" autocomplete="off" autocapitalize="characters">
-  <div id="ferr"></div>
-  <div class="db"><button class="alt" id="fNo">Cancel</button><button id="fYes">Chat shuru</button></div>
+<div id="pv" class="ov"><div class="box glass" style="text-align:center"><div class="av" id="pvDp"></div><h3 id="pvN"></h3><p id="pvU"></p><button class="alt" id="pvEdit" style="display:none">✏️ Profile edit karo</button><button class="alt" id="pvX" style="margin:0">Close</button></div></div>
+<div id="ep" class="ov"><div class="box glass">
+  <h3>✏️ Profile edit</h3>
+  <div class="av" id="eDp" style="width:84px;height:84px;font-size:34px;margin:0 auto 6px;cursor:pointer"></div>
+  <div class="lnk" id="eRm" style="color:#ff8a8a">Photo hatao</div>
+  <input type="file" id="eFile" accept="image/*" style="display:none">
+  <input id="eName" placeholder="Naam" maxlength="20" autocomplete="off">
+  <input id="eUn" placeholder="Username" maxlength="15" autocomplete="off" autocapitalize="none">
+  <input id="ePin" type="password" inputmode="numeric" maxlength="6" placeholder="PIN (sirf username badalne par)" autocomplete="off">
+  <div id="eErr" style="color:#ff8a8a;font-size:13px;min-height:18px;margin:-4px 0 6px"></div>
+  <div class="db"><button class="alt" id="eNo">Cancel</button><button id="eSave">Save</button></div>
 </div></div>
 <div id="viewer"><img id="vimg" alt=""></div>
 <div id="toast"></div>
@@ -222,8 +250,11 @@ var firebaseConfig = {
   if(configured){
     try{firebase.initializeApp(firebaseConfig);db=firebase.database()}catch(e){configured=false}
   }
+  var me=lsGet("me",null),CON={},dpCache={},conMain=null,conW=null,conSt="",signup=true,tmpDp="";
+  function ts(){return firebase.database.ServerValue.TIMESTAMP}
+  function canSend(){return !isDM||conSt==="ok"}
   var els={},info={},sentMark={},presRef=null,pres={},hidden={},bugRef=null,bugSeen={},svOff=0,eating={};
-  var typRef=null,typOthers={},typTimer=null,typLast=0,inboxRef=null;
+  var typRef=null,typOthers={},typTimer=null,typLast=0;
   if(db)db.ref(".info/serverTimeOffset").on("value",function(s){svOff=s.val()||0});
   function now(){return Date.now()+svOff}
 
@@ -375,14 +406,28 @@ var firebaseConfig = {
   }
 
   // ---- contacts (1 to 1) ----
-  function getC(){return lsGet("contacts",{})}
-  function setC(o){lsSet("contacts",o)}
+  function getC(){return CON}
+  function setC(o){}
   function getB(){return lsGet("blocked",{})}
   function setB(o){lsSet("blocked",o)}
   function dmId(o){return "dm_"+[uid,o].sort().join("_")}
   function isBlocked(){return isDM&&!!getB()[curOther]}
   function nameOf(k){var c=getC()[k];return c?c.name:"Guest"}
 
+  function fillAv(el,c){
+    el.innerHTML="";
+    var u=c&&c.st==="ok"&&c.un&&dpCache[c.un];
+    if(u){var i=document.createElement("img");i.src=u;el.appendChild(i)}else el.textContent=avatarFor(c&&c.name);
+  }
+  function loadDp(c){
+    if(!c||c.st!=="ok"||!c.un||(c.un in dpCache)||!db)return;
+    dpCache[c.un]="";
+    db.ref("rooms/_n/"+c.un+"/dp").once("value",function(s){dpCache[c.un]=s.val()||"";renderContacts();updHdp()});
+  }
+  function updHdp(){
+    var h=$("hdp");
+    if(isDM&&getC()[curOther]){var c=getC()[curOther];loadDp(c);h.style.display="flex";fillAv(h,c)}else h.style.display="none";
+  }
   function renderContacts(){
     var box=$("clist");box.innerHTML="";
     var c=getC(),b=getB();
@@ -390,18 +435,27 @@ var firebaseConfig = {
     if(!ks.length)return;
     var h=document.createElement("h3");h.textContent="Chats";box.appendChild(h);
     ks.forEach(function(k){
-      var o=c[k];
+      var o=c[k];loadDp(o);
       var r=document.createElement("div");r.className="rc";
-      var av=document.createElement("div");av.className="av";av.textContent=avatarFor(o.name);
+      var av=document.createElement("div");av.className="av";fillAv(av,o);
       var nn=document.createElement("div");nn.className="nn";
       var bn=document.createElement("b");bn.textContent=o.name||"Guest";
-      var sm=document.createElement("small");
-      sm.textContent=b[k]?"🚫 Blocked":(o.code?String(o.code).toUpperCase():"");
+      var sm=document.createElement("small");sm.style.letterSpacing="0";
+      sm.textContent=o.st==="req"?"📩 Request aayi hai":o.st==="sent"?"⏳ Accept hone ka wait":(b[k]?"🚫 Blocked":"");
       nn.appendChild(bn);nn.appendChild(sm);
-      var m=document.createElement("i");m.textContent="⋮";
-      r.appendChild(av);r.appendChild(nn);r.appendChild(m);
+      r.appendChild(av);r.appendChild(nn);
+      if(o.st==="req"){
+        var y=document.createElement("i");y.className="ok";y.textContent="✓";
+        var n=document.createElement("i");n.textContent="✕";
+        y.onclick=function(e){e.stopPropagation();accept(k)};
+        n.onclick=function(e){e.stopPropagation();reject(k)};
+        r.appendChild(y);r.appendChild(n);
+      }else{
+        var m=document.createElement("i");m.textContent="⋮";
+        m.onclick=function(e){e.stopPropagation();contactMenu(k)};
+        r.appendChild(m);
+      }
       r.onclick=function(){openDM(k)};
-      m.onclick=function(e){e.stopPropagation();contactMenu(k)};
       box.appendChild(r);
     });
   }
@@ -409,22 +463,25 @@ var firebaseConfig = {
     var c=getC()[k];if(!c)return;
     enterChat(dmId(k),{dm:true,other:k,title:c.name});
   }
-  function pushInbox(o){
-    if(!db||!myCode||!o)return;
-    db.ref("rooms/_inbox/"+o+"/"+uid).set({name:myName,code:myCode,t:firebase.database.ServerValue.TIMESTAMP}).catch(function(){});
-  }
-  function startInbox(){
-    if(!db||inboxRef)return;
-    inboxRef=db.ref("rooms/_inbox/"+uid);
-    inboxRef.on("child_added",function(s){
-      var o=s.val()||{},k=s.key;
-      s.ref.remove().catch(function(){});
-      if(!o.name||k===uid||getB()[k])return;
-      var c=getC();
-      c[k]={name:String(o.name).slice(0,20),code:o.code||(c[k]&&c[k].code)||"",t:(c[k]&&c[k].t)||Date.now()};
-      setC(c);renderContacts();
-      if(!isDM||curOther!==k)toast("💬 "+c[k].name);
+  function startCon(){
+    if(!db||conMain||!me)return;
+    conMain=db.ref("rooms/_con/"+uid);
+    conMain.on("value",function(s){
+      var n=s.val()||{};
+      Object.keys(n).forEach(function(k){
+        if(n[k].st==="req"&&(!CON[k]||CON[k].st!=="req"))toast("📩 "+(n[k].name||"Kisi")+" ki request aayi");
+      });
+      CON=n;renderContacts();
     });
+  }
+  function conPaths(k,v){var u={};u["rooms/_con/"+uid+"/"+k]=v&&v[0];u["rooms/_con/"+k+"/"+uid]=v&&v[1];return u}
+  function accept(k){var u={};u["rooms/_con/"+uid+"/"+k+"/st"]="ok";u["rooms/_con/"+k+"/"+uid+"/st"]="ok";db.ref().update(u).catch(function(){toast("Accept nahi hua")})}
+  function reject(k){db.ref().update(conPaths(k,null)).catch(function(){toast("Nahi hua")});toast("Request hata di")}
+  function sendReq(v){
+    var t=ts();
+    db.ref().update(conPaths(v.uid,[{un:v.un,name:v.name,st:"sent",t:t},{un:me.un,name:me.name,st:"req",t:t}]))
+      .then(function(){$("sres").innerHTML="";$("sq").value="";openDM(v.uid)})
+      .catch(function(){toast("Request nahi gayi (rules/internet)")});
   }
 
   // ---- block / delete (confirmation ke saath) ----
@@ -443,13 +500,14 @@ var firebaseConfig = {
     if(isDM&&curOther===k)enterChat(dmId(k),{dm:true,other:k,title:nameOf(k)});
   }
   function askDelete(k){
-    confirmBox("🗑 Chat delete karo?","\""+nameOf(k)+"\" ki chat aur contact aapke phone se hat jayega (block bhi hat jayega). Dusre ke paas chat rahegi.","Delete",function(){
-      try{localStorage.setItem("clr_"+dmId(k),String(now()))}catch(e){}
-      var c=getC();delete c[k];setC(c);
+    confirmBox("🗑 Chat delete karo?","\""+nameOf(k)+"\" ke saath chat dono taraf se delete ho jayegi aur connection khatam. Dobara baat karne ke liye nayi request karni hogi.","Delete",function(){
+      var id=dmId(k);
       var b=getB();delete b[k];setB(b);
       try{localStorage.removeItem("gap_"+k)}catch(e){}
       if(isDM&&curOther===k)goHome();
-      renderContacts();toast("Chat delete ho gayi");
+      var u=conPaths(k,null);u["rooms/"+id]=null;
+      db.ref().update(u).catch(function(){});
+      toast("Chat delete ho gayi");
     });
   }
   function askClear(){
@@ -480,6 +538,7 @@ var firebaseConfig = {
     }else{
       showSheet([
         ["🧹 Meri chat clear karo",askClear],
+        ["🗑 Room delete (sabke liye)",function(){confirmBox("🗑 Room delete?","Room ke saare messages sabke liye hat jayenge.","Delete",function(){var id=curCode;goHome();delRecent(id);renderRecent();db.ref("rooms/"+id).remove().catch(function(){})})},"danger"],
         ["📋 Room code copy",function(){copy(curCode.toUpperCase(),"Code copy ho gaya")}],
         ["Cancel"]
       ]);
@@ -487,90 +546,183 @@ var firebaseConfig = {
   };
   $("unblockBtn").onclick=function(){unblock(curOther)};
   function applyBlockUI(){
-    var b=isBlocked();
-    $("f").style.display=b?"none":"flex";
+    var b=isBlocked(),ok=canSend();
+    $("f").style.display=(b||!ok)?"none":"flex";
     $("blockBar").style.display=b?"flex":"none";
-    if(b)closeEmo();
+    var rq=isDM&&!ok&&!b;
+    $("reqBar").style.display=rq?"flex":"none";
+    if(rq){
+      var inc=conSt==="req";
+      $("reqTxt").textContent=inc?nameOf(curOther)+" ne request bheji hai":"⏳ Accept hone tak aap message nahi bhej sakte";
+      $("reqYes").style.display=inc?"block":"none";
+      $("reqNo").style.display=inc?"block":"none";
+    }
+    if(b||!ok)closeEmo();
   }
+  $("reqYes").onclick=function(){accept(curOther)};
+  $("reqNo").onclick=function(){var k=curOther;goHome();reject(k)};
 
-  // ---- naam + apna code ----
-  function savedName(){try{return localStorage.getItem("chatName")||""}catch(e){return""}}
-  function showMyCode(){
-    $("myCode").textContent=myCode?myCode.toUpperCase():"......";
-    $("myCodeBox").style.display=(myCode&&savedName())?"flex":"none";
+  // ---- profile / login ----
+  function savedName(){return me?me.name:""}
+  function ensureName(){return !!me}
+  function showName(){}
+  function aerr(t){$("aErr").textContent=t||""}
+  function hash(t){
+    try{return crypto.subtle.digest("SHA-256",new TextEncoder().encode(t)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return ("0"+x.toString(16)).slice(-2)}).join("")})}
+    catch(e){return Promise.resolve(btoa(t))}
   }
-  function showName(){
-    var s=savedName();
-    if(s){$("name").style.display="none";$("nameRow").style.display="flex";$("nm").textContent=s}
-    else{$("name").style.display="block";$("nameRow").style.display="none"}
-    showMyCode();
-  }
-  $("chgName").onclick=function(){
-    $("nameRow").style.display="none";$("name").style.display="block";
-    $("name").value=savedName();$("name").focus();
-  };
-  function register(){
-    if(!db||!savedName())return Promise.resolve();
-    try{myCode=localStorage.getItem("myCode")||""}catch(e){}
-    return new Promise(function(res){
-      function claim(c,n){
-        db.ref("rooms/_u/"+c).transaction(function(cur){
-          if(cur&&cur.uid&&cur.uid!==uid)return;
-          return {uid:uid,name:savedName()};
-        },function(e,ok){
-          if(ok){myCode=c;try{localStorage.setItem("myCode",c)}catch(x){}showMyCode();res()}
-          else if(e){err("Code register nahi hua. Firebase rules check karo.");res()}
-          else if(n<8)claim(newCode(),n+1);
-          else res();
-        });
-      }
-      claim(myCode||newCode(),0);
+  function squareDp(file){
+    return new Promise(function(res,rej){
+      var u=URL.createObjectURL(file),im=new Image();
+      im.onload=function(){
+        var m=Math.min(im.width,im.height),c=document.createElement("canvas");c.width=c.height=160;
+        c.getContext("2d").drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,160,160);
+        URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",.7));
+      };
+      im.onerror=function(){URL.revokeObjectURL(u);rej()};im.src=u;
     });
   }
-  function ensureName(){
-    var v=$("name").style.display!=="none"?$("name").value.trim():savedName();
-    if(!v){err("Pehle apna naam likho");showName();return false}
-    var changed=v!==savedName();
-    try{localStorage.setItem("chatName",v)}catch(e){}
-    myName=v;showName();
-    if(configured){if(changed||!myCode)register();startInbox()}
-    return true;
+  function setMode(su){
+    signup=su;
+    $("aName").style.display=su?"block":"none";$("aDp").style.display=su?"flex":"none";
+    $("aGo").textContent=su?"Profile banao":"Login";
+    $("aSub").textContent=su?"Apna profile banao":"Username aur PIN se login karo";
+    $("aSwap").textContent=su?"Pehle se account hai? Login":"Naya profile banao";
+    aerr("");
   }
-  $("name").addEventListener("change",function(){if(this.value.trim())ensureName()});
-  $("myCodeBox").onclick=function(){if(myCode)copy(myCode.toUpperCase(),"Aapka code copy ho gaya")};
+  $("aSwap").onclick=function(){setMode(!signup)};
+  $("aDp").onclick=function(){$("aFile").click()};
+  $("aFile").onchange=function(){
+    var f=this.files&&this.files[0];this.value="";if(!f)return;
+    squareDp(f).then(function(d){tmpDp=d;var i=document.createElement("img");i.src=d;$("aDp").innerHTML="";$("aDp").appendChild(i)}).catch(function(){aerr("Photo nahi khuli")});
+  };
+  function enterApp(){
+    myName=me.name;dpCache[me.un]=me.dp||"";
+    $("auth").style.display="none";$("home").style.display="flex";
+    $("nm").textContent=me.name;fillAv($("meDp"),{name:me.name,un:me.un,st:"ok"});
+    startCon();renderContacts();renderRecent();
+  }
+  $("aGo").onclick=function(){
+    if(!configured){aerr("Firebase config nahi hai");return}
+    var un=clean($("aUn").value).slice(0,15),pin=$("aPin").value.trim(),name=$("aName").value.trim();
+    if(un.length<3){aerr("Username kam se kam 3 letters/numbers ka ho");return}
+    if(!/^\d{4,6}$/.test(pin)){aerr("PIN 4 se 6 number ka ho");return}
+    if(signup&&!name){aerr("Apna naam likho");return}
+    aerr("Ek second...");
+    hash(un+":"+pin).then(function(h){
+      if(signup){
+        db.ref("rooms/_n/"+un).transaction(function(cur){if(cur)return;return {uid:uid,name:name,dp:tmpDp||""}},function(e,ok){
+          if(e){aerr("Firebase rules / internet check karo");return}
+          if(!ok){aerr("Ye username pehle se kisi ka hai, dusra chuno");return}
+          db.ref("rooms/_p/"+un).set(h).then(function(){me={un:un,name:name,dp:tmpDp||""};lsSet("me",me);enterApp()});
+        });
+      }else{
+        Promise.all([db.ref("rooms/_n/"+un).once("value"),db.ref("rooms/_p/"+un).once("value")]).then(function(r){
+          var v=r[0].val();
+          if(!v||r[1].val()!==h){aerr("Username ya PIN galat hai");return}
+          uid=v.uid;try{localStorage.setItem("uid",uid)}catch(e){}
+          me={un:un,name:v.name,dp:v.dp||""};lsSet("me",me);enterApp();
+        }).catch(function(){aerr("Login nahi hua (internet / rules)")});
+      }
+    });
+  };
+  $("lo").onclick=function(e){
+    e.stopPropagation();
+    confirmBox("Logout?","Dobara login ke liye username aur PIN chahiye.","Logout",function(){
+      if(conMain){conMain.off();conMain=null}
+      CON={};me=null;lsSet("me",null);myName="";
+      $("home").style.display="none";$("auth").style.display="flex";
+      $("aPin").value="";setMode(false);
+    });
+  };
+  // profile view
+  function showProfile(o){
+    $("pvN").textContent=o.name||"Guest";
+    $("pvU").textContent=o.st==="ok"?"@"+o.un:"Username accept hone ke baad dikhega";
+    fillAv($("pvDp"),o);$("pvEdit").style.display="none";$("pv").style.display="flex";
+  }
+  $("pv").onclick=function(e){if(e.target===this||e.target.id==="pvX")this.style.display="none"};
+  $("meRow").onclick=function(){showProfile({name:me.name,un:me.un,st:"ok"});$("pvEdit").style.display="block"};
+  var epDp=null;
+  function eerr(t){$("eErr").textContent=t||""}
+  function eShow(){
+    $("eDp").innerHTML="";
+    var d=epDp===null?me.dp:epDp;
+    if(d){var i=document.createElement("img");i.src=d;$("eDp").appendChild(i)}else $("eDp").textContent="📷";
+  }
+  $("pvEdit").onclick=function(){
+    $("pv").style.display="none";epDp=null;
+    $("eName").value=me.name;$("eUn").value=me.un;$("ePin").value="";eerr("");eShow();
+    $("ep").style.display="flex";
+  };
+  $("eNo").onclick=function(){$("ep").style.display="none"};
+  $("eDp").onclick=function(){$("eFile").click()};
+  $("eRm").onclick=function(){epDp="";eShow()};
+  $("eFile").onchange=function(){
+    var f=this.files&&this.files[0];this.value="";if(!f)return;
+    squareDp(f).then(function(d){epDp=d;eShow()}).catch(function(){eerr("Photo nahi khuli")});
+  };
+  function eDone(un,name,dp){
+    var old=me.un,u={};
+    me={un:un,name:name,dp:dp};lsSet("me",me);myName=name;dpCache[un]=dp;
+    Object.keys(CON).forEach(function(k){u["rooms/_con/"+k+"/"+uid+"/name"]=name;u["rooms/_con/"+k+"/"+uid+"/un"]=un});
+    if(Object.keys(u).length)db.ref().update(u).catch(function(){});
+    $("nm").textContent=name;fillAv($("meDp"),{name:name,un:un,st:"ok"});
+    $("ep").style.display="none";toast("Profile update ho gaya");
+  }
+  $("eSave").onclick=function(){
+    var name=$("eName").value.trim(),un=clean($("eUn").value).slice(0,15),pin=$("ePin").value.trim();
+    var dp=epDp===null?(me.dp||""):epDp;
+    if(!name){eerr("Naam likho");return}
+    if(un.length<3){eerr("Username kam se kam 3 letters/numbers ka ho");return}
+    if(un===me.un){
+      db.ref("rooms/_n/"+un).update({name:name,dp:dp}).then(function(){eDone(un,name,dp)}).catch(function(){eerr("Save nahi hua (internet / rules)")});
+      return;
+    }
+    if(!/^\d{4,6}$/.test(pin)){eerr("Username badalne ke liye apna PIN likho");return}
+    eerr("Ek second...");
+    hash(me.un+":"+pin).then(function(oh){
+      db.ref("rooms/_p/"+me.un).once("value").then(function(s){
+        if(s.val()!==oh){eerr("PIN galat hai");return}
+        hash(un+":"+pin).then(function(nh){
+          db.ref("rooms/_n/"+un).transaction(function(cur){if(cur)return;return {uid:uid,name:name,dp:dp}},function(e,ok){
+            if(e){eerr("Firebase rules / internet check karo");return}
+            if(!ok){eerr("Ye username pehle se kisi ka hai");return}
+            var u={};u["rooms/_p/"+un]=nh;u["rooms/_p/"+me.un]=null;u["rooms/_n/"+me.un]=null;
+            db.ref().update(u).then(function(){eDone(un,name,dp)}).catch(function(){eerr("Save adhura raha, dobara try karo")});
+          });
+        });
+      });
+    }).catch(function(){eerr("Nahi hua (internet / rules)")});
+  };
+  $("hT").onclick=function(){if(isDM&&getC()[curOther])showProfile(getC()[curOther])};
 
-  // ---- dost ka code se 1 to 1 ----
-  function ferr(t){$("ferr").textContent=t||""}
-  function openFriend(){
-    if(!ensureName())return;
-    if(!configured){err("Firebase config nahi daali. File me firebaseConfig bharo.");return}
-    err("");ferr("");$("fcode").value="";
-    $("fdlg").style.display="flex";
-    setTimeout(function(){$("fcode").focus()},50);
-  }
-  function closeFriend(){$("fdlg").style.display="none"}
-  $("dm").onclick=openFriend;
-  $("fNo").onclick=closeFriend;
-  $("fdlg").onclick=function(e){if(e.target===this)closeFriend()};
-  function addFriend(){
-    var c=clean($("fcode").value);
-    if(c.length<4){ferr("Dost ka code likho");return}
-    if(c===myCode){ferr("Ye to aapka apna code hai 🙂");return}
-    ferr("Dhoond raha hoon...");
-    db.ref("rooms/_u/"+c).once("value").then(function(s){
+  // ---- username search ----
+  function sMsg(t){$("sres").innerHTML="";var d=document.createElement("div");d.className="or";d.textContent=t;$("sres").appendChild(d)}
+  function doSearch(){
+    var un=clean($("sq").value);
+    if(un.length<3){sMsg("Poora username likho");return}
+    if(un===me.un){sMsg("Ye to aap khud ho 🙂");return}
+    sMsg("Dhoond raha hoon...");
+    db.ref("rooms/_n/"+un).once("value").then(function(s){
       var v=s.val();
-      if(!v||!v.uid){ferr("Ye code nahi mila");return}
-      if(v.uid===uid){ferr("Ye to aapka apna code hai 🙂");return}
-      if(getB()[v.uid]){ferr("Ye banda blocked hai. List me ⋮ se unblock karo.");return}
-      var cs=getC();
-      cs[v.uid]={name:String(v.name||"Guest").slice(0,20),code:c,t:Date.now()};
-      setC(cs);
-      (myCode?Promise.resolve():register()).then(function(){pushInbox(v.uid)});
-      closeFriend();renderContacts();openDM(v.uid);
-    }).catch(function(){ferr("Code check nahi ho paya (internet / rules)")});
+      if(!v){sMsg("Is username ka koi nahi mila");return}
+      var box=$("sres");box.innerHTML="";
+      var r=document.createElement("div");r.className="rc";
+      var av=document.createElement("div");av.className="av";
+      if(v.dp){var i=document.createElement("img");i.src=v.dp;av.appendChild(i)}else av.textContent=avatarFor(v.name);
+      var nn=document.createElement("div");nn.className="nn";
+      var bn=document.createElement("b");bn.textContent=v.name||"Guest";nn.appendChild(bn);
+      var x=document.createElement("i");x.className="ok";
+      var ex=getC()[v.uid];
+      x.textContent=ex?"💬":"＋";
+      r.appendChild(av);r.appendChild(nn);r.appendChild(x);
+      r.onclick=function(){if(ex)openDM(v.uid);else sendReq({uid:v.uid,un:un,name:v.name})};
+      box.appendChild(r);
+    }).catch(function(){sMsg("Search nahi hua (internet / rules)")});
   }
-  $("fYes").onclick=addFriend;
-  $("fcode").addEventListener("keydown",function(e){if(e.key==="Enter")addFriend()});
+  $("sgo").onclick=doSearch;
+  $("sq").addEventListener("keydown",function(e){if(e.key==="Enter")doSearch()});
 
   // ---- viewport ----
   function fit(){
@@ -638,7 +790,7 @@ var firebaseConfig = {
       var cs=getC(),nn=String(d.name).slice(0,20);
       if(cs[curOther]&&cs[curOther].name!==nn){
         cs[curOther].name=nn;setC(cs);
-        $("who").textContent=avatarFor(nn)+" "+nn;
+        $("who").textContent=nn;
       }
     }
     var dt=new Date(typeof d.t==="number"?d.t:Date.now()),dk=dt.toDateString();
@@ -886,6 +1038,7 @@ var firebaseConfig = {
     if(msgQ){msgQ.off();msgQ=null}
     if(ref){ref.off();ref=null}
     if(bugRef){bugRef.off();bugRef=null}
+    if(conW){conW.off();conW=null}
     if(db)db.ref(".info/connected").off();
     clearInterval(statusInt);statusInt=null;
   }
@@ -905,6 +1058,7 @@ var firebaseConfig = {
     enterChat(code,{dm:false});
   }
   $("create").onclick=function(){enter(newCode())};
+  $("pcreate").onclick=function(){enter(newCode()+newCode().slice(0,3))};
   $("join").onclick=function(){enter($("code").value)};
   $("code").addEventListener("keydown",function(e){if(e.key==="Enter")enter($("code").value)});
 
@@ -928,14 +1082,24 @@ var firebaseConfig = {
     $("hav").textContent="";
     $("txt").value="";updSend();
     if(isDM){
-      $("who").textContent=avatarFor(o.title)+" "+(o.title||"Guest");
+      $("who").textContent=o.title||"Guest";
       $("codeBox").style.display="none";
     }else{
-      $("who").textContent="Room · "+id.toUpperCase();
+      updHdp();
+      $("who").textContent=(id.length>6?"🔒 Private · ":"Room · ")+id.toUpperCase();
       $("codeBox").style.display="block";$("codeBox").textContent=id.toUpperCase();
       sys("Room ready. Code dusre ko do: "+id.toUpperCase());
     }
-    applyBlockUI();
+    conSt=isDM?((getC()[curOther]||{}).st||""):"";
+    updHdp();applyBlockUI();
+    if(isDM){
+      conW=db.ref("rooms/_con/"+uid+"/"+curOther);
+      conW.on("value",function(s){
+        var v=s.val();
+        if(!v){toast("Ye chat khatam ho gayi");goHome();return}
+        conSt=v.st||"";updHdp();applyBlockUI();
+      });
+    }
     ref=db.ref("rooms/"+id+"/messages");
     var q=ref.limitToLast(100);msgQ=q;
     function tv(d){return typeof d.t==="number"?d.t:9e15}
@@ -970,7 +1134,7 @@ var firebaseConfig = {
     db.ref(".info/connected").on("value",function(s){connected=!!s.val();updStatus()});
     statusInt=setInterval(updStatus,2000);
     updStatus();
-    if(!isBlocked())$("txt").focus();
+    if(!isBlocked()&&canSend())$("txt").focus();
   }
 
   // ---- send ----
@@ -978,11 +1142,11 @@ var firebaseConfig = {
   $("send").addEventListener("pointerdown",function(e){e.preventDefault()});
   function afterSend(){
     stopTyping();
-    if(isDM)pushInbox(curOther);
+    if(isDM&&canSend()){var u={},t=ts();u["rooms/_con/"+uid+"/"+curOther+"/t"]=t;u["rooms/_con/"+curOther+"/"+uid+"/t"]=t;db.ref().update(u).catch(function(){})}
   }
   function sendMsg(){
     var v=$("txt").value.trim();
-    if(!v||!ref||isBlocked())return;
+    if(!v||!ref||isBlocked()||!canSend())return;
     $("txt").value="";updSend();
     if($("emo").style.display!=="flex")$("txt").focus();
     ref.push({cid:cid,uid:uid,name:myName,text:v,t:firebase.database.ServerValue.TIMESTAMP})
@@ -1018,7 +1182,7 @@ var firebaseConfig = {
     });
   }
   function sendMedia(type,data,dur){
-    if(!ref||isBlocked())return;
+    if(!ref||isBlocked()||!canSend())return;
     var o={cid:cid,uid:uid,name:myName,type:type,data:data,t:firebase.database.ServerValue.TIMESTAMP};
     if(dur)o.dur=dur;
     ref.push(o).catch(function(){sys("Bhejna fail ho gaya (file badi ho sakti hai)")});
@@ -1051,12 +1215,12 @@ var firebaseConfig = {
   function fmt(s){return Math.floor(s/60)+":"+("0"+(s%60)).slice(-2)}
   function recUI(on){
     $("rec").style.display=on?"flex":"none";
-    $("f").style.display=on?"none":(isBlocked()?"none":"flex");
+    $("f").style.display=on?"none":((isBlocked()||!canSend())?"none":"flex");
     if(on)closeEmo();
     if(!on&&recTick){clearInterval(recTick);recTick=null}
   }
   function startRec(){
-    if(!ref||isBlocked())return;
+    if(!ref||isBlocked()||!canSend())return;
     if(!navigator.mediaDevices||!window.MediaRecorder){sys("Is browser me voice record nahi hota");return}
     navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){
       recStream=st;chunks=[];recCancel=false;
@@ -1193,10 +1357,11 @@ var firebaseConfig = {
   }
 
   // ---- start ----
-  myName=savedName();
-  try{myCode=localStorage.getItem("myCode")||""}catch(e){}
-  showName();renderRecent();renderContacts();updSend();
-  if(configured&&myName){register();startInbox()}
+  setMode(true);
+  if(me&&configured)enterApp();
+  else if(me){$("home").style.display="flex"}
+  else $("auth").style.display="flex";
+  updSend();
 })();
 </script>
 </body>
