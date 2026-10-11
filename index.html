@@ -244,6 +244,13 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
   <div id="eErr" style="color:#ff8a8a;font-size:13px;min-height:18px;margin:-4px 0 6px"></div>
   <div class="db"><button class="alt" id="eNo">Cancel</button><button id="eSave">Save</button></div>
 </div></div>
+<div id="cr" class="ov"><div class="box glass" style="text-align:center">
+  <h3>Photo adjust karo</h3>
+  <p style="margin-bottom:10px">Ungli se khiskao, do ungli ya slider se zoom karo</p>
+  <div id="crV" style="width:260px;height:260px;margin:0 auto 14px;position:relative;overflow:hidden;border-radius:50%;touch-action:none;background:#000;border:2px solid var(--acc)"><img id="crI" alt="" draggable="false" style="position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;-webkit-user-select:none;user-select:none"></div>
+  <input id="crZ" type="range" min="1" max="4" step="0.01" value="1" style="padding:0;margin:0 0 14px;border:0;background:none">
+  <div class="db"><button class="alt" id="crNo">Cancel</button><button id="crOk">Done</button></div>
+</div></div>
 <div id="viewer"><img id="vimg" alt=""></div>
 <div id="toast"></div>
 
@@ -621,15 +628,51 @@ var firebaseConfig = {
     try{return crypto.subtle.digest("SHA-256",new TextEncoder().encode(t)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return ("0"+x.toString(16)).slice(-2)}).join("")})}
     catch(e){return Promise.resolve(btoa(t))}
   }
+  var CV=260,crS={w:0,h:0,s0:1,z:1,x:0,y:0,done:null};
+  function crApply(){
+    var sc=crS.s0*crS.z;
+    crS.x=Math.min(0,Math.max(CV-crS.w*sc,crS.x));crS.y=Math.min(0,Math.max(CV-crS.h*sc,crS.y));
+    $("crI").style.transform="translate("+crS.x+"px,"+crS.y+"px) scale("+sc+")";
+  }
+  function crZoom(z){
+    z=Math.min(4,Math.max(1,z));
+    var o=crS.s0*crS.z,n=crS.s0*z,cx=(CV/2-crS.x)/o,cy=(CV/2-crS.y)/o;
+    crS.z=z;crS.x=CV/2-cx*n;crS.y=CV/2-cy*n;$("crZ").value=z;crApply();
+  }
+  (function(){
+    var v=$("crV"),pts={},d0=0,z0=1;
+    function dist(){var k=Object.keys(pts);return Math.hypot(pts[k[0]].x-pts[k[1]].x,pts[k[0]].y-pts[k[1]].y)}
+    v.addEventListener("pointerdown",function(e){try{v.setPointerCapture(e.pointerId)}catch(x){}pts[e.pointerId]={x:e.clientX,y:e.clientY};if(Object.keys(pts).length===2){d0=dist();z0=crS.z}});
+    v.addEventListener("pointermove",function(e){
+      var p=pts[e.pointerId];if(!p)return;
+      var n=Object.keys(pts).length;
+      if(n===1){crS.x+=e.clientX-p.x;crS.y+=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;crApply()}
+      else{p.x=e.clientX;p.y=e.clientY;if(n===2&&d0)crZoom(z0*dist()/d0)}
+    });
+    function up(e){delete pts[e.pointerId];d0=0}
+    v.addEventListener("pointerup",up);v.addEventListener("pointercancel",up);
+    v.addEventListener("wheel",function(e){e.preventDefault();crZoom(crS.z*(e.deltaY<0?1.08:.93))},{passive:false});
+    $("crZ").addEventListener("input",function(){crZoom(parseFloat(this.value))});
+  })();
+  function crClose(r){$("cr").style.display="none";var f=crS.done;crS.done=null;if(f)f(r)}
+  $("crNo").onclick=function(){crClose(null)};
+  $("crOk").onclick=function(){
+    var sc=crS.s0*crS.z,c=document.createElement("canvas");c.width=c.height=220;
+    c.getContext("2d").drawImage($("crI"),-crS.x/sc,-crS.y/sc,CV/sc,CV/sc,0,0,220,220);
+    crClose(c.toDataURL("image/jpeg",.8));
+  };
   function squareDp(file){
     return new Promise(function(res,rej){
-      var u=URL.createObjectURL(file),im=new Image();
+      var u=URL.createObjectURL(file),im=$("crI");
       im.onload=function(){
-        var m=Math.min(im.width,im.height),c=document.createElement("canvas");c.width=c.height=160;
-        c.getContext("2d").drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,160,160);
-        URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",.7));
+        crS.w=im.naturalWidth;crS.h=im.naturalHeight;crS.s0=CV/Math.min(crS.w,crS.h);crS.z=1;
+        crS.x=(CV-crS.w*crS.s0)/2;crS.y=(CV-crS.h*crS.s0)/2;$("crZ").value=1;
+        im.style.width=crS.w+"px";im.style.height=crS.h+"px";crApply();
+        crS.done=function(r){URL.revokeObjectURL(u);res(r)};
+        $("cr").style.display="flex";
       };
-      im.onerror=function(){URL.revokeObjectURL(u);rej()};im.src=u;
+      im.onerror=function(){URL.revokeObjectURL(u);rej()};
+      im.src=u;
     });
   }
   function setMode(su){
@@ -644,7 +687,7 @@ var firebaseConfig = {
   $("aDp").onclick=function(){$("aFile").click()};
   $("aFile").onchange=function(){
     var f=this.files&&this.files[0];this.value="";if(!f)return;
-    squareDp(f).then(function(d){tmpDp=d;var i=document.createElement("img");i.src=d;$("aDp").innerHTML="";$("aDp").appendChild(i)}).catch(function(){aerr("Photo nahi khuli")});
+    squareDp(f).then(function(d){if(!d)return;tmpDp=d;var i=document.createElement("img");i.src=d;$("aDp").innerHTML="";$("aDp").appendChild(i)}).catch(function(){aerr("Photo nahi khuli")});
   };
   function enterApp(){
     myName=me.name;dpCache[me.un]=me.dp||"";
@@ -711,7 +754,7 @@ var firebaseConfig = {
   $("eRm").onclick=function(){epDp="";eShow()};
   $("eFile").onchange=function(){
     var f=this.files&&this.files[0];this.value="";if(!f)return;
-    squareDp(f).then(function(d){epDp=d;eShow()}).catch(function(){eerr("Photo nahi khuli")});
+    squareDp(f).then(function(d){if(!d)return;epDp=d;eShow()}).catch(function(){eerr("Photo nahi khuli")});
   };
   function eDone(un,name,dp){
     var old=me.un,u={};
