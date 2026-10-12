@@ -176,11 +176,11 @@ button:disabled{opacity:.6;cursor:default}
 .seenTxt{display:none}
 
 /* ===== streak ===== */
-.stk{flex:none;font-size:13px;font-weight:700;background:var(--glass2);border:1px solid var(--bd);border-radius:12px;padding:2px 8px;margin-right:4px;white-space:nowrap;cursor:pointer}
-.stk.risk{border-color:#ffb74d;color:#ffd180}
+.skb{flex:none;font-size:13px;font-weight:700;background:var(--glass2);border:1px solid var(--bd);border-radius:12px;padding:2px 8px;margin-right:4px;white-space:nowrap;cursor:pointer}
+.skb.risk{border-color:#ffb74d;color:#ffd180}
 .rc .nn .nl{display:flex;align-items:center;gap:6px}
 .rc .nn .nl b{flex:0 1 auto;min-width:0}
-.rc .nn .nl .stk{margin:0;padding:0 7px;font-size:12px;cursor:inherit}
+.rc .nn .nl .skb{margin:0;padding:0 7px;font-size:12px;cursor:inherit}
 #skBar{display:none;margin:6px 8px 0;border-radius:14px;padding:6px 12px;font-size:13px;text-align:center;color:#ffd180;border-color:rgba(255,183,77,.5)}
 /* ===== draw & guess ===== */
 #dgCv{width:100%;aspect-ratio:1/1;background:#fff;border-radius:14px;touch-action:none;display:block;margin:0 auto 8px;box-shadow:0 2px 10px rgba(0,0,0,.3)}
@@ -231,9 +231,8 @@ button:disabled{opacity:.6;cursor:default}
 <div id="chat">
   <header class="glass">
     <button class="hb" id="back">←</button><div class="av" id="hdp" style="display:none;width:36px;height:36px;font-size:20px"></div>
-    <div class="t" id="hT" style="cursor:pointer"><b id="who">Chat</b><small id="status">connecting...</small></div>
-    <div class="stk" id="hstk" style="display:none"></div>
-    <button class="hb" id="dgBtn" title="Draw &amp; Guess" style="display:none">🎨</button>
+    <div class="t" id="hT" style="cursor:pointer"><div style="display:flex;align-items:center;gap:6px;min-width:0"><b id="who" style="min-width:0">Chat</b><span class="skb" id="hstk" style="display:none"></span></div><small id="status">connecting...</small></div>
+    <button class="hb" id="dgBtn" title="Games" style="display:none">🎮</button>
     <button class="hb" id="bugBtn" title="Insect chhodo">🐞</button>
     <div class="avs" id="hav"></div>
     <div class="code" id="codeBox" title="Copy code"></div>
@@ -603,7 +602,7 @@ var firebaseConfig = {
       sm.textContent=o.st==="req"?"📩 Request aayi hai":o.st==="sent"?"⏳ Accept hone ka wait":(b[k]?"🚫 Blocked":(sk.risk?"⏳ Streak khatre me":""));
       var nl=document.createElement("div");nl.className="nl";nl.appendChild(bn);
       var stxt=(sk.n>0?"🔥"+sk.n:"")+(sk.risk?"⏳":"");
-      if(stxt){var sp=document.createElement("span");sp.className="stk"+(sk.risk?" risk":"");sp.textContent=stxt;nl.appendChild(sp)}
+      if(stxt){var sp=document.createElement("span");sp.className="skb"+(sk.risk?" risk":"");sp.textContent=stxt;nl.appendChild(sp)}
       nn.appendChild(nl);nn.appendChild(sm);
       r.appendChild(av);r.appendChild(nn);
       if(o.st==="req"){
@@ -1596,7 +1595,6 @@ var firebaseConfig = {
       ["🖼 Photo (Gallery)",function(){$("fileImg").click()}],
       ["🎞 Video (Gallery)",function(){$("fileVid").click()}]
     ];
-    if(isDM&&canSend())l.push([G?"🎮 Game kholo ("+scoreLine()+")":"🎮 Tic tac toe khelo ("+scoreLine()+")",G?ttShow:ttInvite]);
     l.push(["Cancel"]);
     showSheet(l);
   };
@@ -1863,11 +1861,11 @@ var firebaseConfig = {
     var h=$("hstk"),bar=$("skBar");
     if(!isDM){h.style.display="none";bar.style.display="none";return}
     var i=skInfo(SKM[curOther],curOther),txt=(i.n>0?"🔥"+i.n:"")+(i.risk?"⏳":"");
-    h.textContent=txt;h.className="stk"+(i.risk?" risk":"");h.style.display=txt?"block":"none";
+    h.textContent=txt;h.className="skb"+(i.risk?" risk":"");h.style.display=txt?"block":"none";
     if(i.risk){bar.textContent=i.me?"⏳ Streak khatre me — "+nameOf(curOther)+" ne aaj abhi message nahi bheja":"⏳ Streak khatre me — aaj aap ne abhi message nahi bheja";bar.style.display="block"}
     else bar.style.display="none";
   }
-  $("hstk").onclick=function(){
+  $("hstk").onclick=function(e){e.stopPropagation();
     var i=skInfo(SKM[curOther],curOther);
     toast(i.risk?"⏳ Streak khatre me — aaj dono ko message bhejna hai":i.n>0?"🔥 "+i.n+" din ki streak":"");
   };
@@ -2046,7 +2044,12 @@ var firebaseConfig = {
   $("dgIn").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();dgGuess()}});
   $("dgBtn").onclick=function(){
     if(!canSend()){toast("Chat accept hone ke baad game khel sakte ho");return}
-    dgShow();
+    $("bugPick").style.display="none";
+    showSheet([
+      [G?"❌ Tic tac toe kholo ("+scoreLine()+")":"❌ Tic tac toe ("+scoreLine()+")",G?ttShow:ttInvite],
+      ["🎨 Draw & Guess ("+dgScoreLine()+")",dgShow],
+      ["Cancel"]
+    ]);
   };
   $("dgX").onclick=function(){$("dgOv").style.display="none"};
   function dgWatch(){
@@ -2137,7 +2140,7 @@ var firebaseConfig = {
 
   // ---- back button: sirf upar wali screen band ho ----
   (function(){
-    var IDS=["chat","menu","dlg","pv","us","jd","ep","cr","em","pc","fg","ttOv","viewer"],stack=[],depth=0,skip=0;
+    var IDS=["chat","menu","dlg","pv","us","jd","ep","cr","em","pc","fg","ttOv","dgOv","viewer"],stack=[],depth=0,skip=0;
     function vis(id){var e=$(id);return !!(e&&e.style.display&&e.style.display!=="none")}
     function reconcile(){
       IDS.forEach(function(id){
