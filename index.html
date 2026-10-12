@@ -245,7 +245,7 @@ button:disabled{opacity:.6;cursor:default}
 <div id="dlg" class="ov"><div class="box glass"><h3 id="dT"></h3><p id="dP"></p><div class="db"><button class="alt" id="dNo">Cancel</button><button class="dng" id="dYes">OK</button></div></div></div>
 <div id="pv" class="ov"><div class="box glass pbox"><div class="pban"></div><div class="pbody">
   <div class="av" id="pvDp"></div><h3 id="pvN"></h3><div class="chip" id="pvU"></div>
-  <div id="pvAct"><button class="alt" id="pvEdit">✏️ Profile edit karo</button><button class="alt" id="lo">⎋ Logout</button></div>
+  <div id="pvAct"><button class="alt" id="pvEdit">✏️ Edit profile</button><button class="alt" id="pvEm">📧 Change email</button><button class="alt" id="pvPc">🔑 Change PIN</button><button class="alt" id="lo">⎋ Logout</button></div>
   <button class="alt" id="pvX" style="margin:0">Close</button><div style="color:var(--sub);font-size:11px;margin-top:10px;opacity:.7">Chatly · build 12</div>
 </div></div></div>
 <div id="us" class="ov"><div class="box glass"><h3>👥 Mere users</h3><div id="usList"></div><button class="alt" id="usX" style="margin:0">Close</button></div></div>
@@ -257,8 +257,6 @@ button:disabled{opacity:.6;cursor:default}
   <input type="file" id="eFile" accept="image/*" style="display:none">
   <input id="eName" placeholder="Naam" maxlength="20" autocomplete="off">
   <input id="eUn" placeholder="Username" maxlength="15" autocomplete="off" autocapitalize="none">
-  <div id="eEmNote" style="color:var(--sub);font-size:13px;margin-bottom:8px"></div>
-  <input id="eEm" type="email" placeholder="Add recovery email" autocomplete="off" autocapitalize="none" style="display:none">
   <input id="ePin" type="password" inputmode="numeric" maxlength="6" placeholder="PIN (sirf username badalne par)" autocomplete="off">
   <div id="eErr" style="color:#ff8a8a;font-size:13px;min-height:18px;margin:-4px 0 6px"></div>
   <div class="db"><button class="alt" id="eNo">Cancel</button><button id="eSave">Save</button></div>
@@ -269,6 +267,23 @@ button:disabled{opacity:.6;cursor:default}
   <div id="crV" style="width:260px;height:260px;margin:0 auto 14px;position:relative;overflow:hidden;border-radius:50%;touch-action:none;background:#000;border:2px solid var(--acc)"><img id="crI" alt="" draggable="false" style="position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;-webkit-user-select:none;user-select:none"></div>
   <input id="crZ" type="range" min="1" max="4" step="0.01" value="1" style="padding:0;margin:0 0 14px;border:0;background:none">
   <div class="db"><button class="alt" id="crNo">Cancel</button><button id="crOk">Done</button></div>
+</div></div>
+<div id="em" class="ov"><div class="box glass">
+  <h3 id="emT">Change email</h3>
+  <div id="emCur" style="color:var(--sub);font-size:13px;margin-bottom:8px"></div>
+  <input id="emNew" type="email" placeholder="New email" autocomplete="off" autocapitalize="none">
+  <input id="emP1" type="password" inputmode="numeric" maxlength="6" placeholder="Current PIN" autocomplete="off">
+  <input id="emP2" type="password" inputmode="numeric" maxlength="6" placeholder="Confirm current PIN" autocomplete="off">
+  <div id="emErr" style="color:#ff8a8a;font-size:13px;min-height:18px;margin:-4px 0 6px"></div>
+  <div class="db"><button class="alt" id="emNo">Cancel</button><button id="emGo">Save</button></div>
+</div></div>
+<div id="pc" class="ov"><div class="box glass">
+  <h3>Change PIN</h3>
+  <input id="pcOld" type="password" inputmode="numeric" maxlength="6" placeholder="Current PIN" autocomplete="off">
+  <input id="pcNew" type="password" inputmode="numeric" maxlength="6" placeholder="New PIN (4-6 digits)" autocomplete="off">
+  <input id="pcNew2" type="password" inputmode="numeric" maxlength="6" placeholder="Confirm new PIN" autocomplete="off">
+  <div id="pcErr" style="color:#ff8a8a;font-size:13px;min-height:18px;margin:-4px 0 6px"></div>
+  <div class="db"><button class="alt" id="pcNo">Cancel</button><button id="pcGo">Change PIN</button></div>
 </div></div>
 <div id="fg" class="ov"><div class="box glass">
   <h3>Reset your PIN</h3>
@@ -852,12 +867,7 @@ var firebaseConfig = {
   }
   $("pvEdit").onclick=function(){
     $("pv").style.display="none";epDp=null;
-    $("eName").value=me.name;$("eUn").value=me.un;$("ePin").value="";$("eEm").value="";$("eEm").style.display="none";$("eEmNote").textContent="";
-    db.ref("rooms/_em/"+me.un).once("value",function(s){
-      var v=s.val();
-      if(v)$("eEmNote").textContent="Recovery email: "+v.charAt(0)+"***"+v.slice(v.indexOf("@"));
-      else{$("eEm").style.display="block";$("eEmNote").textContent="No recovery email yet. Add one to be able to reset your PIN."}
-    });eerr("");eShow();
+    $("eName").value=me.name;$("eUn").value=me.un;$("ePin").value="";eerr("");eShow();
     $("ep").style.display="flex";
   };
   $("eNo").onclick=function(){$("ep").style.display="none"};
@@ -869,8 +879,7 @@ var firebaseConfig = {
   };
   function eDone(un,name,dp){
     var old=me.un,u={};
-    if(eEm)firebase.auth().createUserWithEmailAndPassword(eEm,randPw()).then(function(){try{firebase.auth().signOut()}catch(x){}return db.ref("rooms/_em/"+un).set(eEm)}).catch(function(x){toast(x&&x.code==="auth/email-already-in-use"?"This email is already used by another account":"Email could not be added")});
-    else if(old!==un)["_em","_ph"].forEach(function(k){db.ref("rooms/"+k+"/"+old).once("value",function(s){var v=s.val();if(v){var u2={};u2["rooms/"+k+"/"+un]=v;u2["rooms/"+k+"/"+old]=null;db.ref().update(u2)}})});
+    if(old!==un)["_em","_ph"].forEach(function(k){db.ref("rooms/"+k+"/"+old).once("value",function(s){var v=s.val();if(v){var u2={};u2["rooms/"+k+"/"+un]=v;u2["rooms/"+k+"/"+old]=null;db.ref().update(u2)}})});
     me={un:un,name:name,dp:dp};lsSet("me",me);myName=name;dpCache[un]=dp;
     Object.keys(CON).forEach(function(k){u["rooms/_con/"+k+"/"+uid+"/name"]=name;u["rooms/_con/"+k+"/"+uid+"/un"]=un});
     if(Object.keys(u).length)db.ref().update(u).catch(function(){});
@@ -882,8 +891,6 @@ var firebaseConfig = {
     var dp=epDp===null?(me.dp||""):epDp;
     if(!name){eerr("Naam likho");return}
     if(un.length<3){eerr("Username kam se kam 3 letters/numbers ka ho");return}
-    var emr=$("eEm").value.trim().toLowerCase();eEm=emr;
-    if(emr&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emr)){eerr("Enter a valid email address");return}
     if(un===me.un){
       db.ref("rooms/_n/"+un).update(epDp===null?{name:name}:{name:name,dp:dp,dpf:epDpF}).then(function(){eDone(un,name,dp)}).catch(function(){eerr("Save nahi hua (internet / rules)")});
       return;
@@ -911,6 +918,65 @@ var firebaseConfig = {
     });
   };
   $("hT").onclick=function(){if(isDM&&getC()[curOther])showProfile(getC()[curOther])};
+
+  // ---- change email / change PIN ----
+  var EMRX=/^[^@\s]+@[^@\s]+\.[^@\s]+$/,PINRX=/^\d{4,6}$/;
+  function maskEm(v){return v.charAt(0)+"***"+v.slice(v.indexOf("@"))}
+  function checkPin(pin){
+    return db.ref("rooms/_p/"+me.un).once("value").then(function(s){
+      return hash(me.un+":"+pin).then(function(h){if(s.val()!==h)throw {m:"Wrong PIN"}});
+    });
+  }
+  $("pvEm").onclick=function(){
+    $("pv").style.display="none";
+    $("emNew").value="";$("emP1").value="";$("emP2").value="";$("emErr").textContent="";
+    $("emCur").textContent="Loading...";$("em").style.display="flex";
+    db.ref("rooms/_em/"+me.un).once("value",function(s){
+      var v=s.val();
+      $("emCur").textContent=v?"Current email: "+maskEm(v):"No recovery email yet.";
+      $("emT").textContent=v?"Change email":"Add recovery email";
+    });
+  };
+  $("emNo").onclick=function(){$("em").style.display="none"};
+  $("emGo").onclick=function(){
+    var em=String($("emNew").value).trim().toLowerCase(),p1=$("emP1").value.trim(),p2=$("emP2").value.trim(),E=$("emErr");
+    if(!EMRX.test(em)){E.textContent="Enter a valid email address.";return}
+    if(!PINRX.test(p1)){E.textContent="Enter your current PIN.";return}
+    if(p1!==p2){E.textContent="The two PINs do not match.";return}
+    E.textContent="Checking...";$("emGo").disabled=true;
+    checkPin(p1).then(function(){return db.ref("rooms/_em/"+me.un).once("value")}).then(function(s){
+      if(s.val()===em)throw {m:"This is already your email."};
+      return firebase.auth().createUserWithEmailAndPassword(em,randPw())
+        .then(function(){try{firebase.auth().signOut()}catch(x){}})
+        .catch(function(x){
+          if(x&&x.code==="auth/email-already-in-use")
+            return db.ref("rooms/_em").orderByValue().equalTo(em).once("value").then(function(q){
+              if(q.exists())throw {m:"This email is already used by another account."};
+            });
+          throw x;
+        });
+    }).then(function(){return db.ref("rooms/_em/"+me.un).set(em)})
+      .then(function(){$("em").style.display="none";toast("Email updated")})
+      .catch(function(e){E.textContent=e&&e.m?e.m:((e&&e.code==="auth/invalid-email")?"Enter a valid email address.":"Could not update the email.")})
+      .then(function(){$("emGo").disabled=false});
+  };
+  $("pvPc").onclick=function(){
+    $("pv").style.display="none";
+    $("pcOld").value="";$("pcNew").value="";$("pcNew2").value="";$("pcErr").textContent="";$("pc").style.display="flex";
+  };
+  $("pcNo").onclick=function(){$("pc").style.display="none"};
+  $("pcGo").onclick=function(){
+    var o=$("pcOld").value.trim(),n=$("pcNew").value.trim(),n2=$("pcNew2").value.trim(),E=$("pcErr");
+    if(!PINRX.test(o)){E.textContent="Enter your current PIN.";return}
+    if(!PINRX.test(n)){E.textContent="New PIN must be 4 to 6 digits.";return}
+    if(n!==n2){E.textContent="The new PINs do not match.";return}
+    if(n===o){E.textContent="New PIN must be different from the current one.";return}
+    E.textContent="Checking...";$("pcGo").disabled=true;
+    checkPin(o).then(function(){return hash(me.un+":"+n)}).then(function(h){return db.ref("rooms/_p/"+me.un).set(h)})
+      .then(function(){$("pc").style.display="none";toast("PIN changed")})
+      .catch(function(e){E.textContent=e&&e.m?e.m:"Could not change the PIN."})
+      .then(function(){$("pcGo").disabled=false});
+  };
 
   // ---- forgot PIN (email) ----
   var fgUser="",fgEmail="";
@@ -1717,7 +1783,7 @@ var firebaseConfig = {
 
   // ---- back button: sirf upar wali screen band ho ----
   (function(){
-    var IDS=["chat","menu","dlg","pv","us","jd","ep","cr","fg","viewer"],stack=[],depth=0,skip=0;
+    var IDS=["chat","menu","dlg","pv","us","jd","ep","cr","em","pc","fg","viewer"],stack=[],depth=0,skip=0;
     function vis(id){var e=$(id);return !!(e&&e.style.display&&e.style.display!=="none")}
     function reconcile(){
       IDS.forEach(function(id){
