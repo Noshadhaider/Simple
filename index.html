@@ -1727,27 +1727,39 @@ var firebaseConfig = {
     ref=db.ref("rooms/"+id+"/messages");
     var myRef=ref;
     cacheId=id;cacheArr=[];
+    function tv(d){return typeof d.t==="number"?d.t:9e15}
+    function byT(a,b){return tv(a.d)-tv(b.d)}
     cacheLoad(id).then(function(cached){
       if(ref!==myRef)return;
+      cached.sort(byT);
       cacheArr=cached.slice();
       quiet=true;
       try{cached.forEach(function(x){addMsg(x.d,x.k)})}finally{quiet=false}
-      var last=cached.length?cached[cached.length-1].k:null;
-      // cache hai to sirf naye msgs download honge, warna last 100
-      var q=last?myRef.orderByKey().startAt(last):myRef.limitToLast(100);
+      // cache hai to sirf naye msgs download honge (thoda overlap rakha taaki koi miss na ho), warna last 100
+      var q;
+      if(cached.length){
+        var ks=cached.slice(-10).map(function(x){return x.k}).sort();
+        q=myRef.orderByKey().startAt(ks[0]);
+      }else q=myRef.limitToLast(100);
       msgQ=q;
-      q.on("child_added",function(s){
-        if(info[s.key]||hidden[s.key])return;
-        var v=s.val()||{};
-        addMsg(v,s.key);cachePush(s.key,v);
+      q.once("value",function(snap){
+        if(ref!==myRef||msgQ!==q)return;
+        var arr=[];snap.forEach(function(c){if(!info[c.key]&&!hidden[c.key])arr.push({k:c.key,d:c.val()||{}})});
+        arr.sort(byT);
+        arr.forEach(function(x){addMsg(x.d,x.k);cachePush(x.k,x.d)});
+        q.on("child_added",function(s){
+          if(info[s.key]||hidden[s.key])return;
+          var v=s.val()||{};
+          addMsg(v,s.key);cachePush(s.key,v);
+        });
+        q.on("child_removed",function(s){removeEl(s.key)});
+        q.on("child_changed",function(s){
+          var f=info[s.key];if(!f)return;
+          f.d=s.val()||f.d;cachePush(s.key,f.d);
+          setTick(s.key);if(f.d.eaten&&!eating[s.key])applyEaten(s.key);
+        });
+        if(cached.length)reconcile(myRef,id);
       },function(){sys("Permission error: Firebase rules check karo")});
-      q.on("child_removed",function(s){removeEl(s.key)});
-      q.on("child_changed",function(s){
-        var f=info[s.key];if(!f)return;
-        f.d=s.val()||f.d;cachePush(s.key,f.d);
-        setTick(s.key);if(f.d.eaten&&!eating[s.key])applyEaten(s.key);
-      });
-      if(cached.length)reconcile(myRef,id);
     });
     joinPresence(id);
     joinTyping(id);
