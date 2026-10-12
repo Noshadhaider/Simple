@@ -33,6 +33,8 @@ h1{margin:0 0 4px;font-size:24px}
 .sub{color:var(--sub);font-size:14px;margin:0 0 16px}
 input{width:100%;padding:13px 14px;border:1px solid var(--bd);border-radius:14px;background:var(--glass2);color:var(--text);font-size:16px;margin-bottom:10px;outline:none;font-family:inherit}
 input::placeholder{color:var(--sub)}
+select{width:100%;padding:13px 14px;border:1px solid var(--bd);border-radius:14px;background:var(--glass2);color:var(--text);font-size:16px;margin-bottom:10px;outline:none;font-family:inherit}
+select option{color:#111}
 button{width:100%;padding:13px;border:0;border-radius:14px;background:var(--acc);color:#063;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:10px;font-family:inherit}
 button.alt{background:var(--glass2);color:#fff;border:1px solid var(--bd)}
 .or{text-align:center;color:var(--sub);font-size:13px;margin:4px 0 10px}
@@ -230,6 +232,7 @@ button:disabled{opacity:.6;cursor:default}
     <div class="av" id="aDp"><svg width="42" height="42" viewBox="0 0 24 24" fill="rgba(255,255,255,.8)"><circle cx="12" cy="8" r="4.2"/><path d="M3.5 21c0-4.6 3.8-7.5 8.5-7.5s8.5 2.9 8.5 7.5z"/></svg></div>
     <input type="file" id="aFile" accept="image/*" style="display:none">
     <input id="aName" placeholder="Your name" maxlength="20" autocomplete="off">
+    <select id="aG"><option value="">Gender chuno</option><option value="m">Male</option><option value="f">Female</option></select>
     <input id="aUn" placeholder="Username (unique)" maxlength="15" autocomplete="off" autocapitalize="none">
     <input id="aEm" type="email" placeholder="Email (for password recovery)" autocomplete="off" autocapitalize="none">
     <input id="aPh" type="tel" placeholder="Mobile number (optional)" maxlength="16" autocomplete="off">
@@ -305,6 +308,7 @@ button:disabled{opacity:.6;cursor:default}
   <div class="lnk" id="eRm" style="color:#ff8a8a">Photo hatao</div>
   <input type="file" id="eFile" accept="image/*" style="display:none">
   <input id="eName" placeholder="Naam" maxlength="20" autocomplete="off">
+  <select id="eG"><option value="">Gender chuno</option><option value="m">Male</option><option value="f">Female</option></select>
   <input id="eUn" placeholder="Username" maxlength="15" autocomplete="off" autocapitalize="none">
   <input id="ePin" type="password" maxlength="20" placeholder="Password (only to change username)" autocomplete="off">
   <div id="eErr" style="color:#ff8a8a;font-size:13px;min-height:18px;margin:-4px 0 6px"></div>
@@ -582,7 +586,8 @@ var firebaseConfig = {
   function nickOf(k){return k?(nickMap()[k]||""):""}
   function dispName(k,real){var n=nickOf(k);return n||real||"Guest"}
   // dusre ne mujhe jo nickname diya (Firebase se sync): rooms/_nk/<dene wala uid>/<mera uid>
-  var NKM={},nkW={};
+  var NKM={},nkW={},GN={},gW={};
+  function bul(k){var c=getC()[k];return (c&&c.un&&GN[c.un]==="f")?"bulati":"bulata"}
   function nkSet(k,v){try{if(db&&uid&&k)db.ref("rooms/_nk/"+uid+"/"+k).set(v||null).catch(function(){})}catch(e){}}
   function nkSyncAll(){
     try{var m=nickMap(),u={},any=false;
@@ -590,11 +595,16 @@ var firebaseConfig = {
       if(any&&db)db.ref().update(u).catch(function(){});
     }catch(e){}
   }
-  function nkMsg(k){return nameOf(k)+" ne aapko \""+NKM[k]+"\" nickname diya hai"}
+  function nkMsg(k){return nameOf(k)+" aapko \""+NKM[k]+"\" "+bul(k)+" hai"}
   function nkWatchAll(){
     if(!db||!me)return;
     var c=getC();
     Object.keys(c).forEach(function(k){
+      var un=c[k].un;
+      if(c[k].st==="ok"&&un&&!gW[un]){
+        gW[un]=db.ref("rooms/_n/"+un+"/g");
+        gW[un].on("value",function(sn){var v=sn.val()||"";if(GN[un]===v)return;GN[un]=v;renderContacts()});
+      }
       if(c[k].st!=="ok"||nkW[k])return;
       var r=db.ref("rooms/_nk/"+k+"/"+uid);nkW[k]=r;
       r.on("value",function(sn){
@@ -603,7 +613,7 @@ var firebaseConfig = {
         if(v===old)return;
         renderContacts();
         if(v){
-          toast("✏️ "+nameOf(k)+" ne aapko \""+v+"\" naam diya");
+          toast("✏️ "+nameOf(k)+" aapko \""+v+"\" "+bul(k)+" hai");
           if(isDM&&curOther===k)sys(nkMsg(k));
         }else if(old&&isDM&&curOther===k)sys(nameOf(k)+" ne aapka nickname hata diya");
       });
@@ -687,7 +697,7 @@ var firebaseConfig = {
       var bn=document.createElement("b");bn.textContent=dispName(k,o.name);
       var sm=document.createElement("small");sm.style.letterSpacing="0";
       var sk=o.st==="ok"?skInfo(SKM[k],k):{n:0,risk:false};
-      sm.textContent=o.st==="req"?"📩 Request aayi hai":o.st==="sent"?"⏳ Accept hone ka wait":(b[k]?"🚫 Blocked":(sk.risk?"⏳ Streak khatre me":(NKM[k]?"✏️ Aapko \""+NKM[k]+"\" bulata hai":"")));
+      sm.textContent=o.st==="req"?"📩 Request aayi hai":o.st==="sent"?"⏳ Accept hone ka wait":(b[k]?"🚫 Blocked":(sk.risk?"⏳ Streak khatre me":(NKM[k]?"✏️ Aapko \""+NKM[k]+"\" "+bul(k)+" hai":"")));
       var nl=document.createElement("div");nl.className="nl";nl.appendChild(bn);
       var stxt=(sk.n>0?"🔥"+sk.n:"")+(sk.risk?"⏳":"");
       var sp=null;
@@ -895,7 +905,7 @@ var firebaseConfig = {
   }
   function setMode(su){
     signup=su;
-    $("aName").style.display=su?"block":"none";$("aDp").style.display=su?"flex":"none";
+    $("aName").style.display=su?"block":"none";$("aG").style.display=su?"block":"none";$("aDp").style.display=su?"flex":"none";
     $("aGo").textContent=su?"Create profile":"Login";
     $("aSub").textContent=su?"Create your profile":"Login with your username & password";
     $("aSwap").textContent=su?"Already have an account? Login":"New here? Register a new account";
@@ -913,7 +923,7 @@ var firebaseConfig = {
     myName=me.name;dpCache[me.un]=me.dp||"";
     $("auth").style.display="none";$("home").style.display="flex";
     $("nm").textContent=me.name;fillAv($("meDp"),{name:me.name,un:me.un,st:"ok"});
-    startCon();renderContacts();renderRecent();nkSyncAll();
+    startCon();renderContacts();renderRecent();nkSyncAll();if(!me.g)setTimeout(function(){toast("Profile edit me apna gender chun lo 🙂")},1500);
   }
   $("aGo").onclick=function(){
     if(!configured){aerr("Firebase config nahi hai");return}
@@ -921,6 +931,8 @@ var firebaseConfig = {
     if(un.length<3){aerr("Username kam se kam 3 letters/numbers ka ho");return}
     if(signup?(pin.length<6||pin.length>20):pin.length<4){aerr(signup?"Password must be 6 to 20 characters":"Enter your password");return}
     if(signup&&!name){aerr("Apna naam likho");return}
+    var gSel=signup?$("aG").value:"";
+    if(signup&&!gSel){aerr("Gender chuno (Male / Female)");return}
     var em=signup?String($("aEm").value).trim().toLowerCase():"";
     if(signup&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){aerr("Enter a valid email address");return}
     var ph=signup?normPhone($("aPh").value):"";
@@ -930,14 +942,14 @@ var firebaseConfig = {
       var h=r[0],phH=r[1];
       if(signup){
         uid="u"+Math.random().toString(36).slice(2,12);try{localStorage.setItem("uid",uid)}catch(e){}
-        db.ref("rooms/_n/"+un).transaction(function(cur){if(cur)return;return {uid:uid,name:name,dp:tmpDp||"",dpf:tmpDpF||""}},function(e,ok){
+        db.ref("rooms/_n/"+un).transaction(function(cur){if(cur)return;return {uid:uid,name:name,g:gSel,dp:tmpDp||"",dpf:tmpDpF||""}},function(e,ok){
           if(e){aerr("Firebase rules / internet check karo");return}
           if(!ok){aerr("Ye username pehle se kisi ka hai, dusra chuno");return}
           firebase.auth().createUserWithEmailAndPassword(em,randPw())
             .then(function(){try{firebase.auth().signOut()}catch(x){}
               var pu={};pu["rooms/_p/"+un]=h;pu["rooms/_em/"+un]=em;if(phH)pu["rooms/_ph/"+un]=phH;
               return db.ref().update(pu)})
-            .then(function(){me={un:un,name:name,dp:tmpDp||""};lsSet("me",me);enterApp()})
+            .then(function(){me={un:un,name:name,dp:tmpDp||"",g:gSel};lsSet("me",me);enterApp()})
             .catch(function(x){
               db.ref("rooms/_n/"+un).remove();
               var c=(x&&x.code)||"";
@@ -949,7 +961,7 @@ var firebaseConfig = {
           var v=r[0].val();
           if(!v||r[1].val()!==h){aerr("Username ya password galat hai");return}
           uid=v.uid;try{localStorage.setItem("uid",uid)}catch(e){}
-          me={un:un,name:v.name,dp:v.dp||""};lsSet("me",me);enterApp();
+          me={un:un,name:v.name,dp:v.dp||"",g:v.g||""};lsSet("me",me);enterApp();
         }).catch(function(){aerr("Login nahi hua (internet / rules)")});
       }
     });
@@ -958,7 +970,7 @@ var firebaseConfig = {
     e.stopPropagation();$("pv").style.display="none";
     confirmBox("Logout?","Dobara login ke liye username aur password chahiye.","Logout",function(){
       if(conMain){conMain.off();conMain=null}
-      Object.keys(skW).forEach(function(k){skW[k].off()});skW={};SKM={};Object.keys(nkW).forEach(function(k){nkW[k].off()});nkW={};NKM={};
+      Object.keys(skW).forEach(function(k){skW[k].off()});skW={};SKM={};Object.keys(nkW).forEach(function(k){nkW[k].off()});nkW={};NKM={};Object.keys(gW).forEach(function(u){gW[u].off()});gW={};GN={};
       Object.keys(dpW).forEach(function(u){dpW[u].off()});dpW={};dpCache={};
       CON={};me=null;lsSet("me",null);myName="";
       $("home").style.display="none";$("auth").style.display="flex";
@@ -973,7 +985,7 @@ var firebaseConfig = {
     var nb=$("pvNick");nb.style.display=pk?"block":"none";nb.onclick=function(){$("pv").style.display="none";nickBox(pk)};
     var pl=$("pvNk");
     if(!pl){pl=document.createElement("div");pl.id="pvNk";pl.className="chip";pl.style.marginTop="6px";$("pvU").parentNode.insertBefore(pl,$("pvU").nextSibling)}
-    var tn=pk?NKM[pk]:"";pl.textContent=tn?"✏️ Unhone aapko \""+tn+"\" naam diya hai":"";pl.style.display=tn?"":"none";
+    var tn=pk?NKM[pk]:"";pl.textContent=tn?"✏️ "+nameOf(pk)+" aapko \""+tn+"\" "+bul(pk)+" hai":"";pl.style.display=tn?"":"none";
     fillAv($("pvDp"),o);$("pvAct").style.display="none";$("pv").style.display="flex";
   }
   function viewDp(el){
@@ -1013,7 +1025,7 @@ var firebaseConfig = {
   }
   $("pvEdit").onclick=function(){
     $("pv").style.display="none";epDp=null;
-    $("eName").value=me.name;$("eUn").value=me.un;$("ePin").value="";eerr("");eShow();
+    $("eName").value=me.name;$("eG").value=me.g||"";$("eUn").value=me.un;$("ePin").value="";eerr("");eShow();
     $("ep").style.display="flex";
   };
   $("eNo").onclick=function(){$("ep").style.display="none"};
@@ -1026,7 +1038,7 @@ var firebaseConfig = {
   function eDone(un,name,dp){
     var old=me.un,u={};
     if(old!==un)["_em","_ph"].forEach(function(k){db.ref("rooms/"+k+"/"+old).once("value",function(s){var v=s.val();if(v){var u2={};u2["rooms/"+k+"/"+un]=v;u2["rooms/"+k+"/"+old]=null;db.ref().update(u2)}})});
-    me={un:un,name:name,dp:dp};lsSet("me",me);myName=name;dpCache[un]=dp;
+    me={un:un,name:name,dp:dp,g:($("eG").value||me.g||"")};lsSet("me",me);myName=name;dpCache[un]=dp;
     Object.keys(CON).forEach(function(k){u["rooms/_con/"+k+"/"+uid+"/name"]=name;u["rooms/_con/"+k+"/"+uid+"/un"]=un});
     if(Object.keys(u).length)db.ref().update(u).catch(function(){});
     $("nm").textContent=name;fillAv($("meDp"),{name:name,un:un,st:"ok"});
@@ -1038,7 +1050,9 @@ var firebaseConfig = {
     if(!name){eerr("Naam likho");return}
     if(un.length<3){eerr("Username kam se kam 3 letters/numbers ka ho");return}
     if(un===me.un){
-      db.ref("rooms/_n/"+un).update(epDp===null?{name:name}:{name:name,dp:dp,dpf:epDpF}).then(function(){eDone(un,name,dp)}).catch(function(){eerr("Save nahi hua (internet / rules)")});
+      var uo=epDp===null?{name:name}:{name:name,dp:dp,dpf:epDpF};
+      if($("eG").value)uo.g=$("eG").value;
+      db.ref("rooms/_n/"+un).update(uo).then(function(){eDone(un,name,dp)}).catch(function(){eerr("Save nahi hua (internet / rules)")});
       return;
     }
     if(pin.length<4){eerr("Username badalne ke liye apna password likho");return}
@@ -1052,7 +1066,7 @@ var firebaseConfig = {
       db.ref("rooms/_p/"+me.un).once("value").then(function(s){
         if(s.val()!==oh){eerr("Password galat hai");return}
         hash(un+":"+pin).then(function(nh){
-          db.ref("rooms/_n/"+un).transaction(function(cur){if(cur)return;return {uid:uid,name:name,dp:dp,dpf:dpf}},function(e,ok){
+          db.ref("rooms/_n/"+un).transaction(function(cur){if(cur)return;return {uid:uid,name:name,g:($("eG").value||me.g||""),dp:dp,dpf:dpf}},function(e,ok){
             if(e){eerr("Firebase rules / internet check karo");return}
             if(!ok){eerr("Ye username pehle se kisi ka hai");return}
             var u={};u["rooms/_p/"+un]=nh;u["rooms/_p/"+me.un]=null;u["rooms/_n/"+me.un]=null;
