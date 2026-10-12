@@ -577,15 +577,44 @@ var firebaseConfig = {
   function dmId(o){return "dm_"+[uid,o].sort().join("_")}
   function isBlocked(){return isDM&&!!getB()[curOther]}
   function nameOf(k){var c=getC()[k];return c?c.name:"Guest"}
-  // ---- nickname (sirf mere phone me, dusre ko nahi dikhta) ----
+  // ---- nickname (mujhe apna diya hua dikhta hai; dusre ko bhi pata chalta hai) ----
   function nickMap(){return lsGet("nicks_"+uid,{})}
   function nickOf(k){return k?(nickMap()[k]||""):""}
   function dispName(k,real){var n=nickOf(k);return n||real||"Guest"}
+  // dusre ne mujhe jo nickname diya (Firebase se sync): rooms/_nk/<dene wala uid>/<mera uid>
+  var NKM={},nkW={};
+  function nkSet(k,v){try{if(db&&uid&&k)db.ref("rooms/_nk/"+uid+"/"+k).set(v||null).catch(function(){})}catch(e){}}
+  function nkSyncAll(){
+    try{var m=nickMap(),u={},any=false;
+      Object.keys(m).forEach(function(k){if(m[k]){u["rooms/_nk/"+uid+"/"+k]=m[k];any=true}});
+      if(any&&db)db.ref().update(u).catch(function(){});
+    }catch(e){}
+  }
+  function nkMsg(k){return nameOf(k)+" ne aapko \""+NKM[k]+"\" nickname diya hai"}
+  function nkWatchAll(){
+    if(!db||!me)return;
+    var c=getC();
+    Object.keys(c).forEach(function(k){
+      if(c[k].st!=="ok"||nkW[k])return;
+      var r=db.ref("rooms/_nk/"+k+"/"+uid);nkW[k]=r;
+      r.on("value",function(sn){
+        var v=String(sn.val()||"").slice(0,20),old=NKM[k]||"";
+        NKM[k]=v;
+        if(v===old)return;
+        renderContacts();
+        if(v){
+          toast("✏️ "+nameOf(k)+" ne aapko \""+v+"\" naam diya");
+          if(isDM&&curOther===k)sys(nkMsg(k));
+        }else if(old&&isDM&&curOther===k)sys(nameOf(k)+" ne aapka nickname hata diya");
+      });
+    });
+  }
   function nickByUn(un){var c=getC();for(var k in c){if(c[k].un===un)return k}return ""}
   function setNick(k,v){
     var m=nickMap();v=String(v||"").trim().slice(0,20);
     if(v)m[k]=v;else delete m[k];
     lsSet("nicks_"+uid,m);
+    nkSet(k,v);
     renderContacts();
     if(isDM&&curOther===k)enterChat(dmId(k),{dm:true,other:k,title:dispName(k,nameOf(k))});
     toast(v?"Nickname set ho gaya":"Nickname hata diya");
@@ -593,7 +622,7 @@ var firebaseConfig = {
   function nickBox(k){
     var real=nameOf(k);
     $("nkT").textContent="✏️ Nickname";
-    $("nkP").textContent="\""+real+"\" ko aap jo naam do, wo sirf aapko dikhega. Dusre ko pata nahi chalega.";
+    $("nkP").textContent="\""+real+"\" ko aap jo naam do, wo aapko dikhega. Us ko bhi dikhega ke aapne use kya naam diya hai.";
     var i=$("nkI");i.value=nickOf(k);i.placeholder=real;
     var d=$("nkDlg");d.style.display="flex";
     function close(){d.style.display="none"}
@@ -641,7 +670,7 @@ var firebaseConfig = {
   }
   function renderContacts(){
     var box=$("clist");box.innerHTML="";
-    skWatchAll();
+    skWatchAll();nkWatchAll();
     var c=getC(),b=getB();
     var ks=Object.keys(c).filter(function(k){
       var o=c[k];if(o.st!=="ok")return true;
@@ -658,7 +687,7 @@ var firebaseConfig = {
       var bn=document.createElement("b");bn.textContent=dispName(k,o.name);
       var sm=document.createElement("small");sm.style.letterSpacing="0";
       var sk=o.st==="ok"?skInfo(SKM[k],k):{n:0,risk:false};
-      sm.textContent=o.st==="req"?"📩 Request aayi hai":o.st==="sent"?"⏳ Accept hone ka wait":(b[k]?"🚫 Blocked":(sk.risk?"⏳ Streak khatre me":""));
+      sm.textContent=o.st==="req"?"📩 Request aayi hai":o.st==="sent"?"⏳ Accept hone ka wait":(b[k]?"🚫 Blocked":(sk.risk?"⏳ Streak khatre me":(NKM[k]?"✏️ Aapko \""+NKM[k]+"\" bulata hai":"")));
       var nl=document.createElement("div");nl.className="nl";nl.appendChild(bn);
       var stxt=(sk.n>0?"🔥"+sk.n:"")+(sk.risk?"⏳":"");
       var sp=null;
@@ -884,7 +913,7 @@ var firebaseConfig = {
     myName=me.name;dpCache[me.un]=me.dp||"";
     $("auth").style.display="none";$("home").style.display="flex";
     $("nm").textContent=me.name;fillAv($("meDp"),{name:me.name,un:me.un,st:"ok"});
-    startCon();renderContacts();renderRecent();
+    startCon();renderContacts();renderRecent();nkSyncAll();
   }
   $("aGo").onclick=function(){
     if(!configured){aerr("Firebase config nahi hai");return}
@@ -929,7 +958,7 @@ var firebaseConfig = {
     e.stopPropagation();$("pv").style.display="none";
     confirmBox("Logout?","Dobara login ke liye username aur password chahiye.","Logout",function(){
       if(conMain){conMain.off();conMain=null}
-      Object.keys(skW).forEach(function(k){skW[k].off()});skW={};SKM={};
+      Object.keys(skW).forEach(function(k){skW[k].off()});skW={};SKM={};Object.keys(nkW).forEach(function(k){nkW[k].off()});nkW={};NKM={};
       Object.keys(dpW).forEach(function(u){dpW[u].off()});dpW={};dpCache={};
       CON={};me=null;lsSet("me",null);myName="";
       $("home").style.display="none";$("auth").style.display="flex";
@@ -942,6 +971,9 @@ var firebaseConfig = {
     $("pvN").textContent=pn||o.name||"Guest";
     $("pvU").textContent=o.st==="ok"?"@"+o.un+(pn?" · "+(o.name||""):""):"Username accept hone ke baad dikhega";
     var nb=$("pvNick");nb.style.display=pk?"block":"none";nb.onclick=function(){$("pv").style.display="none";nickBox(pk)};
+    var pl=$("pvNk");
+    if(!pl){pl=document.createElement("div");pl.id="pvNk";pl.className="chip";pl.style.marginTop="6px";$("pvU").parentNode.insertBefore(pl,$("pvU").nextSibling)}
+    var tn=pk?NKM[pk]:"";pl.textContent=tn?"✏️ Unhone aapko \""+tn+"\" naam diya hai":"";pl.style.display=tn?"":"none";
     fillAv($("pvDp"),o);$("pvAct").style.display="none";$("pv").style.display="flex";
   }
   function viewDp(el){
@@ -1202,7 +1234,7 @@ var firebaseConfig = {
   }
   function removeEl(k){
     var el=els[k];if(el&&el.parentNode)el.parentNode.removeChild(el);
-    delete els[k];delete info[k];
+    delete els[k];delete info[k];cacheDel(k);
   }
 
   // ---- reply (swipe) ----
@@ -1378,11 +1410,11 @@ var firebaseConfig = {
     var tm=el.querySelector(".tm");el.insertBefore(a,tm);
   }
   function markDelivered(key){
-    if(!ref)return;
+    if(!ref||quiet)return;
     ref.child(key).child("delivered").child(cid).set(true).catch(function(){});
   }
   function markSeen(key){
-    if(!ref||sentMark[key])return;
+    if(!ref||quiet||sentMark[key])return;
     sentMark[key]=1;
     ref.child(key).child("seen").child(cid).set(true).catch(function(){});
   }
@@ -1556,6 +1588,7 @@ var firebaseConfig = {
 
   // ---- chat open / close ----
   function closeChat(){
+    cacheFlush();
     $("txt").blur();
     stopTyping();
     if(mr)stopRec(true);
@@ -1589,6 +1622,65 @@ var firebaseConfig = {
   $("fPlus").onclick=function(){showSheet([["➕ Create Room",function(){enter(newCode())}],["🔒 Create Private Room",function(){enter(newCode()+newCode().slice(0,3))}],["🔑 Room code se join",function(){$("code").value="";$("jd").style.display="flex";setTimeout(function(){$("code").focus()},50)}],["Cancel"]])};
   $("join").onclick=function(){$("jd").style.display="none";enter($("code").value)};
   $("code").addEventListener("keydown",function(e){if(e.key==="Enter"){$("jd").style.display="none";enter($("code").value)}});
+
+  // ---- local message cache (IndexedDB): purane msgs turant dikhen, dobara download na hon ----
+  var IDBP=null,cacheArr=[],cacheT=null,cacheId="",quiet=false;
+  function idb(){
+    if(IDBP)return IDBP;
+    IDBP=new Promise(function(res,rej){
+      try{var r=indexedDB.open("chatly_cache",1);
+        r.onupgradeneeded=function(){r.result.createObjectStore("c")};
+        r.onsuccess=function(){res(r.result)};r.onerror=function(){rej()}}catch(e){rej()}
+    });
+    return IDBP;
+  }
+  function cacheLoad(id){
+    return idb().then(function(d){return new Promise(function(res){
+      var rq=d.transaction("c").objectStore("c").get(id);
+      rq.onsuccess=function(){res(Array.isArray(rq.result)?rq.result:[])};
+      rq.onerror=function(){res([])};
+    })}).catch(function(){return[]});
+  }
+  function cacheFlush(){
+    if(cacheT){clearTimeout(cacheT);cacheT=null}
+    if(!cacheId)return;
+    var id=cacheId,a=cacheArr.slice(-100);
+    idb().then(function(d){d.transaction("c","readwrite").objectStore("c").put(a,id)}).catch(function(){});
+  }
+  function cacheSave(){if(!cacheT)cacheT=setTimeout(cacheFlush,600)}
+  function cachePush(k,d){
+    for(var i=0;i<cacheArr.length;i++)if(cacheArr[i].k===k){cacheArr[i].d=d;cacheSave();return}
+    cacheArr.push({k:k,d:d});
+    if(cacheArr.length>150)cacheArr=cacheArr.slice(-100);
+    cacheSave();
+  }
+  function cacheDel(k){
+    var n=cacheArr.length;
+    cacheArr=cacheArr.filter(function(x){return x.k!==k});
+    if(cacheArr.length!==n)cacheSave();
+  }
+  // chat khulne ke baad: jo msgs door se delete hue wo hatao, aur apne msgs ke tick refresh karo
+  function reconcile(myRef,id){
+    try{
+      fetch(firebaseConfig.databaseURL+"/rooms/"+encodeURIComponent(id)+"/messages.json?shallow=true")
+        .then(function(r){return r.json()}).then(function(o){
+          if(ref!==myRef)return;
+          if(o&&typeof o==="object"&&o.error)return;
+          var live=o||{};
+          cacheArr.slice().forEach(function(x){if(!live[x.k]){removeEl(x.k)}});
+        }).catch(function(){});
+    }catch(e){}
+    var mine=Object.keys(info).filter(function(k){var f=info[k];return f.mine&&!(cnt(f.d.seen)>0)}).slice(-30);
+    mine.forEach(function(k){
+      ["seen","delivered"].forEach(function(fld){
+        myRef.child(k).child(fld).once("value",function(sn){
+          if(ref!==myRef)return;
+          var f=info[k],v=sn.val();if(!f||!v)return;
+          f.d[fld]=v;setTick(k);cachePush(k,f.d);
+        });
+      });
+    });
+  }
 
   function enterChat(id,o){
     if(!myName)myName=savedName();
@@ -1629,24 +1721,33 @@ var firebaseConfig = {
         conSt=v.st||"";if(v.name)$("who").textContent=dispName(curOther,v.name);updHdp();applyBlockUI();
       });
       ttWatch();skWatch();dgWatch();
+      if(NKM[curOther])sys(nkMsg(curOther));
+      nkSet(curOther,nickOf(curOther));
     }
     ref=db.ref("rooms/"+id+"/messages");
-    var q=ref.limitToLast(100);msgQ=q;
-    function tv(d){return typeof d.t==="number"?d.t:9e15}
-    q.once("value",function(snap){
-      if(msgQ!==q)return;
-      var arr=[];snap.forEach(function(c){arr.push({k:c.key,d:c.val()||{}})});
-      arr.sort(function(a,b){return tv(a.d)-tv(b.d)});
-      arr.forEach(function(x){addMsg(x.d,x.k)});
+    var myRef=ref;
+    cacheId=id;cacheArr=[];
+    cacheLoad(id).then(function(cached){
+      if(ref!==myRef)return;
+      cacheArr=cached.slice();
+      quiet=true;
+      try{cached.forEach(function(x){addMsg(x.d,x.k)})}finally{quiet=false}
+      var last=cached.length?cached[cached.length-1].k:null;
+      // cache hai to sirf naye msgs download honge, warna last 100
+      var q=last?myRef.orderByKey().startAt(last):myRef.limitToLast(100);
+      msgQ=q;
       q.on("child_added",function(s){
         if(info[s.key]||hidden[s.key])return;
-        addMsg(s.val()||{},s.key);
+        var v=s.val()||{};
+        addMsg(v,s.key);cachePush(s.key,v);
+      },function(){sys("Permission error: Firebase rules check karo")});
+      q.on("child_removed",function(s){removeEl(s.key)});
+      q.on("child_changed",function(s){
+        var f=info[s.key];if(!f)return;
+        f.d=s.val()||f.d;cachePush(s.key,f.d);
+        setTick(s.key);if(f.d.eaten&&!eating[s.key])applyEaten(s.key);
       });
-    },function(){sys("Permission error: Firebase rules check karo")});
-    ref.on("child_removed",function(s){removeEl(s.key)});
-    ref.on("child_changed",function(s){
-      var f=info[s.key];if(!f)return;
-      f.d=s.val()||f.d;setTick(s.key);if(f.d.eaten&&!eating[s.key])applyEaten(s.key);
+      if(cached.length)reconcile(myRef,id);
     });
     joinPresence(id);
     joinTyping(id);
