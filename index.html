@@ -290,8 +290,10 @@ button:disabled{opacity:.6;cursor:default}
 
 <div id="menu"><div class="sheet glass" id="sheet"></div></div>
 <div id="dlg" class="ov"><div class="box glass"><h3 id="dT"></h3><p id="dP"></p><div class="db"><button class="alt" id="dNo">Cancel</button><button class="dng" id="dYes">OK</button></div></div></div>
+<div id="nkDlg" class="ov"><div class="box glass"><h3 id="nkT"></h3><p id="nkP"></p><input id="nkI" maxlength="20" autocomplete="off"><div class="db"><button class="alt" id="nkNo">Cancel</button><button class="alt" id="nkClr">Hatao</button><button id="nkYes">Save</button></div></div></div>
 <div id="pv" class="ov"><div class="box glass pbox"><div class="pban"></div><div class="pbody">
   <div class="av" id="pvDp"></div><h3 id="pvN"></h3><div class="chip" id="pvU"></div>
+  <button class="alt" id="pvNick" style="display:none">✏️ Nickname do</button>
   <div id="pvAct"><button class="alt" id="pvEdit">✏️ Edit profile</button><button class="alt" id="pvEm">📧 Change email</button><button class="alt" id="pvPc">🔑 Change password</button><button class="alt" id="lo">⎋ Logout</button></div>
   <button class="alt" id="pvX" style="margin:0">Close</button><div style="color:var(--sub);font-size:11px;margin-top:10px;opacity:.7">Chatly · build 12</div>
 </div></div></div>
@@ -575,6 +577,32 @@ var firebaseConfig = {
   function dmId(o){return "dm_"+[uid,o].sort().join("_")}
   function isBlocked(){return isDM&&!!getB()[curOther]}
   function nameOf(k){var c=getC()[k];return c?c.name:"Guest"}
+  // ---- nickname (sirf mere phone me, dusre ko nahi dikhta) ----
+  function nickMap(){return lsGet("nicks_"+uid,{})}
+  function nickOf(k){return k?(nickMap()[k]||""):""}
+  function dispName(k,real){var n=nickOf(k);return n||real||"Guest"}
+  function nickByUn(un){var c=getC();for(var k in c){if(c[k].un===un)return k}return ""}
+  function setNick(k,v){
+    var m=nickMap();v=String(v||"").trim().slice(0,20);
+    if(v)m[k]=v;else delete m[k];
+    lsSet("nicks_"+uid,m);
+    renderContacts();
+    if(isDM&&curOther===k)enterChat(dmId(k),{dm:true,other:k,title:dispName(k,nameOf(k))});
+    toast(v?"Nickname set ho gaya":"Nickname hata diya");
+  }
+  function nickBox(k){
+    var real=nameOf(k);
+    $("nkT").textContent="✏️ Nickname";
+    $("nkP").textContent="\""+real+"\" ko aap jo naam do, wo sirf aapko dikhega. Dusre ko pata nahi chalega.";
+    var i=$("nkI");i.value=nickOf(k);i.placeholder=real;
+    var d=$("nkDlg");d.style.display="flex";
+    function close(){d.style.display="none"}
+    $("nkNo").onclick=close;
+    $("nkClr").onclick=function(){close();setNick(k,"")};
+    $("nkYes").onclick=function(){close();setNick(k,i.value)};
+    d.onclick=function(e){if(e.target===d)close()};
+    setTimeout(function(){try{i.focus()}catch(e){}},50);
+  }
 
   var GR=[["#7c3aed","#4f46e5"],["#0ea5e9","#2563eb"],["#10b981","#059669"],["#f59e0b","#ea580c"],["#ec4899","#db2777"],["#14b8a6","#0d9488"],["#8b5cf6","#6d28d9"],["#ef4444","#dc2626"]];
   function initialAv(el,name){
@@ -627,7 +655,7 @@ var firebaseConfig = {
       var r=document.createElement("div");r.className="rc";
       var av=document.createElement("div");av.className="av";fillAv(av,o);
       var nn=document.createElement("div");nn.className="nn";
-      var bn=document.createElement("b");bn.textContent=o.name||"Guest";
+      var bn=document.createElement("b");bn.textContent=dispName(k,o.name);
       var sm=document.createElement("small");sm.style.letterSpacing="0";
       var sk=o.st==="ok"?skInfo(SKM[k],k):{n:0,risk:false};
       sm.textContent=o.st==="req"?"📩 Request aayi hai":o.st==="sent"?"⏳ Accept hone ka wait":(b[k]?"🚫 Blocked":(sk.risk?"⏳ Streak khatre me":""));
@@ -655,7 +683,7 @@ var firebaseConfig = {
   }
   function openDM(k){
     var c=getC()[k];if(!c)return;
-    enterChat(dmId(k),{dm:true,other:k,title:c.name});
+    enterChat(dmId(k),{dm:true,other:k,title:dispName(k,c.name)});
   }
   function startCon(){
     if(!db||conMain||!me)return;
@@ -691,7 +719,7 @@ var firebaseConfig = {
     var b=getB(),ts=b[k];delete b[k];setB(b);
     if(ts){var g=lsGet("gap_"+k,[]);g.push([ts,now()]);lsSet("gap_"+k,g.slice(-30))}
     renderContacts();toast("Unblock ho gaya");
-    if(isDM&&curOther===k)enterChat(dmId(k),{dm:true,other:k,title:nameOf(k)});
+    if(isDM&&curOther===k)enterChat(dmId(k),{dm:true,other:k,title:dispName(k,nameOf(k))});
   }
   function askDelete(k){
     confirmBox("🗑 Chat delete karo?","Sirf aapki chat hategi. \""+nameOf(k)+"\" aapke users me rahega, 👥 se dobara message kar sakte ho.","Delete",function(){
@@ -721,6 +749,7 @@ var firebaseConfig = {
   function contactMenu(k){
     var bl=!!getB()[k];
     showSheet([
+      ["✏️ Nickname do",function(){nickBox(k)}],
       [bl?"✅ Unblock karo":"🚫 Block karo",function(){bl?unblock(k):askBlock(k)}],
       ["🗑 Chat delete karo",function(){askDelete(k)},"danger"],
         ["👤 Contact hatao",function(){askRemove(k)},"danger"],
@@ -733,6 +762,7 @@ var firebaseConfig = {
       var k=curOther,bl=isBlocked();
       showSheet([
         ["🧹 Meri chat clear karo",askClear],
+        ["✏️ Nickname do",function(){nickBox(k)}],
         [bl?"✅ Unblock karo":"🚫 Block karo",function(){bl?unblock(k):askBlock(k)}],
         ["🗑 Chat delete karo",function(){askDelete(k)},"danger"],
         ["👤 Contact hatao",function(){askRemove(k)},"danger"],
@@ -908,8 +938,10 @@ var firebaseConfig = {
   };
   // profile view
   function showProfile(o){
-    pvObj=o;$("pvN").textContent=o.name||"Guest";
-    $("pvU").textContent=o.st==="ok"?"@"+o.un:"Username accept hone ke baad dikhega";
+    pvObj=o;var pk=o.st==="ok"&&o.un&&o.un!==(me&&me.un)?nickByUn(o.un):"",pn=pk?nickOf(pk):"";
+    $("pvN").textContent=pn||o.name||"Guest";
+    $("pvU").textContent=o.st==="ok"?"@"+o.un+(pn?" · "+(o.name||""):""):"Username accept hone ke baad dikhega";
+    var nb=$("pvNick");nb.style.display=pk?"block":"none";nb.onclick=function(){$("pv").style.display="none";nickBox(pk)};
     fillAv($("pvDp"),o);$("pvAct").style.display="none";$("pv").style.display="flex";
   }
   function viewDp(el){
@@ -1249,16 +1281,16 @@ var firebaseConfig = {
       var cs=getC(),nn=String(d.name).slice(0,20);
       if(cs[curOther]&&cs[curOther].name!==nn){
         cs[curOther].name=nn;setC(cs);
-        $("who").textContent=nn;
+        $("who").textContent=dispName(curOther,nn);
       }
     }
     var dt=new Date(typeof d.t==="number"?d.t:Date.now()),dk=dt.toDateString();
     if(dk!==lastDay){lastDay=dk;sys(dayLabel(dt))}
     var el=document.createElement("div");el.className="m glass"+(mine?" me":"");
-    if(!mine&&!isDM){var n=document.createElement("div");n.className="n";n.textContent=String(d.name||"Guest").slice(0,20);el.appendChild(n)}
+    if(!mine&&!isDM){var n=document.createElement("div");n.className="n";n.textContent=dispName(d.uid,String(d.name||"Guest").slice(0,20));el.appendChild(n)}
     if(d.rp&&typeof d.rp==="object"){
       var q=document.createElement("div");q.className="rq";
-      var qn=document.createElement("b");qn.textContent=((d.rp.u&&d.rp.u===uid)||(d.rp.c&&d.rp.c===cid))?"You":String(d.rp.n||"Guest").slice(0,20);
+      var qn=document.createElement("b");qn.textContent=((d.rp.u&&d.rp.u===uid)||(d.rp.c&&d.rp.c===cid))?"You":dispName(d.rp.u,String(d.rp.n||"Guest").slice(0,20));
       var qt=document.createElement("span");qt.textContent=String(d.rp.x||"").slice(0,80);
       q.appendChild(qn);q.appendChild(qt);
       q.addEventListener("click",function(e){
@@ -1594,7 +1626,7 @@ var firebaseConfig = {
       conW.on("value",function(s){
         var v=s.val();
         if(!v){toast("Ye chat khatam ho gayi");goHome();return}
-        conSt=v.st||"";if(v.name)$("who").textContent=v.name;updHdp();applyBlockUI();
+        conSt=v.st||"";if(v.name)$("who").textContent=dispName(curOther,v.name);updHdp();applyBlockUI();
       });
       ttWatch();skWatch();dgWatch();
     }
@@ -1868,7 +1900,7 @@ var firebaseConfig = {
       var o=c[k];loadDp(o);
       var r=document.createElement("div");r.className="rc";
       var av=document.createElement("div");av.className="av";fillAv(av,o);
-      var nn=document.createElement("div");nn.className="nn";var bn=document.createElement("b");bn.textContent=o.name||"Guest";nn.appendChild(bn);
+      var nn=document.createElement("div");nn.className="nn";var bn=document.createElement("b");bn.textContent=dispName(k,o.name);nn.appendChild(bn);
       r.appendChild(av);r.appendChild(nn);
       r.onclick=function(){$("us").style.display="none";openDM(k)};
       b.appendChild(r);
