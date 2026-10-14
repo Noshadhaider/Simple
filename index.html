@@ -198,7 +198,7 @@ button:disabled{opacity:.6;cursor:default}
 /* ===== v2 fixes: ticks, swipe reply, streak, ttt ===== */
 #msgs{overflow-x:hidden}
 .m{min-width:64px;position:relative;touch-action:pan-y}
-.m.sw{transition:transform .18s ease}
+.m.swt{transition:transform .18s ease}
 .m .tm{display:flex;justify-content:flex-end;align-items:center;gap:3px;white-space:nowrap;height:12px;line-height:12px;margin-top:3px;font-size:10px}
 .tick{display:inline-flex;align-items:center;justify-content:flex-end;width:17px;height:12px;margin:0;letter-spacing:0;font-weight:400;flex:none}
 .tick svg{display:block;width:17px;height:12px}
@@ -1765,7 +1765,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       var endSwipe=function(fire){
         cancelPress();
         if(!sw)return;
-        sw=false;el.classList.add("sw");el.classList.remove("swm");el.style.transform="";icon.style.opacity="0";icon.style.transform="scale(.4)";
+        sw=false;el.classList.add("swt");el.classList.remove("swm");el.style.transform="";icon.style.opacity="0";icon.style.transform="scale(.4)";
         var go=fire&&dx>=50;dx=0;
         if(go){if(navigator.vibrate)try{navigator.vibrate(12)}catch(x){}setReply(key)}
       };
@@ -1778,7 +1778,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
         var mx=e.clientX-px,my=e.clientY-py;
         if(pt&&(Math.abs(mx)>8||Math.abs(my)>8))cancelPress();
         if(skipSw)return;
-        if(!sw&&mx>12&&mx>Math.abs(my)*1.5){sw=true;el.classList.remove("sw");el.classList.add("swm")}
+        if(!sw&&mx>12&&mx>Math.abs(my)*1.5){sw=true;el.classList.remove("swt");el.classList.add("swm")}
         if(sw){
           dx=Math.max(0,Math.min(mx,64));
           el.style.transform="translateX("+dx+"px)";
