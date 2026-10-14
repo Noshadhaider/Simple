@@ -432,6 +432,32 @@ html[data-style=glass][data-mode=dark] #list,html[data-style=glass][data-mode=da
 #gPrev .pm{position:relative;max-width:75%;padding:7px 12px;font-size:14px;color:#fff;border-radius:16px 16px 16px 5px;align-self:flex-start;background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.06));border:1px solid rgba(255,255,255,.16)}
 #gPrev .pm.me{align-self:flex-end;border-radius:16px 16px 5px 16px;background:linear-gradient(135deg,rgba(var(--gl-rgb),calc(var(--gA) + .14)),rgba(var(--gl-rgb),var(--gA)));border:1px solid rgba(var(--gl-rgb),.6)}
 </style>
+<style id="contrast-fix">
+#stg .box{max-height:100%;overflow-y:auto}
+html:not([data-style=glass]):not([data-theme=dark]){--sub:#6a6788}
+html[data-style=glass][data-mode=light]{--nm:var(--acct)}
+#dgW,html[data-style=glass] #dgW,.lnk,html[data-style=glass] .lnk,.namerow i,#myCodeBox i,.me i,.rc i.ok,html[data-style=glass] .rc i.ok{color:var(--acct,var(--acc))}
+html:not([data-style=glass]) .m .n{color:var(--acct,var(--pu))}
+html[data-style=glass][data-mode=light] .ov p,html[data-style=glass][data-mode=light] #dgLg,html[data-style=glass][data-mode=light] .chip{color:#4a4770}
+html[data-style=glass][data-mode=light] #dgTools i{border-color:rgba(0,0,0,.3)}
+html[data-style=glass][data-mode=light] .ov h3{color:#1f1b3d}
+html[data-mode=light] #gPrev{background:linear-gradient(135deg,#f3f1ff,#dfe6ff)}
+html[data-mode=light] #gPrevD{display:none}
+html[data-mode=light] #gPrev .pm{color:#1f1b3d;background:rgba(255,255,255,.75);border-color:rgba(255,255,255,.9)}
+html[data-mode=light] #gPrev .pm.me{background:linear-gradient(135deg,rgba(var(--gl-rgb),.5),rgba(var(--gl-rgb),.32));border-color:rgba(var(--gl-rgb),.6)}
+.thm button.on{color:var(--on)!important}
+</style>
+<style id="contrast-fix">
+/* light bg pe light text na aaye */
+#myCodeBox b,#f button.ic,#emo .cats button,.ov h3,.ov .box{color:var(--text)}
+.ov p{color:var(--sub)}
+.ov button.dng{color:#fff}
+html:not([data-style=glass]) header.glass b,html:not([data-style=glass]) header.glass small,html:not([data-style=glass]) .hb{color:var(--on)}
+html[data-style=glass][data-mode=light] header b,html[data-style=glass][data-mode=light] .hb,html[data-style=glass][data-mode=light] header small{color:var(--on)}
+html[data-style=glass][data-mode=light] header .code{background:rgba(0,0,0,.12);color:var(--on)}
+html[data-style=glass][data-mode=light] #dgS,html[data-style=glass][data-mode=light] #dgSc{color:#1f1b3d}
+html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
+</style>
 </head>
 <body>
 
@@ -586,6 +612,7 @@ html[data-style=glass][data-mode=dark] #list,html[data-style=glass][data-mode=da
   <div id="dgAct"></div>
   <button class="alt" id="dgX" style="margin:0">Close</button>
 </div></div>
+<div id="gPop" class="ov" style="z-index:70"><div class="box glass" style="text-align:center"><div id="gPopI" style="font-size:46px;line-height:1.1;margin-bottom:6px">⏰</div><h3 id="gPopT"></h3><p id="gPopP"></p><div id="gPopAct" style="display:none"></div><button id="gPopOk" style="margin:0">OK</button></div></div>
 <div id="viewer"><img id="vimg" alt=""><div id="vld">⏳ Loading HD photo...</div></div>
 <div id="toast"></div>
 
@@ -1026,7 +1053,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   });
   function renderContacts(){
     var box=$("clist");box.innerHTML="";
-    skWatchAll();nkWatchAll();presWatchAll();msgWatchAll();
+    skWatchAll();invWatchAll();nkWatchAll();presWatchAll();msgWatchAll();
     var c=getC(),b=getB();
     var ks=Object.keys(c).filter(function(k){
       var o=c[k];if(o.st!=="ok")return true;
@@ -2432,10 +2459,27 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   function ttRef(){return db.ref("rooms/"+curCode+"/game")}
   function ttOpen(){return $("ttOv").style.display==="flex"}
   function ttShow(){$("ttOv").style.display="flex";ttRender()}
+  var INV_TTL=60000;
+  function invLeft(n){return Math.max(0,Math.ceil((INV_TTL-(now()-(n&&n.t||0)))/1000))}
+  function invStatus(n,game){
+    var nm=nameOf(curOther),l=invLeft(n);
+    if(l<=0)return n.a===uid?"⏰ Time khatam ho gaya…":"⏰ Invite expire ho gaya. "+nm+" se dobara invite bhejne ko kaho.";
+    return n.a===uid?"Waiting for "+nm+" to accept… ("+l+"s)":"🎮 "+nm+" ne "+game+" ka invite bheja hai ("+l+"s)";
+  }
+  function gamePop(ic,t,p){
+    $("gPopAct").style.display="none";$("gPopOk").style.display="";$("gPopI").textContent=ic;$("gPopT").textContent=t;$("gPopP").textContent=p;$("gPop").style.display="flex";
+    try{if(navigator.vibrate)navigator.vibrate([120,60,120])}catch(e){}
+  }
+  function invAlert(game){
+    try{if(navigator.vibrate)navigator.vibrate([150,80,150])}catch(e){}
+    if(document.visibilityState!=="visible"&&ntfOn())sysNotify(dispName(curOther,nameOf(curOther)),game+" ka invite bheja hai",curOther);
+  }
+  function invEnd(ref,st){ref().transaction(function(c){if(c&&c.st==="invited"){c.st=st;c.by=uid;return c}},null,false)}
+  function invAccept(ref,after){ref().transaction(function(c){if(c&&c.st==="invited"&&invLeft(c)>0){c.st="play";return c}},function(e,ok,sn){if(!e&&!ok)toast("Invite expire ho chuka hai")},false)}
   function ttBtn(txt,cls,fn){var b=document.createElement("button");b.type="button";b.textContent=txt;if(cls)b.className=cls;b.style.marginBottom="8px";b.onclick=fn;return b}
   function ttRender(){
     var o=$("ttOv");
-    if(!G){o.style.display="none";return}
+    if(!G||G.st==="declined"||G.st==="timeout"){o.style.display="none";return}
     if(!ttOpen())return;
     var nm=nameOf(curOther),act=$("ttAct"),bd=$("ttB");
     act.innerHTML="";bd.innerHTML="";
@@ -2443,8 +2487,9 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     var s="";
     if(G.st==="invited"){
       bd.style.display="none";
-      if(G.a===uid){s="Waiting for "+nm+" to accept…";act.appendChild(ttBtn("Cancel invite","alt",function(){ttRef().remove()}))}
-      else{s=nm+" invited you to play Tic tac toe";act.appendChild(ttBtn("Accept","",function(){ttRef().update({st:"play"})}));act.appendChild(ttBtn("Decline","alt",function(){ttRef().remove()}))}
+      s=invStatus(G,"Tic tac toe");
+      if(G.a===uid)act.appendChild(ttBtn("Cancel invite","alt",function(){ttRef().remove()}));
+      else if(invLeft(G)>0){act.appendChild(ttBtn("Accept","",function(){invAccept(ttRef)}));act.appendChild(ttBtn("Decline","alt",function(){invEnd(ttRef,"declined");$("ttOv").style.display="none"}))}
     }else{
       bd.style.display="grid";
       var mk=G.x===uid?"X":"O";
@@ -2475,7 +2520,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   }
   function ttInvite(){
     if(!canSend()){toast("You can play games after the chat is accepted");return}
-    ttRef().set({st:"invited",a:uid,b:curOther,x:uid,board:"---------",turn:uid,w:"",n:Date.now()}).then(ttShow);
+    ttRef().set({st:"invited",a:uid,b:curOther,x:uid,board:"---------",turn:uid,w:"",n:Date.now(),t:now()}).then(ttShow);
   }
   function ttWatch(){
     G=null;SC={};
@@ -2483,9 +2528,23 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     scW.on("value",function(s){SC=s.val()||{};ttRender()});
     gameW.on("value",function(s){
       var n=s.val(),old=G;G=n;
-      if(!n){ttRender();return}
-      var st=n.st,ost=old&&old.st;
-      if(st==="invited"&&n.b===uid&&ost!=="invited")ttShow();
+      var onm=nameOf(curOther);
+      if(n&&(n.st==="declined"||n.st==="timeout")){
+        if(n.a===uid){
+          if(n.st==="declined")gamePop("❌","Invite reject ho gaya",onm+" ne Tic tac toe ka invite reject kar diya.");
+          else gamePop("⏰","Time khatam",onm+" ne Tic tac toe invite ka jawab nahi diya. Baad mein dobara try karo.");
+          ttRef().remove();
+        }else if(n.st==="timeout"&&old&&old.st==="invited")gamePop("⏰","Invite expire ho gaya",onm+" ka Tic tac toe invite time khatam hone par band ho gaya.");
+        ttRender();return;
+      }
+      if(!n){
+        if(old&&old.st==="invited"&&old.b===uid)gamePop("🚫","Invite cancel ho gaya",onm+" ne Tic tac toe ka invite cancel kar diya.");
+        ttRender();return;
+      }
+      var st=n.st,ost=old&&old.st,exp=st==="invited"&&invLeft(n)<=0;
+      if(exp&&n.a===uid)invEnd(ttRef,"timeout");
+      if(st==="invited"&&n.b===uid&&ost!=="invited"){if(!exp){ttShow();invAlert("Tic tac toe")}}
+      else if(ost==="invited"&&st==="play"&&n.a===uid){toast("✅ "+onm+" ne invite accept kar liya");ttShow()}
       else if(old&&st!==ost&&(st==="play"||st==="over"))ttShow();
       else if(old&&st==="play"&&n.board!==old.board&&n.turn===uid&&!ttOpen())toast("🎮 "+nameOf(curOther)+" made a move");
       else ttRender();
@@ -2545,10 +2604,20 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   }
 
   // ---- draw & guess ----
-  var WORDS=["cat","dog","cow","goat","horse","lion","tiger","monkey","rabbit","snake","camel","fish","bird","apple","banana","mango","orange","watermelon","tomato","potato","onion","egg","bread","rice","cake","pizza","burger","milk","tea","juice","sun","moon","star","cloud","rain","tree","flower","mountain","river","fire","house","door","window","table","chair","bed","fan","clock","lamp","mirror","key","lock","bottle","cup","spoon","plate","fork","candle","umbrella","phone","computer","book","pen","pencil","bag","shoe","hat","shirt","glasses","watch","ring","ball","kite","camera","guitar","drum","flag","gift","car","bus","bike","train","plane","boat","truck","bridge","school","mosque","hospital","shop","heart","eye","nose","hand","tooth","baby","king","robot","rocket","balloon"];
+  var WT={easy:"cat dog cow goat horse lion tiger monkey rabbit snake fish bird duck hen elephant sheep donkey bear fox deer parrot crow owl apple banana mango orange grapes tomato potato onion egg bread rice cake pizza burger milk tea juice water sugar salt ice sun moon star cloud rain tree flower leaf grass mountain river sea fire house door window table chair bed fan clock lamp mirror key lock bottle cup spoon plate fork knife candle umbrella phone computer book pen pencil bag shoe hat shirt cap watch ring ball kite camera guitar drum flag gift car bus bike train plane boat truck road school mosque shop heart eye nose hand leg ear mouth tooth baby king queen robot rocket balloon cricket bat chai samosa roti biryani rickshaw soap towel brush comb pillow blanket socks jeans mobile charger remote radio laptop bulb switch wire ladder broom bucket basket box coin money smile face hair finger foot cheese carrot lemon coconut cherry peach corn nut cookie candy jam toast soup salad noodles chicken".split(" "),medium:"airport station hospital bakery market library garden garage kitchen bedroom bathroom bridge tunnel tower castle palace village city island desert forest jungle volcano waterfall rainbow thunder lightning storm snowman telescope microscope calculator keyboard mouse printer speaker headphones microphone television fridge oven scissors hammer screwdriver spanner drill saw axe shovel rope chain trophy medal crown sword shield arrow tent campfire backpack suitcase passport ticket map compass globe lighthouse anchor submarine helicopter ambulance tractor scooter skateboard bicycle motorcycle parachute football hockey tennis badminton volleyball basketball swimming running boxing wrestling doctor teacher police soldier farmer pilot driver chef tailor barber engineer judge nurse painter singer dancer sandwich chocolate popcorn pancake honey butter cucumber cabbage cauliflower spinach strawberry pineapple pomegranate butterfly spider ant bee mosquito crocodile giraffe zebra dolphin shark whale octopus penguin peacock eagle pigeon sparrow kangaroo panda wallet sunglasses necklace bracelet earrings lipstick perfume toothbrush toothpaste shampoo bathtub sofa curtain carpet staircase chimney fence gate stadium umpire wicket petrol cinema museum factory farm".split(" "),hard:"skeleton astronaut satellite galaxy planet universe gravity magnet electricity pollution traffic internet password wifi bluetooth download screenshot selfie emoji notification freedom justice election parliament inflation loadshedding dream idea secret shadow echo whisper fever sneeze yawn hiccup sunrise sunset eclipse horizon oxygen orbit fossil dinosaur pyramid mummy treasure pirate detective magician ghost vampire zombie alien superhero ninja scarecrow windmill escalator elevator vending skyscraper tornado avalanche iceberg quicksand juggler acrobat sculpture handcuffs fingerprint thermometer stethoscope syringe fireworks carnival circus mermaid unicorn dragon fountain hourglass sandcastle snowflake rollercoaster scoreboard minaret chandelier backbone electricfan generator transformer".split(" ")};
+  var WX={"easy": "camel buffalo pigeon eagle peacock frog butterfly bee ant spider mouse squirrel cheetah zebra giraffe crocodile turtle whale dolphin shark crab rooster lamb panda kangaroo bat snail worm fly mosquito chicken mutton biryani samosa pakora jalebi kebab paratha roti naan chai lassi coffee chocolate icecream biscuit butter cheese honey jam noodles soup salad carrot cucumber spinach garlic ginger chilli lemon peach guava pomegranate watermelon melon cherry strawberry pineapple coconut almond peanut popcorn candy sandwich fries eye ear nose mouth tooth tongue hand finger leg foot hair head heart brain beard soap towel comb brush bucket broom pillow blanket sofa curtain carpet bulb switch wire battery remote charger laptop tablet mobile helmet glasses wallet belt socks jacket scarf slipper sandal tie pocket button needle thread pot pan kettle glass jug tray basket ladder nail brick wheel engine cricket stumps wicket football hockey carrom ludo chess balloon doll toy robot cartoon music song dance party snow wind fog smoke sand stone rock hill lake pond well beach farm field wheat rose cactus bamboo nest feather rickshaw charpai dupatta", "medium": "doctor teacher police farmer driver pilot soldier engineer nurse tailor barber chef carpenter plumber electrician painter singer dancer cricketer shopkeeper judge lawyer student king queen prince thief clown hotel restaurant cinema stadium factory prison bank postman park playground zoo museum bandage medicine injection stretcher wheelchair crutches iron microwave heater cooler geyser toothbrush toothpaste shampoo perfume razor lipstick bracelet necklace earrings sunglasses raincoat sweater uniform basketball badminton swimming wrestling boxing cycling fishing camping cooking shopping reading painting sleeping running jumping climbing laughing crying angry sleepy hungry thirsty website hotspot router earphones smartwatch drone rocket spaceship minibus tonga flyover motorway ladder scaffold wheelbarrow bonfire fountainpen notebook blackboard eraser ruler sharpener stapler envelope stamp letterbox dustbin toilet bathtub shower sink tap faucet cupboard drawer shelf hanger wardrobe handbag purse zip lunchbox waterbottle flask thermos grill barbecue frypan rolling blender toaster kettle teapot saucer bowl tray chopsticks", "hard": "marathon tsunami earthquake flood drought cyclone blizzard laboratory experiment dentist surgeon operation bulldozer excavator crane forklift hologram hacker firewall virus vaccine antenna dish radar periscope binoculars xray anatomy kidney stomach muscle nightmare sculptor architect blueprint skyline tightrope trampoline gymnast wrestler weightlifter goalkeeper penalty tournament champion audience applause autograph interview documentary dictionary encyclopedia photographer journalist newspaper headline ballot protest trafficjam roundabout speedbreaker pothole petrolpump parking highway shipwreck greenhouse snowstorm sandstorm fireman firetruck jackpot lottery auction bargain discount billboard cashier receipt compass hammock backpacker parachutist skydiving bungee zipline surfing snorkel scuba diver lifeguard lifejacket anchor harbour cargo container warehouse conveyor assembly mechanic welder blacksmith goldsmith potter weaver shepherd fisherman beekeeper magician hypnotist astronomer scientist professor principal"};["easy","medium","hard"].forEach(function(k){WX[k].split(" ").forEach(function(w){if(w&&WT[k].indexOf(w)<0)WT[k].push(w)})});
+  var WTI={},dgRecent=[];try{dgRecent=JSON.parse(localStorage.getItem("dgRec")||"[]")||[]}catch(e){dgRecent=[]}["easy","medium","hard"].forEach(function(k){WT[k].forEach(function(w){WTI[w]=k})});
+  var DFN={easy:"Easy",medium:"Medium",hard:"Hard",mix:"Mix"},dgDf="mix";
+  try{var _d=localStorage.getItem("dgDf");if(_d&&DFN[_d])dgDf=_d}catch(e){}
   var D=null,DSC={},dgW=null,dgsW=null,dscW=null,dgCol="#111111",dgSz=12,dgStk=null,dgBuf=[],dgSent=false,dgTmr=null;
   var dgCv=$("dgCv"),dgCtx=dgCv.getContext("2d");
-  function pickWord(prev){var w;do{w=WORDS[Math.floor(Math.random()*WORDS.length)]}while(w===prev);return w}
+  function pickWord(prev,df){
+    var t=df;if(!WT[t]){var r=Math.random();t=r<.4?"easy":r<.8?"medium":"hard"}
+    var a=WT[t],w,i=0;
+    do{w=a[Math.floor(Math.random()*a.length)];i++}while((w===prev||dgRecent.indexOf(w)>=0)&&i<40);
+    dgRecent.push(w);if(dgRecent.length>150)dgRecent.shift();try{localStorage.setItem("dgRec",JSON.stringify(dgRecent))}catch(e){}
+    return w;
+  }
   function dgRef(){return db.ref("rooms/"+curCode+"/dg")}
   function dgsRef(){return db.ref("rooms/"+curCode+"/dgs")}
   function dgOpen(){return $("dgOv").style.display==="flex"}
@@ -2629,7 +2698,9 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   }
   function dgRender(){
     if(!dgOpen())return;
-    var nm=nameOf(curOther),act=$("dgAct"),n=D,st=n&&n.st,play=st==="play",dr=play&&n.d===uid,s="",w="";
+    var nm=nameOf(curOther),act=$("dgAct"),n=D,st=n&&n.st;
+    if(n&&(st==="declined"||st==="timeout")){n=null;st=null}
+    var play=st==="play",dr=play&&n.d===uid,s="",w="";
     act.innerHTML="";
     $("dgSc").textContent=dgScoreLine();
     $("dgPlay").style.display=play?"block":"none";
@@ -2637,16 +2708,23 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     $("dgGuess").style.display=(play&&!dr)?"flex":"none";
     if(!n){
       s="Draw a secret word and let "+nm+" guess it. Correct guess = +10 points, then you swap turns.";
+      var lb=document.createElement("div");lb.style.cssText="font-size:13px;color:var(--sub);margin:0 0 6px";lb.textContent="Word difficulty";act.appendChild(lb);
+      var row=document.createElement("div");row.className="thm";row.style.marginBottom="12px";
+      ["easy","medium","hard","mix"].forEach(function(k){
+        var b=document.createElement("button");b.type="button";b.textContent=DFN[k];if(k===dgDf)b.className="on";
+        b.onclick=function(){dgDf=k;try{localStorage.setItem("dgDf",k)}catch(e){}dgRender()};row.appendChild(b);
+      });
+      act.appendChild(row);
       act.appendChild(ttBtn("Start game","",dgStart));
     }else if(st==="invited"){
-      if(n.a===uid){s="Waiting for "+nm+" to accept…";act.appendChild(ttBtn("Cancel invite","alt",dgQuit))}
-      else{
-        s=nm+" invited you to play Draw & Guess";
-        act.appendChild(ttBtn("Accept","",function(){dgRef().update({st:"play"})}));
-        act.appendChild(ttBtn("Decline","alt",dgQuit));
+      s=invStatus(n,"Draw & Guess");
+      if(n.a===uid)act.appendChild(ttBtn("Cancel invite","alt",dgQuit));
+      else if(invLeft(n)>0){
+        act.appendChild(ttBtn("Accept","",function(){invAccept(dgRef)}));
+        act.appendChild(ttBtn("Decline","alt",function(){invEnd(dgRef,"declined");$("dgOv").style.display="none";toast("Invite reject kar diya")}));
       }
     }else{
-      if(dr){s="Your turn to draw! Draw this word:";w=String(n.w).toUpperCase();act.appendChild(ttBtn("Skip word","alt",dgSkip))}
+      if(dr){s="Your turn to draw! Draw this word:";w=String(n.w).toUpperCase();var tr=WTI[n.w];if(tr)s+=" ("+DFN[tr]+")";act.appendChild(ttBtn("Skip word","alt",dgSkip))}
       else{s=nm+" is drawing. Guess the word! ("+String(n.w).length+" letters)";w=String(n.w).replace(/./g,"_ ").trim()}
       act.appendChild(ttBtn("Quit game","alt",dgQuit));
     }
@@ -2658,14 +2736,14 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   function dgStart(){
     if(!canSend()){toast("You can play games after the chat is accepted");return}
     dgsRef().remove();dgClear();
-    dgRef().set({st:"invited",a:uid,b:curOther,d:uid,w:pickWord(""),n:1});
+    dgRef().set({st:"invited",a:uid,b:curOther,d:uid,w:pickWord("",dgDf),df:dgDf,n:1,t:now()});
     dgShow();
   }
   function dgQuit(){dgRef().remove();dgsRef().remove();dgClear()}
   function dgSkip(){
     dgRef().transaction(function(c){
       if(!c||c.st!=="play"||c.d!==uid)return;
-      c.w=pickWord(c.w);c.n=(c.n||0)+1;c.lg=null;return c;
+      c.w=pickWord(c.w,c.df);c.n=(c.n||0)+1;c.lg=null;return c;
     },function(e,ok){if(!e&&ok)dgsRef().remove()},false);
   }
   function dgGuess(){
@@ -2676,7 +2754,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(g&&(g===w||g===w+"s"||g===w+"es")){
       dgRef().transaction(function(c){
         if(!c||c.st!=="play"||c.n!==n0)return;
-        return {st:"play",a:c.a,b:c.b,d:uid,w:pickWord(c.w),n:n0+1,lg:{u:uid,x:c.w,ok:1}};
+        return {st:"play",a:c.a,b:c.b,d:uid,w:pickWord(c.w,c.df),df:c.df||"mix",n:n0+1,lg:{u:uid,x:c.w,ok:1}};
       },function(e,ok){
         if(e||!ok)return;
         db.ref("rooms/"+id+"/dgscore/"+uid).transaction(function(v){return (v||0)+10});
@@ -2696,8 +2774,24 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     ]);
   };
   $("dgX").onclick=function(){$("dgOv").style.display="none"};
+  $("gPopOk").onclick=function(){$("gPop").style.display="none"};
+  var invTmr=null;
+  function invTick(){
+    var n=D,g=G;
+    if(n&&n.st==="invited"){
+      var l=invLeft(n);
+      if(l<=0&&n.a===uid)invEnd(dgRef,"timeout");
+      if(dgOpen()){if(l<=0)dgRender();else $("dgS").textContent=invStatus(n,"Draw & Guess")}
+    }
+    if(g&&g.st==="invited"){
+      var l2=invLeft(g);
+      if(l2<=0&&g.a===uid)invEnd(ttRef,"timeout");
+      if(ttOpen()){if(l2<=0)ttRender();else $("ttS").textContent=invStatus(g,"Tic tac toe")}
+    }
+  }
   function dgWatch(){
     D=null;DSC={};dgClear();
+    clearInterval(invTmr);invTmr=setInterval(invTick,1000);
     dgW=dgRef();dscW=db.ref("rooms/"+curCode+"/dgscore");dgsW=dgsRef();
     dscW.on("value",function(s){DSC=s.val()||{};dgRender()});
     dgsW.on("child_added",function(s){
@@ -2708,10 +2802,22 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     dgsW.on("child_removed",function(){dgClear()});
     dgW.on("value",function(s){
       var n=s.val(),old=D;D=n;
+      var onm=nameOf(curOther);
+      if(n&&(n.st==="declined"||n.st==="timeout")){
+        if(n.a===uid){
+          if(n.st==="declined")gamePop("❌","Invite reject ho gaya",onm+" ne Draw & Guess ka invite reject kar diya.");
+          else gamePop("⏰","Time khatam",onm+" ne Draw & Guess invite ka jawab nahi diya. Baad mein dobara try karo.");
+          dgRef().remove();dgsRef().remove();dgClear();
+        }else if(n.st==="timeout"&&old&&old.st==="invited")gamePop("⏰","Invite expire ho gaya",onm+" ka Draw & Guess invite time khatam hone par band ho gaya.");
+        dgRender();return;
+      }
+      if(!n&&old&&old.st==="invited"&&old.b===uid)gamePop("🚫","Invite cancel ho gaya",onm+" ne Draw & Guess ka invite cancel kar diya.");
+      var exp=!!n&&n.st==="invited"&&invLeft(n)<=0;
+      if(exp&&n.a===uid)invEnd(dgRef,"timeout");
       var newRound=!!(old&&n&&n.n!==old.n);
       if(newRound){dgClear();$("dgIn").value=""}
-      if(n&&n.st==="invited"&&n.b===uid&&(!old||old.st!=="invited"))dgShow();
-      else if(old&&n&&n.st==="play"&&old.st!=="play")dgShow();
+      if(n&&n.st==="invited"&&n.b===uid&&(!old||old.st!=="invited")){if(!exp){dgShow();invAlert("Draw & Guess")}else dgRender()}
+      else if(old&&n&&n.st==="play"&&old.st!=="play"){if(old.st==="invited"&&n.a===uid)toast("✅ "+onm+" ne invite accept kar liya");dgShow()}
       else{
         if(newRound&&!dgOpen()){
           var l=n.lg;
@@ -2722,9 +2828,10 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     });
   }
   function dgStop(){
+    clearInterval(invTmr);invTmr=null;
     if(dgW){dgW.off();dgW=null}if(dgsW){dgsW.off();dgsW=null}if(dscW){dscW.off();dscW=null}
     clearInterval(dgTmr);dgTmr=null;dgStk=null;dgBuf=[];dgSent=false;D=null;DSC={};
-    $("dgOv").style.display="none";dgClear();
+    $("dgOv").style.display="none";$("gPop").style.display="none";dgClear();
   }
 
   // ---- stickers ----
@@ -2805,6 +2912,51 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     });
   })();
 
+  // ---- invites: chat band ho tab bhi popup ----
+  var INVW={};
+  function inChatWith(k){return isDM&&curOther===k&&$("chat").style.display!=="none"}
+  function invPop(k,g,path,show){
+    var nm=dispName(k,nameOf(k)),code=dmId(k),T=nm+" ne invite bheja";
+    function R(){return db.ref("rooms/"+code+"/"+path)}
+    function done(){$("gPop").style.display="none"}
+    gamePop("🎮",T,g+" khelne ka invite aaya hai. Accept karoge? (60s)");
+    $("gPopOk").style.display="none";
+    var a=$("gPopAct");a.innerHTML="";a.style.display="block";
+    a.appendChild(ttBtn("Accept","",function(){done();R().transaction(function(c){if(c&&c.st==="invited"&&invLeft(c)>0){c.st="play";return c}},function(e,ok){if(e)return;if(!ok){toast("Invite expire ho chuka hai");return}openDM(k);setTimeout(function(){if(inChatWith(k))show()},900)},false)}));
+    a.appendChild(ttBtn("Decline","alt",function(){done();R().transaction(function(c){if(c&&c.st==="invited"){c.st="declined";c.by=uid;return c}},null,false);toast("Invite reject kar diya")}));
+    setTimeout(function(){if($("gPopT").textContent===T&&$("gPopOk").style.display==="none")done()},60500);
+  }
+  function invWatchAll(){
+    if(!db||!me)return;
+    var c=getC();
+    Object.keys(c).forEach(function(k){
+      if(c[k].st!=="ok")return;
+      [["dg","Draw & Guess",function(){dgShow()}],["game","Tic tac toe",function(){ttShow()}]].forEach(function(p){
+        var key=k+p[0];if(INVW[key])return;
+        var code=dmId(k),r=db.ref("rooms/"+code+"/"+p[0]),prev=null;INVW[key]=r;
+        r.on("value",function(s){
+          var n=s.val(),o=prev;prev=n;
+          if(inChatWith(k))return;
+          var nm=dispName(k,nameOf(k));
+          if(!n){if(o&&o.st==="invited"&&o.b===uid)gamePop("🚫","Invite cancel ho gaya",nm+" ne "+p[1]+" ka invite cancel kar diya.");return}
+          if(n.a===uid&&(n.st==="declined"||n.st==="timeout")){
+            if(n.st==="declined")gamePop("❌","Invite reject ho gaya",nm+" ne "+p[1]+" ka invite reject kar diya.");
+            else gamePop("⏰","Time khatam",nm+" ne "+p[1]+" invite ka jawab nahi diya. Baad mein dobara try karo.");
+            r.remove();if(p[0]==="dg")db.ref("rooms/"+code+"/dgs").remove();return;
+          }
+          if(n.st!=="invited")return;
+          var l=invLeft(n);
+          if(n.a===uid){setTimeout(function(){r.transaction(function(x){if(x&&x.st==="invited"&&x.t===n.t){x.st="timeout";x.by=uid;return x}},null,false)},l*1000+400);return}
+          if(n.b===uid&&(!o||o.st!=="invited")&&l>0){
+            try{if(navigator.vibrate)navigator.vibrate([150,80,150])}catch(e){}
+            if(document.visibilityState!=="visible"&&ntfOn())sysNotify(nm,p[1]+" ka invite bheja hai",k);
+            invPop(k,p[1],p[0],p[2]);
+          }
+        });
+      });
+    });
+  }
+
   // ---- start ----
   setMode(false);
   if(me&&configured)enterApp();
@@ -2823,13 +2975,15 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
 <div class="thm" id="mod"><button type="button" data-m="light">☀️ Light</button><button type="button" data-m="dark">🌙 Dark</button></div>
 <div class="srw" style="margin:0"><span>🎨 Theme color</span></div>
 <div class="sws" id="swCols"></div>
+<div id="glOpts" style="display:none">
 <div class="srw" style="margin:0 0 6px"><span>💬 My bubble glass shade</span></div>
 <div class="sws" id="swGl"></div>
 <div class="srw" style="margin:0"><span>✨ Glass strength</span><b id="gaV"></b></div>
 <input type="range" id="gaR" min="12" max="70">
-<div class="srw" style="margin:0"><span>🌑 Darkness</span><b id="dkV"></b></div>
-<input type="range" id="dkR" min="0" max="85">
+<div id="dkWrap"><div class="srw" style="margin:0"><span>🌑 Darkness</span><b id="dkV"></b></div>
+<input type="range" id="dkR" min="0" max="85"></div>
 <div id="gPrev"><div id="gPrevD"></div><div class="pm">Hi! Ye received msg 👋</div><div class="pm me">Ye mera glassy msg ✓✓</div></div>
+</div>
 <button id="stgX" style="margin:0">Done</button></div></div>
 <script>
 (function(){
@@ -2837,17 +2991,17 @@ var cols=['#25d366','#2f7de1','#6b58c7','#e0457b','#e8801f','#0f9aa8','#d9423e',
 try{var x=JSON.parse(localStorage.getItem(K)||'null');if(x)st=x}catch(e){}
 if(st.v!==3)st={c:(!st.c||st.c==='#6b58c7')?cols[0]:st.c,s:st.s||'glass',m:st.m||'dark',v:3};
 var mt=document.querySelector('meta[name=theme-color]');
-function ap(){R.style.setProperty('--pu',st.c);var g=st.s==='glass',dk=st.m==='dark',gr=st.c.toLowerCase()==='#25d366';
+function ap(){R.style.setProperty('--pu',st.c);R.style.setProperty('--acc',st.c);var g=st.s==='glass',dk=st.m==='dark',gr=st.c.toLowerCase()==='#25d366';
 if(!g&&dk)R.setAttribute('data-theme','dark');else R.removeAttribute('data-theme');
 if(g)R.setAttribute('data-style','glass');else R.removeAttribute('data-style');
 R.setAttribute('data-mode',st.m);
 if(g&&dk&&gr)R.setAttribute('data-orig','1');else R.removeAttribute('data-orig');
-var h=st.c.replace('#','');if(h.length===3)h=h.replace(/./g,'$&$&');var rr=parseInt(h.substr(0,2),16),gg=parseInt(h.substr(2,2),16),bb=parseInt(h.substr(4,2),16),lt=(rr*299+gg*587+bb*114)/1000>140;R.style.setProperty('--on',lt?'#111':'#fff');if(lt)R.setAttribute('data-lt','1');else R.removeAttribute('data-lt');var pl=st.c.toLowerCase();R.style.setProperty('--pu2',pl==='#7c3aed'||pl==='#6b58c7'?'#25d366':'#7c3aed');
+var h=st.c.replace('#','');if(h.length===3)h=h.replace(/./g,'$&$&');var rr=parseInt(h.substr(0,2),16),gg=parseInt(h.substr(2,2),16),bb=parseInt(h.substr(4,2),16),lt=(rr*299+gg*587+bb*114)/1000>140;R.style.setProperty('--on',lt?'#111':'#fff');var lum=(rr*299+gg*587+bb*114)/1000;function mx(t,p){return 'rgb('+[rr,gg,bb].map(function(v){return Math.round(v+(t-v)*p)}).join(',')+')'}var acct=st.c;if(dk&&lum<120)acct=mx(255,.55);else if(!dk&&lum>125)acct=mx(0,.5);R.style.setProperty('--acct',acct);if(lt)R.setAttribute('data-lt','1');else R.removeAttribute('data-lt');var pl=st.c.toLowerCase();R.style.setProperty('--pu2',pl==='#7c3aed'||pl==='#6b58c7'?'#25d366':'#7c3aed');
 if(mt)mt.content=g?(dk?'#0f2027':'#e9e6fb'):dk?'#12111b':st.c;
 document.querySelectorAll('#sty button').forEach(function(e){e.classList.toggle('on',e.dataset.s===st.s)});
 document.querySelectorAll('#mod button').forEach(function(e){e.classList.toggle('on',e.dataset.m===st.m)});
 document.querySelectorAll('#swCols i').forEach(function(e){e.classList.toggle('on',e.dataset.c===st.c)});
-var ci=document.getElementById('cc');if(ci&&/^#[0-9a-f]{6}$/i.test(st.c))ci.value=st.c;ag()}
+var ci=document.getElementById('cc');if(ci&&/^#[0-9a-f]{6}$/i.test(st.c))ci.value=st.c;ag();var go=document.getElementById('glOpts'),dw=document.getElementById('dkWrap');if(go)go.style.display=g?'block':'none';if(dw)dw.style.display=(g&&dk)?'block':'none'}
 var gls=['#3b82f6','#22c55e','#14b8a6','#8b5cf6','#ec4899','#f59e0b'];
 function ag(){var g=/^#[0-9a-f]{6}$/i.test(st.g||'')?st.g:gls[0],a=st.ga==null?34:st.ga,d=st.dk==null?45:st.dk;
 R.style.setProperty('--gl-rgb',parseInt(g.substr(1,2),16)+','+parseInt(g.substr(3,2),16)+','+parseInt(g.substr(5,2),16));
