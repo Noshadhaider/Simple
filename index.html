@@ -369,6 +369,25 @@ html[data-style=glass] #list,html[data-style=glass] #msgs,html[data-style=glass]
 html[data-style=glass] #list,html[data-style=glass] #msgs{background:color-mix(in srgb,var(--pu) 10%,var(--glass))}
 html[data-style=glass]:not([data-mode=light]) #list,html[data-style=glass]:not([data-mode=light]) #msgs{background:rgba(255,255,255,.1)}
 </style>
+<style id="glass-chat">
+html[data-style=glass] #chat header.glass{background:var(--glass);border:1px solid var(--bd);border-radius:20px;margin:8px 8px 0;padding:7px 8px;box-shadow:0 4px 18px rgba(0,0,0,.22);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%)}
+html[data-style=glass] #chat header b,html[data-style=glass] #chat .hb{color:var(--text)}html[data-style=glass] #chat header b{text-align:left}
+html[data-style=glass] #chat header .t{text-align:left}html[data-style=glass] #chat header .t>div{justify-content:flex-start}
+html[data-style=glass] #chat header small{color:var(--sub)}html[data-style=glass] #chat header small.typ{color:var(--nm)}
+html[data-style=glass] #chat header .code{background:var(--glass);border:1px solid var(--bd);color:var(--text)}html[data-style=glass] #chat header .av{background:var(--glass)}
+html[data-style=glass] #chat #msgs{background:transparent;border:0;border-radius:0;margin-top:0;padding:10px 12px;gap:6px;backdrop-filter:none;-webkit-backdrop-filter:none}
+html[data-style=glass] #chat .m,html[data-style=glass] #chat .m.glass{background:var(--glass);border:1px solid var(--bd);box-shadow:0 1px 3px rgba(0,0,0,.18);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%)}
+html[data-style=glass] #chat .m.me{background:linear-gradient(135deg,color-mix(in srgb,var(--pu) 55%,transparent),color-mix(in srgb,var(--pu) 42%,transparent));border-color:color-mix(in srgb,var(--pu) 55%,transparent);color:var(--text)}
+html[data-style=glass][data-mode=light] #chat .m.me{background:linear-gradient(135deg,color-mix(in srgb,var(--pu) 88%,transparent),color-mix(in srgb,var(--pu) 70%,transparent));color:#fff}
+html[data-style=glass] #chat .m.big{background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+html[data-style=glass] #chat .m.me .tm,html[data-style=glass] #chat .m.me .tick.sent,html[data-style=glass] #chat .m.me .tick.dlv{color:var(--sub)}
+html[data-style=glass][data-mode=light] #chat .m.me .tm,html[data-style=glass][data-mode=light] #chat .m.me .tick.sent,html[data-style=glass][data-mode=light] #chat .m.me .tick.dlv{color:rgba(255,255,255,.8)}
+html[data-style=glass] #chat .m.me .rq{background:rgba(0,0,0,.2);border-left-color:var(--nm)}html[data-style=glass] #chat .m.me .rq b{color:var(--nm)}html[data-style=glass] #chat .m.me .rq span{color:var(--sub)}
+html[data-style=glass][data-mode=light] #chat .m.me .rq{background:rgba(255,255,255,.2);border-left-color:#fff}html[data-style=glass][data-mode=light] #chat .m.me .rq b{color:#fff}html[data-style=glass][data-mode=light] #chat .m.me .rq span{color:rgba(255,255,255,.85)}
+html[data-style=glass] #chat #f{background:var(--glass);border:1px solid var(--bd);border-radius:28px;margin:0 8px 8px;box-shadow:0 4px 18px rgba(0,0,0,.22);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%)}
+html[data-style=glass] #chat #f input{background:var(--glass2);border:1px solid var(--bd);color:var(--text)}
+html[data-style=glass] #chat #mic,html[data-style=glass] #chat #send{background:linear-gradient(135deg,var(--pu),color-mix(in srgb,var(--pu) 72%,#000));color:var(--on,#fff)}
+</style>
 </head>
 <body>
 
