@@ -3047,5 +3047,28 @@ L.addEventListener('wheel',function(e){if(e.deltaY>0&&p<1){set(1,1);e.preventDef
 sq.addEventListener('focus',function(){set(0,1)});
 })();
 </script>
+<!-- Screen-capture alert hook: Android WebView must call
+     webView.evaluateJavascript("window.onNativeScreenCaptureDetected && window.onNativeScreenCaptureDetected()", null)
+     from its native screenshot-detection callback. A normal website cannot reliably detect screenshots. -->
+<div id="captureAlert" role="status" aria-live="polite" style="display:none;position:fixed;z-index:2147483647;left:16px;right:16px;top:calc(12px + env(safe-area-inset-top));padding:14px 16px;border-radius:14px;background:#202124;color:#fff;box-shadow:0 8px 28px rgba(0,0,0,.3);font:500 14px/1.45 system-ui,sans-serif;align-items:center;gap:10px">
+  <span aria-hidden="true" style="font-size:22px">⚠️</span>
+  <span id="captureAlertText" style="flex:1">Screen capture detected.</span>
+  <button id="captureAlertClose" type="button" aria-label="Dismiss" style="border:0;background:transparent;color:#fff;font-size:22px;padding:0 4px">×</button>
+</div>
+<script>
+(function(){
+  var box=document.getElementById('captureAlert');
+  var msg=document.getElementById('captureAlertText');
+  var close=document.getElementById('captureAlertClose');
+  var timer=null;
+  window.onNativeScreenCaptureDetected=function(details){
+    msg.textContent=(typeof details==='string' && details.trim()) ? details : 'A screenshot or screen recording may have been detected.';
+    box.style.display='flex';
+    if(timer)clearTimeout(timer);
+    timer=setTimeout(function(){box.style.display='none'},6000);
+  };
+  close.addEventListener('click',function(){box.style.display='none';if(timer)clearTimeout(timer)});
+})();
+</script>
 </body>
 </html>
