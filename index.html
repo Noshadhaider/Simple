@@ -501,6 +501,23 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
 .vu-ic{flex:none;width:26px;height:26px;border-radius:50%;border:2px dashed currentColor;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
 .vu-mine.on .vu-ic{border-style:solid;background:#25d366;border-color:#25d366;color:#063b2b}
 .vu-mine.on b{color:#53bdeb}
+#edTools{display:none;flex:none;background:#111820;padding:6px 10px 0;border-top:1px solid #ffffff20}
+#edRow{display:flex;justify-content:space-around}
+#edRow button{background:none;border:0;color:#fff;font-size:20px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 12px;margin:0;border-radius:12px}
+#edRow button small{font-size:11px}
+#edRow button.on{background:#25d36633;color:#25d366}
+#edSub{display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 0}
+#edSub:empty{display:none}
+.edc{width:26px;height:26px;border-radius:50%;border:2px solid #fff6;padding:0;margin:0;flex:none}
+.edc.on{border-color:#fff;transform:scale(1.25)}
+#edSub input{flex:1;min-width:0;margin:0;background:#26313b;color:#fff;border:0;border-radius:18px;padding:10px 14px;font-size:16px}
+#edSub button.eb{margin:0;padding:9px 18px;border-radius:18px;border:0;background:#26313b;color:#fff;font-weight:700;flex:none}
+#edSub button.eb.ok{background:#25d366;color:#063b2b}
+#edCv{max-width:100%;max-height:100%;touch-action:none;border-radius:4px}
+.vu-open{display:inline-flex;align-items:center;gap:6px;width:auto;max-width:200px;padding:7px 12px;border-radius:12px;font:600 13px inherit}
+.vu-mine{padding:3px 4px;gap:7px;font-size:13px;min-width:0}
+.vu-ic{width:22px;height:22px;font-size:12px}
+.vu-used{padding:6px 10px;border-radius:10px;font-size:12px}
 </style>
 </head>
 <body>
@@ -662,12 +679,12 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
 <div id="mediaComposer" aria-modal="true" role="dialog">
   <div id="mcTop"><button type="button" id="mcClose" aria-label="Close">‹</button><div id="mcTitle">Send photo</div></div>
   <div id="mcPreview"></div>
+  <div id="edTools"><div id="edSub"></div><div id="edRow"><button type="button" data-e="draw">✏️<small>Draw</small></button><button type="button" data-e="text">T<small>Text</small></button><button type="button" data-e="crop">✂️<small>Crop</small></button><button type="button" data-e="rot">⟳<small>Rotate</small></button><button type="button" data-e="undo">↶<small>Undo</small></button></div></div>
   <div id="mcBottom"><div id="mcTools"><input id="mcCaption" type="text" maxlength="1000" placeholder="Add a caption…" autocomplete="off"><label id="mcOnce" title="View once"><input id="mcOnceCheck" type="checkbox"><span>1</span></label></div><button type="button" id="mcSend">➤ Send</button></div>
 </div>
 <div id="attSheet"><div class="as-box glass"><i class="as-grip"></i><div class="as-grid">
   <button type="button" data-a="gal"><span>🖼️</span>Gallery</button>
   <button type="button" data-a="cam"><span>📷</span>Camera</button>
-  <button type="button" data-a="once"><span>1</span>View once</button>
 </div></div></div>
 <div id="camScr"><video id="camV" playsinline muted autoplay></video>
   <div id="camTop"><button type="button" class="cb" id="camX" aria-label="Close">✕</button><div id="camTm">0:00</div><button type="button" class="cb" id="camFl" aria-label="Flash">⚡</button></div>
@@ -829,10 +846,20 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   function cnt(o){return o&&typeof o==="object"?Object.keys(o).length:0}
   function dayLabel(d){
     var t=new Date(),y=new Date(Date.now()-864e5);
-    if(d.toDateString()===t.toDateString())return "Aaj";
-    if(d.toDateString()===y.toDateString())return "Kal";
-    return d.toLocaleDateString([],{day:"numeric",month:"short",year:"numeric"});
+    if(d.toDateString()===t.toDateString())return "Today";
+    if(d.toDateString()===y.toDateString())return "Yesterday";
+    return d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
   }
+
+  function refreshDays(){
+    document.querySelectorAll("#msgs [data-day]").forEach(function(e){
+      var t=dayLabel(new Date(+e.getAttribute("data-day")));
+      if(e.textContent!==t)e.textContent=t;
+    });
+  }
+  setInterval(refreshDays,30000);
+  document.addEventListener("visibilitychange",refreshDays);
+  window.addEventListener("focus",refreshDays);
 
   // ---- popups ----
   function closeMenu(){$("menu").style.display="none"}
@@ -1133,9 +1160,9 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       var bn=document.createElement("b");bn.textContent=dispName(k,o.name);
       var sm=document.createElement("small");sm.style.letterSpacing="0";
       var sk=o.st==="ok"?skInfo(SKM[k],k):{n:0,risk:false};
-      sm.textContent=o.st==="req"?"📩 Request received":o.st==="sent"?"⏳ Awaiting acceptance":(b[k]?"🚫 Blocked":(sk.risk?"⏳ Streak at risk":(NKM[k]?"✏️ Calls you \""+NKM[k]+"\"":"")));
+      sm.textContent=o.st==="req"?"📩 Request received":o.st==="sent"?"⏳ Awaiting acceptance":(b[k]?"🚫 Blocked":(sk.risk?"⌛ Streak at risk":(NKM[k]?"✏️ Calls you \""+NKM[k]+"\"":"")));
       var nl=document.createElement("div");nl.className="nl";nl.appendChild(bn);
-      var stxt=(sk.n>0?"🔥"+sk.n:"")+(sk.risk?"⏳":"");
+      var stxt=(sk.n>0?"🔥"+sk.n:"")+(sk.risk?"⌛":"");
       var sp=null;
       if(stxt){sp=document.createElement("span");sp.className="skb"+(sk.risk?" risk":"");sp.textContent=stxt}
       nn.appendChild(nl);nn.appendChild(sm);
@@ -1752,6 +1779,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     var l=[];
     if(!(f.d&&f.d.eaten))l.push(["↩️ Reply",function(){setReply(key)}]);
     if(f.d&&!f.d.eaten&&(!f.d.type||f.d.type==="text")&&typeof f.d.text==="string"&&f.d.text)l.push(["📋 Copy",function(){copy(f.d.text,"Message copied")}]);
+    if(!(f.d&&f.d.eaten))l.push(["🐛 Feed to insect",function(){sendEat(key)}]);
     l.push(["🗑 Delete for me",function(){hideKey(key);removeEl(key)}]);
     if(f.mine)l.push(["🗑 Delete for everyone",function(){if(ref)ref.child(key).remove()},"danger"]);
     if(f.d&&(f.d.type==="sticker"||f.d.type==="image")&&typeof f.d.data==="string")l.push(["⭐ Save as sticker",function(){saveStk(f.d.data,f.d.type==="sticker")}]);
@@ -1808,7 +1836,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       }
     }
     var dt=new Date(typeof d.t==="number"?d.t:Date.now()),dk=dt.toDateString();
-    if(dk!==lastDay){lastDay=dk;sys(dayLabel(dt))}
+    if(dk!==lastDay){lastDay=dk;var dsp=document.createElement("div");dsp.className="sys";dsp.setAttribute("data-day",String(dt.getTime()));dsp.textContent=dayLabel(dt);$("msgs").appendChild(dsp);scroll()}
     var el=document.createElement("div");el.className="m glass"+(mine?" me":"");
     if(!mine&&!isDM){var n=document.createElement("div");n.className="n";n.textContent=dispName(d.uid,String(d.name||"Guest").slice(0,20));el.appendChild(n)}
     if(d.rp&&typeof d.rp==="object"){
@@ -1925,7 +1953,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(key&&d.eaten)applyEaten(key);
     $("msgs").appendChild(el);scroll();
   }
-  function applyEaten(key){return;
+  function applyEaten(key){
     var el=els[key];if(!el||el.classList.contains("eaten"))return;
     el.classList.remove("nib");el.classList.add("eaten");
     var a=document.createElement("div");a.className="ate";a.textContent="🕳️ An insect ate this message 😋";
@@ -2368,14 +2396,14 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     $("mediaComposer").style.display="none";
     var pr=$("mcPreview");while(pr.firstChild)pr.removeChild(pr.firstChild);
     if(pendingObjectUrl){URL.revokeObjectURL(pendingObjectUrl);pendingObjectUrl=null;}
-    pendingMedia=null;$("mcCaption").value="";$("mcOnceCheck").checked=false;
+    pendingMedia=null;$("mcCaption").value="";$("mcOnceCheck").checked=false;edOff();
   }
   $("mcClose").onclick=closeMediaComposer;
   $("mcSend").onclick=function(){
     if(!pendingMedia)return;
     var item=pendingMedia,caption=$("mcCaption").value.trim(),once=$("mcOnceCheck").checked;
     $("mcSend").disabled=true;$("mcSend").textContent="Sending…";
-    sendMedia(item.type,item.data,0,caption,once);
+    sendMedia(item.type,(item.type==="image"&&ed.dirty&&ed.base)?edExport():item.data,0,caption,once);
     $("mcSend").disabled=false;$("mcSend").textContent="➤ Send";
     closeMediaComposer();
   };
@@ -2388,8 +2416,9 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     $("mcTitle").textContent=type==="image"?"Send photo":"Send video";
     var el;
     if(type==="image"){
-      el=document.createElement("img");el.alt="Photo preview";el.src=data;
+      el=edInit(data);
     }else{
+      edOff();
       pendingObjectUrl=URL.createObjectURL(file);el=document.createElement("video");el.src=pendingObjectUrl;el.controls=true;el.playsInline=true;el.muted=true;
     }
     pr.appendChild(el);$("mcCaption").value="";$("mcOnceCheck").checked=presetOnce;presetOnce=false;
@@ -2410,6 +2439,157 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   $("fileVid").onchange=onPick;
   $("fileAny").onchange=onPick;$("fileCam").onchange=onPick;
   $("mcOnceCheck").onchange=function(){toast(this.checked?"View once ON · disappears after they open it":"View once OFF")};
+
+
+  // ---- photo editor: draw / text / crop / rotate / undo ----
+  var ed={base:null,cv:null,items:[],mode:null,color:"#ff3b30",dirty:false,crop:null,drag:null};
+  var ED_COL=["#ffffff","#ff3b30","#ffcc00","#34c759","#0a84ff","#000000"];
+  function edOff(){ed.base=null;ed.cv=null;ed.items=[];ed.mode=null;ed.crop=null;ed.drag=null;ed.dirty=false;$("edTools").style.display="none";$("edSub").innerHTML=""}
+  function edInit(data){
+    edOff();
+    var cv=document.createElement("canvas");cv.id="edCv";ed.cv=cv;
+    var im=new Image();
+    im.onload=function(){if(ed.cv!==cv)return;var b=document.createElement("canvas");b.width=im.width;b.height=im.height;b.getContext("2d").drawImage(im,0,0);ed.base=b;edDraw()};
+    im.src=data;
+    edBind(cv);edUI();
+    $("edTools").style.display="block";
+    return cv;
+  }
+  function edDraw(){
+    var b=ed.base,cv=ed.cv;if(!b||!cv)return;
+    if(cv.width!==b.width||cv.height!==b.height){cv.width=b.width;cv.height=b.height}
+    var x=cv.getContext("2d");x.clearRect(0,0,cv.width,cv.height);x.drawImage(b,0,0);
+    ed.items.forEach(function(it){
+      x.lineJoin="round";x.lineCap="round";
+      if(it.t==="s"){
+        x.strokeStyle=it.c;x.lineWidth=it.w;x.beginPath();
+        it.p.forEach(function(q,i){if(i)x.lineTo(q[0],q[1]);else x.moveTo(q[0],q[1])});
+        if(it.p.length===1)x.lineTo(it.p[0][0]+.1,it.p[0][1]);
+        x.stroke();
+      }else{
+        x.font="800 "+it.s+"px sans-serif";x.textAlign="center";x.textBaseline="middle";
+        x.lineWidth=it.s/7;x.strokeStyle="rgba(0,0,0,.65)";x.strokeText(it.str,it.x,it.y);
+        x.fillStyle=it.c;x.fillText(it.str,it.x,it.y);
+      }
+    });
+    if(ed.mode==="crop"&&ed.crop){
+      var c=ed.crop,W=cv.width,H=cv.height,h=Math.max(10,W/40);
+      x.fillStyle="rgba(0,0,0,.55)";
+      x.fillRect(0,0,W,c.y0);x.fillRect(0,c.y1,W,H-c.y1);x.fillRect(0,c.y0,c.x0,c.y1-c.y0);x.fillRect(c.x1,c.y0,W-c.x1,c.y1-c.y0);
+      x.strokeStyle="#fff";x.lineWidth=Math.max(2,W/300);x.strokeRect(c.x0,c.y0,c.x1-c.x0,c.y1-c.y0);
+      x.fillStyle="#fff";
+      [[c.x0,c.y0],[c.x1,c.y0],[c.x0,c.y1],[c.x1,c.y1]].forEach(function(q){x.fillRect(q[0]-h,q[1]-h,h*2,h*2)});
+    }
+  }
+  function edFlatten(){
+    var m=ed.mode;ed.mode=null;edDraw();
+    var f=document.createElement("canvas");f.width=ed.cv.width;f.height=ed.cv.height;
+    f.getContext("2d").drawImage(ed.cv,0,0);
+    ed.mode=m;edDraw();return f;
+  }
+  function edExport(){
+    var f=edFlatten(),q=.82,d=f.toDataURL("image/jpeg",q);
+    while(d.length>900000&&q>.3){q-=.1;d=f.toDataURL("image/jpeg",q)}
+    return d;
+  }
+  function edUI(){
+    document.querySelectorAll("#edRow button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-e")===ed.mode)});
+    var sub=$("edSub");sub.innerHTML="";
+    function dots(){
+      ED_COL.forEach(function(c){
+        var d=document.createElement("button");d.type="button";d.className="edc"+(c===ed.color?" on":"");d.style.background=c;
+        d.onclick=function(){ed.color=c;edUI()};sub.appendChild(d);
+      });
+    }
+    if(ed.mode==="draw")dots();
+    else if(ed.mode==="text"){
+      var inp=document.createElement("input");inp.id="edIn";inp.type="text";inp.maxLength=60;inp.placeholder="Type text…";
+      var add=document.createElement("button");add.type="button";add.className="eb ok";add.textContent="Add";
+      function doAdd(){
+        var v=inp.value.trim();if(!v||!ed.base)return;
+        ed.items.push({t:"t",str:v,c:ed.color,s:Math.round(ed.base.width/11),x:ed.base.width/2,y:ed.base.height/2});
+        ed.dirty=true;inp.value="";edDraw();toast("Drag the text to move it");
+      }
+      add.onclick=doAdd;inp.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();doAdd()}};
+      sub.appendChild(inp);sub.appendChild(add);
+      var row=document.createElement("div");row.style.cssText="display:flex;gap:8px;position:absolute;left:-9999px";
+    }
+    if(ed.mode==="text"){
+      var cr=document.createElement("div");cr.style.cssText="display:flex;gap:6px;flex:none";
+      ED_COL.forEach(function(c){
+        var d=document.createElement("button");d.type="button";d.className="edc"+(c===ed.color?" on":"");d.style.background=c;
+        d.onclick=function(){ed.color=c;document.querySelectorAll("#edSub .edc").forEach(function(e){e.classList.remove("on")});d.classList.add("on")};
+        cr.appendChild(d);
+      });
+      sub.style.flexWrap="wrap";sub.appendChild(cr);
+    }else sub.style.flexWrap="";
+    if(ed.mode==="crop"){
+      var cn=document.createElement("button");cn.type="button";cn.className="eb";cn.textContent="Cancel";
+      cn.onclick=function(){ed.mode=null;ed.crop=null;edUI();edDraw()};
+      var ap=document.createElement("button");ap.type="button";ap.className="eb ok";ap.textContent="Apply crop";
+      ap.onclick=edApplyCrop;sub.appendChild(cn);sub.appendChild(ap);
+    }
+  }
+  function edApplyCrop(){
+    if(!ed.crop||!ed.base)return;
+    var f=edFlatten(),c=ed.crop,w=Math.round(c.x1-c.x0),h=Math.round(c.y1-c.y0);
+    var nb=document.createElement("canvas");nb.width=Math.max(1,w);nb.height=Math.max(1,h);
+    nb.getContext("2d").drawImage(f,Math.round(c.x0),Math.round(c.y0),w,h,0,0,w,h);
+    ed.base=nb;ed.items=[];ed.mode=null;ed.crop=null;ed.dirty=true;edUI();edDraw();
+  }
+  function edBind(cv){
+    function pt(e){var r=cv.getBoundingClientRect();return [(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height]}
+    function cl(v,a,b){return Math.max(a,Math.min(b,v))}
+    cv.addEventListener("pointerdown",function(e){
+      if(!ed.base)return;var p=pt(e),W=cv.width,H=cv.height;
+      try{cv.setPointerCapture(e.pointerId)}catch(x){}
+      if(ed.mode==="draw"){
+        var it={t:"s",c:ed.color,w:Math.max(5,W/80),p:[p]};ed.items.push(it);ed.drag={k:"d",it:it};ed.dirty=true;edDraw();
+      }else if(ed.mode==="text"){
+        for(var i=ed.items.length-1;i>=0;i--){
+          var t=ed.items[i];if(t.t!=="t")continue;
+          if(Math.abs(p[0]-t.x)<t.str.length*t.s*.34+t.s*.4&&Math.abs(p[1]-t.y)<t.s*.8){ed.drag={k:"m",it:t,dx:t.x-p[0],dy:t.y-p[1]};break}
+        }
+      }else if(ed.mode==="crop"&&ed.crop){
+        var c=ed.crop,h=Math.max(30,W/12),cs=[["x0","y0"],["x1","y0"],["x0","y1"],["x1","y1"]];
+        for(var j=0;j<4;j++){if(Math.abs(p[0]-c[cs[j][0]])<h&&Math.abs(p[1]-c[cs[j][1]])<h){ed.drag={k:"c",cx:cs[j][0],cy:cs[j][1]};return}}
+        if(p[0]>c.x0&&p[0]<c.x1&&p[1]>c.y0&&p[1]<c.y1)ed.drag={k:"cm",ox:p[0]-c.x0,oy:p[1]-c.y0};
+      }
+    });
+    cv.addEventListener("pointermove",function(e){
+      var d=ed.drag;if(!d)return;var p=pt(e),W=cv.width,H=cv.height;
+      if(d.k==="d"){d.it.p.push(p)}
+      else if(d.k==="m"){d.it.x=p[0]+d.dx;d.it.y=p[1]+d.dy}
+      else if(d.k==="c"){
+        var c=ed.crop;
+        if(d.cx==="x0")c.x0=cl(p[0],0,c.x1-40);else c.x1=cl(p[0],c.x0+40,W);
+        if(d.cy==="y0")c.y0=cl(p[1],0,c.y1-40);else c.y1=cl(p[1],c.y0+40,H);
+      }else if(d.k==="cm"){
+        var c2=ed.crop,w=c2.x1-c2.x0,h2=c2.y1-c2.y0;
+        c2.x0=cl(p[0]-d.ox,0,W-w);c2.y0=cl(p[1]-d.oy,0,H-h2);c2.x1=c2.x0+w;c2.y1=c2.y0+h2;
+      }
+      ed.dirty=true;edDraw();
+    });
+    ["pointerup","pointercancel"].forEach(function(n){cv.addEventListener(n,function(){ed.drag=null})});
+  }
+  document.querySelectorAll("#edRow button").forEach(function(b){
+    b.onclick=function(){
+      if(!ed.base)return;
+      var a=b.getAttribute("data-e");
+      if(a==="draw"||a==="text"){ed.mode=ed.mode===a?null:a;ed.crop=null}
+      else if(a==="crop"){
+        if(ed.mode==="crop"){ed.mode=null;ed.crop=null}
+        else{var W=ed.base.width,H=ed.base.height;ed.mode="crop";ed.crop={x0:W*.06,y0:H*.06,x1:W*.94,y1:H*.94}}
+      }else if(a==="rot"){
+        var f=edFlatten(),nb=document.createElement("canvas");nb.width=f.height;nb.height=f.width;
+        var x=nb.getContext("2d");x.translate(nb.width,0);x.rotate(Math.PI/2);x.drawImage(f,0,0);
+        ed.base=nb;ed.items=[];ed.crop=null;if(ed.mode==="crop")ed.mode=null;ed.dirty=true;
+      }else if(a==="undo"){
+        if(ed.mode==="crop"){ed.mode=null;ed.crop=null}else ed.items.pop();
+      }
+      edUI();edDraw();
+    };
+  });
 
   // ---- WhatsApp-style attach sheet + in-app camera ----
   var cam={st:null,face:"environment",mode:"photo",rec:null,tick:null,torch:false};
@@ -2554,7 +2734,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     r.catch(function(){eatMsg(e,key,true)});
     setTimeout(function(){try{r.remove()}catch(x){}},20000);
   }
-  function eatMsg(emoji,key,starter){return;
+  function eatMsg(emoji,key,starter){
     var tg=els[key];
     if(!tg||tg.classList.contains("eaten")||eating[key])return;
     var L=$("bugs");if(L.children.length>=10)return;
@@ -2668,8 +2848,8 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   function invLeft(n){return Math.max(0,Math.ceil((INV_TTL-(now()-(n&&n.t||0)))/1000))}
   function invStatus(n,game){
     var nm=nameOf(curOther),l=invLeft(n);
-    if(l<=0)return n.a===uid?"⏰ Time khatam ho gaya…":"⏰ Invite expire ho gaya. "+nm+" se dobara invite bhejne ko kaho.";
-    return n.a===uid?"Waiting for "+nm+" to accept… ("+l+"s)":"🎮 "+nm+" ne "+game+" ka invite bheja hai ("+l+"s)";
+    if(l<=0)return n.a===uid?"⏰ Time is up…":"⏰ Invite expired. Ask "+nm+" to send a new invite.";
+    return n.a===uid?"Waiting for "+nm+" to accept… ("+l+"s)":"🎮 "+nm+" invited you to play "+game+" ("+l+"s)";
   }
   function gamePop(ic,t,p){
     $("gPopAct").style.display="none";$("gPopOk").style.display="";$("gPopI").textContent=ic;$("gPopT").textContent=t;$("gPopP").textContent=p;$("gPop").style.display="flex";
@@ -2677,10 +2857,10 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   }
   function invAlert(game){
     try{if(navigator.vibrate)navigator.vibrate([150,80,150])}catch(e){}
-    if(document.visibilityState!=="visible"&&ntfOn())sysNotify(dispName(curOther,nameOf(curOther)),game+" ka invite bheja hai",curOther);
+    if(document.visibilityState!=="visible"&&ntfOn())sysNotify(dispName(curOther,nameOf(curOther)),"Invited you to play "+game,curOther);
   }
   function invEnd(ref,st){ref().transaction(function(c){if(c&&c.st==="invited"){c.st=st;c.by=uid;return c}},null,false)}
-  function invAccept(ref,after){ref().transaction(function(c){if(c&&c.st==="invited"&&invLeft(c)>0){c.st="play";return c}},function(e,ok,sn){if(!e&&!ok)toast("Invite expire ho chuka hai")},false)}
+  function invAccept(ref,after){ref().transaction(function(c){if(c&&c.st==="invited"&&invLeft(c)>0){c.st="play";return c}},function(e,ok,sn){if(!e&&!ok)toast("Invite has expired")},false)}
   function ttBtn(txt,cls,fn){var b=document.createElement("button");b.type="button";b.textContent=txt;if(cls)b.className=cls;b.style.marginBottom="8px";b.onclick=fn;return b}
   function ttRender(){
     var o=$("ttOv");
@@ -2736,20 +2916,20 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       var onm=nameOf(curOther);
       if(n&&(n.st==="declined"||n.st==="timeout")){
         if(n.a===uid){
-          if(n.st==="declined")gamePop("❌","Invite reject ho gaya",onm+" ne Tic tac toe ka invite reject kar diya.");
-          else gamePop("⏰","Time khatam",onm+" ne Tic tac toe invite ka jawab nahi diya. Baad mein dobara try karo.");
+          if(n.st==="declined")gamePop("❌","Invite declined",onm+" declined your Tic tac toe invite.");
+          else gamePop("⏰","Time's up",onm+" didn't respond to your Tic tac toe invite. Try again later.");
           ttRef().remove();
-        }else if(n.st==="timeout"&&old&&old.st==="invited")gamePop("⏰","Invite expire ho gaya",onm+" ka Tic tac toe invite time khatam hone par band ho gaya.");
+        }else if(n.st==="timeout"&&old&&old.st==="invited")gamePop("⏰","Invite expired","Your Tic tac toe invite to "+onm+" has expired.");
         ttRender();return;
       }
       if(!n){
-        if(old&&old.st==="invited"&&old.b===uid)gamePop("🚫","Invite cancel ho gaya",onm+" ne Tic tac toe ka invite cancel kar diya.");
+        if(old&&old.st==="invited"&&old.b===uid)gamePop("🚫","Invite cancelled",onm+" cancelled the Tic tac toe invite.");
         ttRender();return;
       }
       var st=n.st,ost=old&&old.st,exp=st==="invited"&&invLeft(n)<=0;
       if(exp&&n.a===uid)invEnd(ttRef,"timeout");
       if(st==="invited"&&n.b===uid&&ost!=="invited"){if(!exp){ttShow();invAlert("Tic tac toe")}}
-      else if(ost==="invited"&&st==="play"&&n.a===uid){toast("✅ "+onm+" ne invite accept kar liya");ttShow()}
+      else if(ost==="invited"&&st==="play"&&n.a===uid){toast("✅ "+onm+" accepted your invite");ttShow()}
       else if(old&&st!==ost&&(st==="play"||st==="over"))ttShow();
       else if(old&&st==="play"&&n.board!==old.board&&n.turn===uid&&!ttOpen())toast("🎮 "+nameOf(curOther)+" made a move");
       else ttRender();
@@ -2763,19 +2943,22 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   function dayStr(off){var d=new Date(now());d=new Date(d.getFullYear(),d.getMonth(),d.getDate()-(off||0));return d.getFullYear()+"-"+skP(d.getMonth()+1)+"-"+skP(d.getDate())}
   function skInfo(s,o){
     s=s||{};var u=s.u||{},t=dayStr(0),y=dayStr(1),a=u[uid]===t,b=u[o]===t;
-    return {n:(s.b===t||s.b===y)?(s.n||0):0,risk:a!==b,me:a,ot:b};
+    var n=(s.b===t||s.b===y)?(s.n||0):0;
+    var nd=new Date(now());nd=new Date(nd.getFullYear(),nd.getMonth(),nd.getDate()+1);
+    var late=(nd.getTime()-now())<=3*36e5;
+    return {n:n,risk:late&&(a!==b||(n>0&&!a&&!b)),me:a,ot:b};
   }
   function skRender(){
     var h=$("hstk"),bar=$("skBar");
     if(!isDM){h.style.display="none";bar.style.display="none";return}
-    var i=skInfo(SKM[curOther],curOther),txt=(i.n>0?"🔥"+i.n:"")+(i.risk?"⏳":"");
+    var i=skInfo(SKM[curOther],curOther),txt=(i.n>0?"🔥"+i.n:"")+(i.risk?"⌛":"");
     h.textContent=txt;h.className="skb"+(i.risk?" risk":"");h.style.display=txt?"block":"none";
-    if(i.risk){bar.textContent=i.me?"⏳ Streak at risk — "+nameOf(curOther)+" has not sent a message today":"⏳ Streak at risk — you have not sent a message today";bar.style.display="block"}
+    if(i.risk){bar.textContent=(i.me?nameOf(curOther)+" has not sent a message today":"You have not sent a message today")+" — the day is almost over, send one to keep your streak 🔥";bar.textContent="⌛ "+bar.textContent;bar.style.display="block"}
     else bar.style.display="none";
   }
   $("hstk").onclick=function(e){e.stopPropagation();
     var i=skInfo(SKM[curOther],curOther);
-    toast(i.risk?"⏳ Streak at risk — both of you need to message today":i.n>0?"🔥 "+i.n+" day streak":"");
+    toast(i.risk?"⌛ Day is almost over — both of you need to message to keep the streak":i.n>0?"🔥 "+i.n+" day streak":"");
   };
   function skWatch(){
     var k=curOther;
@@ -2788,8 +2971,10 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     clearInterval(skInt);skInt=null;
     $("hstk").style.display="none";$("skBar").style.display="none";
   }
+  var skAllInt=null;
   function skWatchAll(){
     if(!db||!me)return;
+    if(!skAllInt)skAllInt=setInterval(renderContacts,60000);
     var c=getC();
     Object.keys(c).forEach(function(k){
       if(c[k].st!=="ok"||skW[k])return;
@@ -2926,7 +3111,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       if(n.a===uid)act.appendChild(ttBtn("Cancel invite","alt",dgQuit));
       else if(invLeft(n)>0){
         act.appendChild(ttBtn("Accept","",function(){invAccept(dgRef)}));
-        act.appendChild(ttBtn("Decline","alt",function(){invEnd(dgRef,"declined");$("dgOv").style.display="none";toast("Invite reject kar diya")}));
+        act.appendChild(ttBtn("Decline","alt",function(){invEnd(dgRef,"declined");$("dgOv").style.display="none";toast("Invite declined")}));
       }
     }else{
       if(dr){s="Your turn to draw! Draw this word:";w=String(n.w).toUpperCase();var tr=WTI[n.w];if(tr)s+=" ("+DFN[tr]+")";act.appendChild(ttBtn("Skip word","alt",dgSkip))}
@@ -2973,7 +3158,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(!canSend()){toast("You can play games after the chat is accepted");return}
     $("bugPick").style.display="none";
     showSheet([
-      [G?"❌ Tic tac toe kholo ("+scoreLine()+")":"❌ Tic tac toe ("+scoreLine()+")",G?ttShow:ttInvite],
+      [G?"❌ Open Tic tac toe ("+scoreLine()+")":"❌ Tic tac toe ("+scoreLine()+")",G?ttShow:ttInvite],
       ["🎨 Draw & Guess ("+dgScoreLine()+")",dgShow],
       ["Cancel"]
     ]);
@@ -3010,19 +3195,19 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       var onm=nameOf(curOther);
       if(n&&(n.st==="declined"||n.st==="timeout")){
         if(n.a===uid){
-          if(n.st==="declined")gamePop("❌","Invite reject ho gaya",onm+" ne Draw & Guess ka invite reject kar diya.");
-          else gamePop("⏰","Time khatam",onm+" ne Draw & Guess invite ka jawab nahi diya. Baad mein dobara try karo.");
+          if(n.st==="declined")gamePop("❌","Invite declined",onm+" declined your Draw & Guess invite.");
+          else gamePop("⏰","Time's up",onm+" didn't respond to your Draw & Guess invite. Try again later.");
           dgRef().remove();dgsRef().remove();dgClear();
-        }else if(n.st==="timeout"&&old&&old.st==="invited")gamePop("⏰","Invite expire ho gaya",onm+" ka Draw & Guess invite time khatam hone par band ho gaya.");
+        }else if(n.st==="timeout"&&old&&old.st==="invited")gamePop("⏰","Invite expired","Your Draw & Guess invite to "+onm+" has expired.");
         dgRender();return;
       }
-      if(!n&&old&&old.st==="invited"&&old.b===uid)gamePop("🚫","Invite cancel ho gaya",onm+" ne Draw & Guess ka invite cancel kar diya.");
+      if(!n&&old&&old.st==="invited"&&old.b===uid)gamePop("🚫","Invite cancelled",onm+" cancelled the Draw & Guess invite.");
       var exp=!!n&&n.st==="invited"&&invLeft(n)<=0;
       if(exp&&n.a===uid)invEnd(dgRef,"timeout");
       var newRound=!!(old&&n&&n.n!==old.n);
       if(newRound){dgClear();$("dgIn").value=""}
       if(n&&n.st==="invited"&&n.b===uid&&(!old||old.st!=="invited")){if(!exp){dgShow();invAlert("Draw & Guess")}else dgRender()}
-      else if(old&&n&&n.st==="play"&&old.st!=="play"){if(old.st==="invited"&&n.a===uid)toast("✅ "+onm+" ne invite accept kar liya");dgShow()}
+      else if(old&&n&&n.st==="play"&&old.st!=="play"){if(old.st==="invited"&&n.a===uid)toast("✅ "+onm+" accepted your invite");dgShow()}
       else{
         if(newRound&&!dgOpen()){
           var l=n.lg;
@@ -3121,14 +3306,14 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   var INVW={};
   function inChatWith(k){return isDM&&curOther===k&&$("chat").style.display!=="none"}
   function invPop(k,g,path,show){
-    var nm=dispName(k,nameOf(k)),code=dmId(k),T=nm+" ne invite bheja";
+    var nm=dispName(k,nameOf(k)),code=dmId(k),T=nm+" sent an invite";
     function R(){return db.ref("rooms/"+code+"/"+path)}
     function done(){$("gPop").style.display="none"}
-    gamePop("🎮",T,g+" khelne ka invite aaya hai. Accept karoge? (60s)");
+    gamePop("🎮",T,"Invited you to play "+g+". Accept? (60s)");
     $("gPopOk").style.display="none";
     var a=$("gPopAct");a.innerHTML="";a.style.display="block";
-    a.appendChild(ttBtn("Accept","",function(){done();R().transaction(function(c){if(c&&c.st==="invited"&&invLeft(c)>0){c.st="play";return c}},function(e,ok){if(e)return;if(!ok){toast("Invite expire ho chuka hai");return}openDM(k);setTimeout(function(){if(inChatWith(k))show()},900)},false)}));
-    a.appendChild(ttBtn("Decline","alt",function(){done();R().transaction(function(c){if(c&&c.st==="invited"){c.st="declined";c.by=uid;return c}},null,false);toast("Invite reject kar diya")}));
+    a.appendChild(ttBtn("Accept","",function(){done();R().transaction(function(c){if(c&&c.st==="invited"&&invLeft(c)>0){c.st="play";return c}},function(e,ok){if(e)return;if(!ok){toast("Invite has expired");return}openDM(k);setTimeout(function(){if(inChatWith(k))show()},900)},false)}));
+    a.appendChild(ttBtn("Decline","alt",function(){done();R().transaction(function(c){if(c&&c.st==="invited"){c.st="declined";c.by=uid;return c}},null,false);toast("Invite declined")}));
     setTimeout(function(){if($("gPopT").textContent===T&&$("gPopOk").style.display==="none")done()},60500);
   }
   function invWatchAll(){
@@ -3143,10 +3328,10 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
           var n=s.val(),o=prev;prev=n;
           if(inChatWith(k))return;
           var nm=dispName(k,nameOf(k));
-          if(!n){if(o&&o.st==="invited"&&o.b===uid)gamePop("🚫","Invite cancel ho gaya",nm+" ne "+p[1]+" ka invite cancel kar diya.");return}
+          if(!n){if(o&&o.st==="invited"&&o.b===uid)gamePop("🚫","Invite cancelled",nm+" cancelled the "+p[1]+" invite.");return}
           if(n.a===uid&&(n.st==="declined"||n.st==="timeout")){
-            if(n.st==="declined")gamePop("❌","Invite reject ho gaya",nm+" ne "+p[1]+" ka invite reject kar diya.");
-            else gamePop("⏰","Time khatam",nm+" ne "+p[1]+" invite ka jawab nahi diya. Baad mein dobara try karo.");
+            if(n.st==="declined")gamePop("❌","Invite declined",nm+" declined your "+p[1]+" invite.");
+            else gamePop("⏰","Time's up",nm+" didn't respond to your "+p[1]+" invite. Try again later.");
             r.remove();if(p[0]==="dg")db.ref("rooms/"+code+"/dgs").remove();return;
           }
           if(n.st!=="invited")return;
@@ -3154,7 +3339,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
           if(n.a===uid){setTimeout(function(){r.transaction(function(x){if(x&&x.st==="invited"&&x.t===n.t){x.st="timeout";x.by=uid;return x}},null,false)},l*1000+400);return}
           if(n.b===uid&&(!o||o.st!=="invited")&&l>0){
             try{if(navigator.vibrate)navigator.vibrate([150,80,150])}catch(e){}
-            if(document.visibilityState!=="visible"&&ntfOn())sysNotify(nm,p[1]+" ka invite bheja hai",k);
+            if(document.visibilityState!=="visible"&&ntfOn())sysNotify(nm,"Invited you to play "+p[1],k);
             invPop(k,p[1],p[0],p[2]);
           }
         });
