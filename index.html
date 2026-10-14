@@ -398,6 +398,40 @@ html[data-style=glass] #chat #mic,html[data-style=glass] #chat #send{background:
 .ub{background:var(--pu);color:var(--on);border-radius:11px;min-width:22px;height:22px;padding:0 6px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-right:6px;flex:none}
 .rc.unr .nn b{font-weight:800}
 </style>
+<style id="glass-v3">
+/* v3: glassy bubbles without backdrop-filter (fixes ghost/misaligned bubbles on reply/swipe), user-picked shade + darkness */
+html[data-style=glass]{--gl-rgb:59,130,246;--gA:.34;--dkA:.45}
+html[data-style=glass] #chat .m,html[data-style=glass] #chat .m.glass,html[data-style=glass] #chat .m.me{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html[data-style=glass] #chat .m{-webkit-tap-highlight-color:transparent;transform:translateZ(0);backface-visibility:hidden}
+html[data-style=glass] #chat .m.big{transform:none}
+html[data-style=glass] #chat .m:not(.me):not(.big){background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.06))!important;border:1px solid rgba(255,255,255,.16)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 2px 8px rgba(0,0,0,.28)}
+/* my bubbles = glass tinted with chosen shade */
+html[data-style=glass] #chat .m.me:not(.big){background:linear-gradient(135deg,rgba(var(--gl-rgb),calc(var(--gA) + .14)),rgba(var(--gl-rgb),var(--gA)))!important;border:1px solid rgba(var(--gl-rgb),.6)!important;color:#fff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 10px rgba(var(--gl-rgb),.2)}
+html[data-style=glass] #chat .m.me .tm,html[data-style=glass] #chat .m.me .tick.sent,html[data-style=glass] #chat .m.me .tick.dlv{color:rgba(255,255,255,.72)!important}
+html[data-style=glass] #chat .m.me .tick.seen{color:#9be7ff!important}
+html[data-style=glass] #chat .m.me .rq{background:rgba(0,0,0,.22)!important;border-left-color:#fff!important}
+html[data-style=glass] #chat .m.me .rq b{color:#fff!important}html[data-style=glass] #chat .m.me .rq span{color:rgba(255,255,255,.8)!important}
+html[data-style=glass][data-mode=light] #chat .m:not(.me):not(.big){background:rgba(255,255,255,.7)!important;border:1px solid rgba(255,255,255,.9)!important}
+html[data-style=glass][data-mode=light] #chat .m.me:not(.big){background:linear-gradient(135deg,rgba(var(--gl-rgb),.5),rgba(var(--gl-rgb),.32))!important;color:#1f1b3d!important}
+html[data-style=glass][data-mode=light] #chat .m.me .tm,html[data-style=glass][data-mode=light] #chat .m.me .tick.sent,html[data-style=glass][data-mode=light] #chat .m.me .tick.dlv{color:rgba(31,27,61,.6)!important}
+html[data-style=glass][data-mode=light] #chat .m.me .rq{background:rgba(255,255,255,.45)!important;border-left-color:#1f1b3d!important}
+html[data-style=glass][data-mode=light] #chat .m.me .rq b{color:#1f1b3d!important}html[data-style=glass][data-mode=light] #chat .m.me .rq span{color:rgba(31,27,61,.7)!important}
+/* selected-for-reply ring (box-shadow instead of outline: no ghost) */
+html[data-style=glass] #chat .m.rsel{outline:0!important;box-shadow:0 0 0 2px rgba(255,255,255,.75)!important}
+.m.swm{will-change:transform}
+/* darker dark mode, strength controlled by --dkA */
+html[data-style=glass][data-mode=dark]{--glass:rgba(255,255,255,.09);--glass2:rgba(255,255,255,.07);--bd:rgba(255,255,255,.15)}
+html[data-style=glass][data-mode=dark] body{background:linear-gradient(rgba(0,0,0,var(--dkA)),rgba(0,0,0,var(--dkA))),var(--gbg,#0f2027)!important}
+html[data-style=glass][data-mode=dark] body:before,html[data-style=glass][data-mode=dark] body:after{opacity:calc(.4*(1 - var(--dkA)))}
+html[data-style=glass][data-mode=dark] #list,html[data-style=glass][data-mode=dark] #msgs{background:rgba(255,255,255,.05)}
+/* settings: sliders + preview */
+#stg input[type=range]{padding:0;margin:0 0 12px;height:28px;border:0;background:none;accent-color:var(--pu)}
+#stg .srw b{font-weight:600;color:var(--sub);font-size:13px}
+#gPrev{border-radius:16px;padding:12px;margin:0 0 14px;display:flex;flex-direction:column;gap:6px;background:linear-gradient(135deg,#0a1418,#18303a 50%,#25505f);position:relative}
+#gPrevD{position:absolute;inset:0;border-radius:16px;background:#000;pointer-events:none}
+#gPrev .pm{position:relative;max-width:75%;padding:7px 12px;font-size:14px;color:#fff;border-radius:16px 16px 16px 5px;align-self:flex-start;background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.06));border:1px solid rgba(255,255,255,.16)}
+#gPrev .pm.me{align-self:flex-end;border-radius:16px 16px 5px 16px;background:linear-gradient(135deg,rgba(var(--gl-rgb),calc(var(--gA) + .14)),rgba(var(--gl-rgb),var(--gA)));border:1px solid rgba(var(--gl-rgb),.6)}
+</style>
 </head>
 <body>
 
@@ -997,7 +1031,10 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     var ks=Object.keys(c).filter(function(k){
       var o=c[k];if(o.st!=="ok")return true;
       var hc=lsGet("hc_"+k,null);return hc===null||(o.t||0)>hc;
-    }).sort(function(x,y){return (c[y].t||0)-(c[x].t||0)});
+    });
+    var la=lsGet("la_"+uid,{});
+    function ak(k){return Math.max(typeof c[k].t==="number"?c[k].t:0,la[k]||0)}
+    ks.sort(function(x,y){return ak(y)-ak(x)});
     $("empty").style.display=(ks.length||getRecent().length)?"none":"block";
     if(!ks.length)return;
     var h=document.createElement("h3");h.textContent="Chats";box.appendChild(h);
@@ -1611,7 +1648,9 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     RP={k:key,u:f.mine?uid:(d.uid||""),c:d.cid||"",n:String(f.mine?myName:(d.name||nameOf(curOther))||"Guest").slice(0,20),x:snip(d),y:d.type||"text"};
     rpEl=els[key];if(rpEl)rpEl.classList.add("rsel");
     $("rpN").textContent=f.mine?"You":RP.n;$("rpT").textContent=RP.x;
+    var mg=$("msgs"),nb=mg.scrollHeight-mg.scrollTop-mg.clientHeight<160;
     $("rpBar").style.display="flex";
+    if(nb)requestAnimationFrame(function(){mg.scrollTop=mg.scrollHeight});
     if(!isBlocked()&&canSend())$("txt").focus();
   }
   function clearReply(){
@@ -1726,7 +1765,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       var endSwipe=function(fire){
         cancelPress();
         if(!sw)return;
-        sw=false;el.classList.add("sw");el.style.transform="";icon.style.opacity="0";icon.style.transform="scale(.4)";
+        sw=false;el.classList.add("sw");el.classList.remove("swm");el.style.transform="";icon.style.opacity="0";icon.style.transform="scale(.4)";
         var go=fire&&dx>=50;dx=0;
         if(go){if(navigator.vibrate)try{navigator.vibrate(12)}catch(x){}setReply(key)}
       };
@@ -1739,7 +1778,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
         var mx=e.clientX-px,my=e.clientY-py;
         if(pt&&(Math.abs(mx)>8||Math.abs(my)>8))cancelPress();
         if(skipSw)return;
-        if(!sw&&mx>12&&mx>Math.abs(my)*1.5){sw=true;el.classList.remove("sw")}
+        if(!sw&&mx>12&&mx>Math.abs(my)*1.5){sw=true;el.classList.remove("sw");el.classList.add("swm")}
         if(sw){
           dx=Math.max(0,Math.min(mx,64));
           el.style.transform="translateX("+dx+"px)";
@@ -2050,7 +2089,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     isDM=!!o.dm;curOther=o.other||"";curCode=id;
     if(isDM){
       var cs=getC();
-      if(cs[curOther]){cs[curOther].t=Date.now();setC(cs)}
+      
       curClr=parseInt(localStorage.getItem("clr_"+id)||"0",10)||0;
     }else{addRecent(id);curClr=0}
     els={};info={};sentMark={};eating={};pres={};typOthers={};lastDay="";
@@ -2144,6 +2183,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   $("send").addEventListener("pointerdown",function(e){e.preventDefault()});
   function afterSend(){
     stopTyping();skBump();
+    if(isDM&&curOther){var la=lsGet("la_"+uid,{});la[curOther]=Date.now();lsSet("la_"+uid,la)}
     if(isDM&&canSend()){var u={},t=ts();u["rooms/_con/"+uid+"/"+curOther+"/t"]=t;u["rooms/_con/"+curOther+"/"+uid+"/t"]=t;db.ref().update(u).catch(function(){})}
   }
   function pushMsg(o,fm){
@@ -2766,7 +2806,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   })();
 
   // ---- start ----
-  setMode(!accs().length);
+  setMode(false);
   if(me&&configured)enterApp();
   else if(me){$("home").style.display="flex"}
   else $("auth").style.display="flex";
@@ -2783,6 +2823,13 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
 <div class="thm" id="mod"><button type="button" data-m="light">☀️ Light</button><button type="button" data-m="dark">🌙 Dark</button></div>
 <div class="srw" style="margin:0"><span>🎨 Theme color</span></div>
 <div class="sws" id="swCols"></div>
+<div class="srw" style="margin:0 0 6px"><span>💬 My bubble glass shade</span></div>
+<div class="sws" id="swGl"></div>
+<div class="srw" style="margin:0"><span>✨ Glass strength</span><b id="gaV"></b></div>
+<input type="range" id="gaR" min="12" max="70">
+<div class="srw" style="margin:0"><span>🌑 Darkness</span><b id="dkV"></b></div>
+<input type="range" id="dkR" min="0" max="85">
+<div id="gPrev"><div id="gPrevD"></div><div class="pm">Hi! Ye received msg 👋</div><div class="pm me">Ye mera glassy msg ✓✓</div></div>
 <button id="stgX" style="margin:0">Done</button></div></div>
 <script>
 (function(){
@@ -2800,11 +2847,25 @@ if(mt)mt.content=g?(dk?'#0f2027':'#e9e6fb'):dk?'#12111b':st.c;
 document.querySelectorAll('#sty button').forEach(function(e){e.classList.toggle('on',e.dataset.s===st.s)});
 document.querySelectorAll('#mod button').forEach(function(e){e.classList.toggle('on',e.dataset.m===st.m)});
 document.querySelectorAll('#swCols i').forEach(function(e){e.classList.toggle('on',e.dataset.c===st.c)});
-var ci=document.getElementById('cc');if(ci&&/^#[0-9a-f]{6}$/i.test(st.c))ci.value=st.c}
+var ci=document.getElementById('cc');if(ci&&/^#[0-9a-f]{6}$/i.test(st.c))ci.value=st.c;ag()}
+var gls=['#3b82f6','#22c55e','#14b8a6','#8b5cf6','#ec4899','#f59e0b'];
+function ag(){var g=/^#[0-9a-f]{6}$/i.test(st.g||'')?st.g:gls[0],a=st.ga==null?34:st.ga,d=st.dk==null?45:st.dk;
+R.style.setProperty('--gl-rgb',parseInt(g.substr(1,2),16)+','+parseInt(g.substr(3,2),16)+','+parseInt(g.substr(5,2),16));
+R.style.setProperty('--gA',String(a/100));R.style.setProperty('--dkA',String(d/100));
+var pd=document.getElementById('gPrevD');if(pd)pd.style.opacity=String(d/100);
+var r1=document.getElementById('gaR'),r2=document.getElementById('dkR');
+if(r1){r1.value=a;document.getElementById('gaV').textContent=a+'%'}if(r2){r2.value=d;document.getElementById('dkV').textContent=d+'%'}
+document.querySelectorAll('#swGl i').forEach(function(e){e.classList.toggle('on',e.dataset.c===g)});
+var gc=document.getElementById('gc');if(gc)gc.value=g}
 function sv(){try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}ap()}
 var box=document.getElementById('swCols');
 cols.forEach(function(c){var i=document.createElement('i');i.style.background=c;i.dataset.c=c;i.onclick=function(){st.c=c;sv()};box.appendChild(i)});
 var ci=document.createElement('input');ci.type='color';ci.id='cc';ci.title='Custom color';ci.oninput=function(){st.c=ci.value;sv()};box.appendChild(ci);
+var gb=document.getElementById('swGl');
+gls.forEach(function(c){var i=document.createElement('i');i.style.background=c;i.dataset.c=c;i.onclick=function(){st.g=c;sv()};gb.appendChild(i)});
+var gi=document.createElement('input');gi.type='color';gi.id='gc';gi.title='Custom shade';gi.oninput=function(){st.g=gi.value;sv()};gb.appendChild(gi);
+document.getElementById('gaR').oninput=function(){st.ga=+this.value;sv()};
+document.getElementById('dkR').oninput=function(){st.dk=+this.value;sv()};
 document.querySelectorAll('#sty button').forEach(function(e){e.onclick=function(){st.s=e.dataset.s;sv()}});document.querySelectorAll('#mod button').forEach(function(e){e.onclick=function(){st.m=e.dataset.m;sv()}});
 var ov=document.getElementById('stg');
 var nt=document.getElementById('swNtf'),nh=document.getElementById('ntfH');
