@@ -457,6 +457,9 @@ html[data-style=glass][data-mode=light] header b,html[data-style=glass][data-mod
 html[data-style=glass][data-mode=light] header .code{background:rgba(0,0,0,.12);color:var(--on)}
 html[data-style=glass][data-mode=light] #dgS,html[data-style=glass][data-mode=light] #dgSc{color:#1f1b3d}
 html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
+
+  .vu-open{display:block;width:100%;max-width:260px;padding:18px 16px;border:1px solid rgba(255,255,255,.2);border-radius:14px;background:rgba(124,58,237,.22);color:inherit;font:600 15px inherit;text-align:center;cursor:pointer}
+  .vu-used{padding:12px 14px;border-radius:12px;background:rgba(128,128,128,.12);color:var(--sub);font-size:13px}
 </style>
 </head>
 <body>
@@ -1757,7 +1760,30 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       el.appendChild(q);
     }
     var data=typeof d.data==="string"?d.data:"";
-    if(d.type==="image"&&data.indexOf("data:image/")===0){
+    if(d.viewOnce && d.eaten){
+      var used=document.createElement("div");used.className="vu-used";used.textContent="✓ View once media opened";el.appendChild(used);
+    }else if(d.viewOnce && mine){
+      var sentOnce=document.createElement("div");sentOnce.className="vu-used";sentOnce.textContent="👁 View once media sent";el.appendChild(sentOnce);
+    }else if(d.viewOnce && (d.type==="image"||d.type==="video")){
+      var vo=document.createElement("button");vo.className="vu-open";vo.type="button";
+      vo.textContent=(d.type==="image"?"📷":"🎥")+" View once · Tap to open";
+      vo.onclick=function(e){
+        e.stopPropagation();
+        if(d.eaten){vo.disabled=true;return}
+        if(d.type==="image"){
+          $("vimg").style.cssText="";$("vimg").src=data;$("viewer").style.display="flex";
+        }else{
+          var wrap=document.createElement("div");wrap.style.cssText="position:fixed;inset:0;z-index:99999;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:16px";
+          var v=document.createElement("video");v.src=data;v.controls=true;v.autoplay=true;v.playsInline=true;v.style.cssText="max-width:100%;max-height:82vh";
+          var close=document.createElement("button");close.textContent="Close";close.style.cssText="margin-top:12px;padding:12px 24px;border:0;border-radius:20px";
+          close.onclick=function(){try{v.pause();v.removeAttribute("src");v.load()}catch(x){}wrap.remove()};
+          wrap.appendChild(v);wrap.appendChild(close);document.body.appendChild(wrap);
+        }
+        d.eaten=true;vo.textContent="✓ Opened";
+        if(ref&&key)ref.child(key).update({eaten:true,openedBy:uid,openedAt:firebase.database.ServerValue.TIMESTAMP}).catch(function(){});
+      };
+      el.appendChild(vo);
+    }else if(d.type==="image"&&data.indexOf("data:image/")===0){
       var im=document.createElement("img");im.className="media";im.src=data;im.alt="photo";
       im.onclick=function(e){e.stopPropagation();$("vimg").style.cssText="";$("vimg").src=data;$("viewer").style.display="flex"};
       el.appendChild(im);
@@ -2254,24 +2280,28 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       im.src=u;
     });
   }
+  var sendViewOnce=false;
   function sendMedia(type,data,dur){
     if(!ref||isBlocked()||!canSend())return;
     var o={cid:cid,uid:uid,name:myName,type:type,data:data,t:firebase.database.ServerValue.TIMESTAMP};
+    if(sendViewOnce&&(type==="image"||type==="video")){o.viewOnce=true;sendViewOnce=false;}
     if(dur)o.dur=dur;
     pushMsg(o,"Failed to send (file may be too large)");
     afterSend();
   }
   $("attach").onclick=function(){
     var l=[
-      ["🖼 Photo (Gallery)",function(){$("fileImg").click()}],
-      ["🎞 Video (Gallery)",function(){$("fileVid").click()}]
+      ["🖼 Photo (Gallery)",function(){sendViewOnce=false;$("fileImg").click()}],
+      ["🎞 Video (Gallery)",function(){sendViewOnce=false;$("fileVid").click()}],
+      ["👁 View Once Photo",function(){sendViewOnce=true;$("fileImg").click()}],
+      ["👁 View Once Video",function(){sendViewOnce=true;$("fileVid").click()}]
     ];
     l.push(["Cancel"]);
     showSheet(l);
   };
   function onPick(){
     var f=this.files&&this.files[0];this.value="";
-    if(!f||!ref)return;
+    if(!f||!ref){sendViewOnce=false;return;}
     if(f.type.indexOf("image/")===0){
       sys("Sending photo...");
       imgToData(f).then(function(d){sendMedia("image",d)}).catch(function(){sys("Could not open photo")});
@@ -2279,7 +2309,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       if(f.size>3*1024*1024){sys("Video is too large. Maximum 3 MB.");return}
       sys("Sending video...");
       blobToData(f).then(function(d){sendMedia("video",d)}).catch(function(){sys("Could not read video")});
-    }else sys("Only photos or videos can be sent");
+    }else {sendViewOnce=false;sys("Only photos or videos can be sent");}
   }
   $("fileImg").onchange=onPick;
   $("fileVid").onchange=onPick;
@@ -3045,29 +3075,6 @@ function end(){if(p>0&&p<1)set(p>.4?1:0,1)}
 L.addEventListener('touchend',end);L.addEventListener('touchcancel',end);
 L.addEventListener('wheel',function(e){if(e.deltaY>0&&p<1){set(1,1);e.preventDefault()}else if(e.deltaY<0&&L.scrollTop<=0&&p>0)set(0,1)},{passive:false});
 sq.addEventListener('focus',function(){set(0,1)});
-})();
-</script>
-<!-- Screen-capture alert hook: Android WebView must call
-     webView.evaluateJavascript("window.onNativeScreenCaptureDetected && window.onNativeScreenCaptureDetected()", null)
-     from its native screenshot-detection callback. A normal website cannot reliably detect screenshots. -->
-<div id="captureAlert" role="status" aria-live="polite" style="display:none;position:fixed;z-index:2147483647;left:16px;right:16px;top:calc(12px + env(safe-area-inset-top));padding:14px 16px;border-radius:14px;background:#202124;color:#fff;box-shadow:0 8px 28px rgba(0,0,0,.3);font:500 14px/1.45 system-ui,sans-serif;align-items:center;gap:10px">
-  <span aria-hidden="true" style="font-size:22px">⚠️</span>
-  <span id="captureAlertText" style="flex:1">Screen capture detected.</span>
-  <button id="captureAlertClose" type="button" aria-label="Dismiss" style="border:0;background:transparent;color:#fff;font-size:22px;padding:0 4px">×</button>
-</div>
-<script>
-(function(){
-  var box=document.getElementById('captureAlert');
-  var msg=document.getElementById('captureAlertText');
-  var close=document.getElementById('captureAlertClose');
-  var timer=null;
-  window.onNativeScreenCaptureDetected=function(details){
-    msg.textContent=(typeof details==='string' && details.trim()) ? details : 'A screenshot or screen recording may have been detected.';
-    box.style.display='flex';
-    if(timer)clearTimeout(timer);
-    timer=setTimeout(function(){box.style.display='none'},6000);
-  };
-  close.addEventListener('click',function(){box.style.display='none';if(timer)clearTimeout(timer)});
 })();
 </script>
 </body>
