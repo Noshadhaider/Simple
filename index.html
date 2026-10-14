@@ -224,7 +224,7 @@ button:disabled{opacity:.6;cursor:default}
 :root{--text:#1f1b3d;--sub:#8b88a3;--glass:#fff;--glass2:var(--glass2);--bd:#e9e7f4;--acc:#25d366;--pu:#25d366;--on:#063;--bg:#f6f6f9;--card:#fff;--tint:color-mix(in srgb,var(--pu) 12%,#fff)}
 body{background:var(--bg)}body:before,body:after{display:none}
 .glass{background:var(--card);border:1px solid var(--bd);backdrop-filter:none;-webkit-backdrop-filter:none}
-button{color:#fff}button.alt{background:var(--glass2);color:#3d3963;border:1px solid var(--bd)}
+button{color:var(--on)}button.alt{background:var(--glass2);color:#3d3963;border:1px solid var(--bd)}
 input{background:var(--glass2);color:var(--text);border:1px solid var(--bd)}input::placeholder{color:var(--sub)}
 .av{background:var(--tint);color:var(--pu)}
 /* auth + overlays */
@@ -236,8 +236,8 @@ input{background:var(--glass2);color:var(--text);border:1px solid var(--bd)}inpu
 #lo{color:#e5484d}#err,#ferr{color:#e5484d}
 /* home */
 #home{background:var(--pu)}
-.top h1{color:#fff;font-size:22px}.top .av{border:2px solid rgba(255,255,255,.55);background:rgba(255,255,255,.2)}
-.sbar input{background:rgba(255,255,255,.17);border:0;color:#fff}.sbar input::placeholder{color:rgba(255,255,255,.8)}
+.top h1{color:var(--on);font-size:22px}.top .av{border:2px solid rgba(255,255,255,.55);background:rgba(255,255,255,.2)}
+.sbar input{background:color-mix(in srgb,var(--on) 17%,transparent);border:0;color:var(--on)}.sbar input::placeholder{color:color-mix(in srgb,var(--on) 75%,transparent)}
 #list{background:var(--card);border-radius:28px 28px 0 0;margin-top:8px;padding:16px 16px 120px}
 .rc{background:transparent;border:0;border-bottom:1px solid var(--bd);border-radius:0;padding:10px 2px}
 #list .rc{padding:11px 2px}
@@ -245,33 +245,33 @@ input{background:var(--glass2);color:var(--text);border:1px solid var(--bd)}inpu
 .rc .av{width:46px;height:46px}
 .skb{background:var(--tint);border-color:#e3dffa;color:var(--pu)}.skb.risk{color:#d9822b;border-color:#f3c999}
 #empty{color:var(--sub)}
-.fab{background:var(--pu);color:#fff;box-shadow:0 8px 20px rgba(107,88,199,.5)}
+.fab{background:var(--pu);color:var(--on);box-shadow:0 8px 20px rgba(107,88,199,.5)}
 .fab.alt{background:var(--card);color:var(--pu);border:1px solid var(--bd)}
 .lnk{color:var(--pu)}.sub{color:var(--sub)}
 /* chat */
 #chat{background:var(--bg)}
 header.glass{background:var(--pu);border:0;border-radius:0;box-shadow:none;margin:0;padding:12px 10px 34px}
-header b{color:#fff;text-align:center}header small{color:rgba(255,255,255,.85)}header small.typ{color:#b9ffd4}
+header b{color:var(--on);text-align:center}header small{color:color-mix(in srgb,var(--on) 85%,transparent)}header small.typ{color:#b9ffd4}
 header .t{text-align:center}header .t>div{justify-content:center}
-.hb{color:#fff}header .code{background:rgba(255,255,255,.18);border:0;color:#fff}
+.hb{color:var(--on)}header .code{background:color-mix(in srgb,var(--on) 18%,transparent);border:0;color:var(--on)}
 header .av{background:rgba(255,255,255,.2)}
 #skBar{background:var(--card)7e8;color:#c9791b;border-color:#f3dcae}
 #msgs{background:var(--bg);border-radius:28px 28px 0 0;margin-top:-22px;position:relative;padding:16px 14px 10px;gap:8px}
 .m,.m.glass{background:var(--card);color:var(--text);border:0;box-shadow:0 1px 3px rgba(40,30,90,.07);border-radius:18px 18px 18px 5px}
-.m.me{background:var(--pu);color:#fff;border-radius:18px 18px 5px 18px}
-.m .n{color:var(--pu)}.m .tm{color:#a9a6bf}.m.me .tm{color:rgba(255,255,255,.72)}
-.m.me .tick.sent,.m.me .tick.dlv{color:rgba(255,255,255,.72)}.m.me .tick.seen{color:#9be7ff}
+.m.me{background:var(--pu);color:var(--on);border-radius:18px 18px 5px 18px}
+.m .n{color:var(--pu)}.m .tm{color:#a9a6bf}.m.me .tm{color:color-mix(in srgb,var(--on) 72%,transparent)}
+.m.me .tick.sent,.m.me .tick.dlv{color:color-mix(in srgb,var(--on) 72%,transparent)}.m.me .tick.seen{color:#9be7ff}
 .m.big{background:none;box-shadow:none;color:var(--text)}
 .sys{background:var(--glass2);color:var(--sub)}
 .rq{background:var(--tint);border-left-color:var(--pu)}.rq b{color:var(--pu)}.rq span{color:#6f6c88}
-.m.me .rq{background:rgba(255,255,255,.18);border-left-color:#fff}.m.me .rq b{color:#fff}.m.me .rq span{color:rgba(255,255,255,.85)}
+.m.me .rq{background:color-mix(in srgb,var(--on) 18%,transparent);border-left-color:var(--on)}.m.me .rq b{color:var(--on)}.m.me .rq span{color:color-mix(in srgb,var(--on) 85%,transparent)}
 .m.rsel{outline-color:var(--pu)}.m .ate{color:var(--sub)}
 .m.me .ate{color:rgba(255,255,255,.8)}
 #rpBar .rpb{border-left-color:var(--pu)}#rpBar b{color:var(--pu)}
 #f{background:var(--card);border:0;border-radius:30px;margin:4px 10px 10px;box-shadow:0 4px 18px rgba(60,40,140,.12)}
 #f input{background:var(--glass2);border:0;color:var(--text)}
 #f button.ic{color:var(--pu)}
-#mic,#send{background:var(--pu);color:#fff;box-shadow:0 4px 12px rgba(107,88,199,.4)}
+#mic,#send{background:var(--pu);color:var(--on);box-shadow:0 4px 12px rgba(107,88,199,.4)}
 #rec{background:var(--card)}#rec .tmr{color:var(--text)}
 #blockBar,#reqBar,#emo,#rpBar{background:var(--card);color:var(--text)}
 #emo .cats button{color:var(--text)}#emo .cats button.on{background:var(--tint)}
@@ -343,7 +343,7 @@ html[data-style=glass] header .code{background:rgba(255,255,255,.2);border:0;col
 html[data-style=glass] #skBar{background:var(--glass);color:var(--warn);border-color:var(--warn)}
 html[data-style=glass] #msgs{background:var(--glass);border:1px solid var(--bd);border-bottom:0;backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%)}
 html[data-style=glass] .m,html[data-style=glass] .m.glass{background:var(--bub);color:var(--text);border:1px solid var(--bd);box-shadow:0 1px 3px rgba(0,0,0,.12)}
-html[data-style=glass] .m.me{background:linear-gradient(135deg,color-mix(in srgb,var(--pu) 88%,transparent),color-mix(in srgb,var(--pu) 68%,transparent));border-color:color-mix(in srgb,var(--pu) 60%,transparent);color:#fff}
+html[data-style=glass] .m.me{background:linear-gradient(135deg,color-mix(in srgb,var(--pu) 88%,transparent),color-mix(in srgb,var(--pu) 68%,transparent));border-color:color-mix(in srgb,var(--pu) 60%,transparent);color:var(--on)}
 html[data-style=glass] .m .n{color:var(--nm)}html[data-style=glass] .m .tm{color:var(--sub)}html[data-style=glass] .m.me .tm{color:rgba(255,255,255,.78)}
 html[data-style=glass] .m.me .tick.sent,html[data-style=glass] .m.me .tick.dlv{color:rgba(255,255,255,.78)}html[data-style=glass] .m.me .tick.seen{color:#9be7ff}
 html[data-style=glass] .m.big{background:none;border:0;box-shadow:none;color:var(--text)}
@@ -363,7 +363,7 @@ html[data-style=glass] .tttb{background:var(--glass2)!important;border:1px solid
 html[data-style=glass] .acc{background:var(--glass2)}html[data-style=glass] .acc .at b{color:var(--text)}
 .thm{display:flex;gap:8px;margin:0 0 14px}
 .thm button{flex:1;margin:0;padding:11px 4px;font-size:14px;background:var(--glass2);color:var(--text);border:1px solid var(--bd)}
-.thm button.on,html[data-style=glass] .thm button.on{background:var(--pu);color:#fff;border-color:var(--pu)}
+.thm button.on,html[data-style=glass] .thm button.on{background:var(--pu);color:var(--on);border-color:var(--pu)}
 <style id="glass-fix">
 html[data-style=glass] #list,html[data-style=glass] #msgs,html[data-style=glass] .m,html[data-style=glass] .m.glass,html[data-style=glass] #emo,html[data-style=glass] #rec,html[data-style=glass] #blockBar,html[data-style=glass] #reqBar,html[data-style=glass] #rpBar,html[data-style=glass] #skBar,html[data-style=glass] #bugPick{backdrop-filter:none;-webkit-backdrop-filter:none}
 html[data-style=glass] #list,html[data-style=glass] #msgs{background:color-mix(in srgb,var(--pu) 10%,var(--glass))}
@@ -378,15 +378,25 @@ html[data-style=glass] #chat header .code{background:var(--glass);border:1px sol
 html[data-style=glass] #chat #msgs{background:transparent;border:0;border-radius:0;margin-top:0;padding:10px 12px;gap:6px;backdrop-filter:none;-webkit-backdrop-filter:none}
 html[data-style=glass] #chat .m,html[data-style=glass] #chat .m.glass{background:var(--glass);border:1px solid var(--bd);box-shadow:0 1px 3px rgba(0,0,0,.18);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%)}
 html[data-style=glass] #chat .m.me{background:linear-gradient(135deg,color-mix(in srgb,var(--pu) 55%,transparent),color-mix(in srgb,var(--pu) 42%,transparent));border-color:color-mix(in srgb,var(--pu) 55%,transparent);color:var(--text)}
-html[data-style=glass][data-mode=light] #chat .m.me{background:linear-gradient(135deg,color-mix(in srgb,var(--pu) 88%,transparent),color-mix(in srgb,var(--pu) 70%,transparent));color:#fff}
+html[data-style=glass][data-mode=light] #chat .m.me{background:linear-gradient(135deg,color-mix(in srgb,var(--pu) 88%,transparent),color-mix(in srgb,var(--pu) 70%,transparent));color:var(--on)}
+html[data-style=glass][data-lt="1"] #chat .m.me{background:linear-gradient(135deg,color-mix(in srgb,var(--pu) 88%,transparent),color-mix(in srgb,var(--pu) 70%,transparent));color:var(--on)}
 html[data-style=glass] #chat .m.big{background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
 html[data-style=glass] #chat .m.me .tm,html[data-style=glass] #chat .m.me .tick.sent,html[data-style=glass] #chat .m.me .tick.dlv{color:var(--sub)}
-html[data-style=glass][data-mode=light] #chat .m.me .tm,html[data-style=glass][data-mode=light] #chat .m.me .tick.sent,html[data-style=glass][data-mode=light] #chat .m.me .tick.dlv{color:rgba(255,255,255,.8)}
+html[data-style=glass][data-mode=light] #chat .m.me .tm,html[data-style=glass][data-mode=light] #chat .m.me .tick.sent,html[data-style=glass][data-mode=light] #chat .m.me .tick.dlv{color:color-mix(in srgb,var(--on) 80%,transparent)}
+html[data-style=glass][data-lt="1"] #chat .m.me .tm,html[data-style=glass][data-lt="1"] #chat .m.me .tick.sent,html[data-style=glass][data-lt="1"] #chat .m.me .tick.dlv{color:color-mix(in srgb,var(--on) 80%,transparent)}
 html[data-style=glass] #chat .m.me .rq{background:rgba(0,0,0,.2);border-left-color:var(--nm)}html[data-style=glass] #chat .m.me .rq b{color:var(--nm)}html[data-style=glass] #chat .m.me .rq span{color:var(--sub)}
-html[data-style=glass][data-mode=light] #chat .m.me .rq{background:rgba(255,255,255,.2);border-left-color:#fff}html[data-style=glass][data-mode=light] #chat .m.me .rq b{color:#fff}html[data-style=glass][data-mode=light] #chat .m.me .rq span{color:rgba(255,255,255,.85)}
+html[data-style=glass][data-mode=light] #chat .m.me .rq{background:rgba(255,255,255,.2);border-left-color:var(--on)}html[data-style=glass][data-mode=light] #chat .m.me .rq b{color:var(--on)}html[data-style=glass][data-mode=light] #chat .m.me .rq span{color:color-mix(in srgb,var(--on) 85%,transparent)}
+html[data-style=glass][data-lt="1"] #chat .m.me .rq{background:rgba(255,255,255,.2);border-left-color:var(--on)}html[data-style=glass][data-mode=light] #chat .m.me .rq b{color:var(--on)}html[data-style=glass][data-mode=light] #chat .m.me .rq span{color:color-mix(in srgb,var(--on) 85%,transparent)}
 html[data-style=glass] #chat #f{background:var(--glass);border:1px solid var(--bd);border-radius:28px;margin:0 8px 8px;box-shadow:0 4px 18px rgba(0,0,0,.22);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%)}
 html[data-style=glass] #chat #f input{background:var(--glass2);border:1px solid var(--bd);color:var(--text)}
 html[data-style=glass] #chat #mic,html[data-style=glass] #chat #send{background:linear-gradient(135deg,var(--pu),color-mix(in srgb,var(--pu) 72%,#000));color:var(--on,#fff)}
+</style>
+<style id="ntf-css">
+.avw{position:relative;flex:none}
+.rc .dot{position:absolute;right:-1px;bottom:-1px;width:14px;height:14px;border-radius:50%;background:#2ee66b;border:2.5px solid var(--solid,var(--card));display:none}
+.rc.on .dot{display:block}
+.ub{background:var(--pu);color:var(--on);border-radius:11px;min-width:22px;height:22px;padding:0 6px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-right:6px;flex:none}
+.rc.unr .nn b{font-weight:800}
 </style>
 </head>
 <body>
@@ -548,6 +558,7 @@ html[data-style=glass] #chat #mic,html[data-style=glass] #chat #send{background:
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 <script>
 // ====== YAHAN APNI FIREBASE CONFIG PASTE KARO ======
 var firebaseConfig = {
@@ -560,6 +571,11 @@ var firebaseConfig = {
   appId: "1:514314613198:web:3e13c2c28287b73f3bfb9f"
 };
 // ====================================================
+// ====== PUSH NOTIFICATIONS (app band hone par bhi) — see push/SETUP.txt ======
+var PUSH_VAPID = "";  // Firebase console > Project settings > Cloud Messaging > Web Push certificates > Key pair
+var PUSH_URL   = "";  // Your Cloudflare Worker URL (https://xxxx.workers.dev)
+var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
+// =============================================================================
 
 (function(){
   var $=function(i){return document.getElementById(i)};
@@ -840,9 +856,143 @@ var firebaseConfig = {
     var h=$("hdp");
     if(isDM&&getC()[curOther]){var c=getC()[curOther];loadDp(c);h.style.display="flex";fillAv(h,c)}else h.style.display="none";
   }
+  // ---- online presence + message notifications ----
+  var ONL={},PW={},MW={},UNR={},UK={},LT={},presCb=null,presRefMe=null,nTm=null;
+  function ntfOn(){return lsGet("ntf",1)===1}
+  function TSV(){return firebase.database.ServerValue.TIMESTAMP}
+  function presStart(){
+    if(!db||!uid)return;presStop();
+    presRefMe=db.ref("rooms/_on/"+uid);
+    presCb=function(s){if(s.val()&&presRefMe){presRefMe.onDisconnect().set(TSV());if(document.visibilityState==="visible")presRefMe.set(1)}};
+    db.ref(".info/connected").on("value",presCb);
+  }
+  function presStop(){
+    if(presCb){try{db.ref(".info/connected").off("value",presCb)}catch(e){}presCb=null}
+    if(presRefMe){try{presRefMe.set(TSV())}catch(e){}presRefMe=null}
+  }
+  function presHook(){if(presCb&&db){db.ref(".info/connected").off("value",presCb);db.ref(".info/connected").on("value",presCb)}}
+  function updDots(){
+    var rs=document.querySelectorAll("#clist .rc[data-k]");
+    for(var i=0;i<rs.length;i++)rs[i].classList.toggle("on",ONL[rs[i].getAttribute("data-k")]===1);
+  }
+  function presWatchAll(){
+    if(!db||!me)return;
+    var c=getC();
+    Object.keys(c).forEach(function(k){
+      if(c[k].st!=="ok"||PW[k])return;
+      var r=db.ref("rooms/_on/"+k);PW[k]=r;
+      r.on("value",function(s){
+        ONL[k]=s.val();updDots();
+        if(isDM&&curOther===k&&typeof updStatus==="function")updStatus();
+      },function(){});
+    });
+  }
+  function markRead(k){
+    if(!k)return;
+    lsSet("rd_"+k,Math.max(Date.now(),LT[k]||0));
+    if(UNR[k]){UNR[k]=0;UK[k]={};schedRender()}
+    updTitle();
+  }
+  function updTitle(){
+    var n=0;Object.keys(UNR).forEach(function(k){n+=UNR[k]||0});
+    document.title=(n?"("+n+") ":"")+"Chatly";
+  }
+  function schedRender(){
+    clearTimeout(nTm);
+    nTm=setTimeout(function(){if($("home").style.display!=="none")renderContacts();updTitle()},150);
+  }
+  function msgPrev(d){
+    var t=d.type||"text";
+    if(t==="image")return "📷 Photo";if(t==="video")return "🎥 Video";if(t==="audio")return "🎤 Voice message";if(t==="sticker")return "Sticker";
+    var x=String(d.text||"").replace(/\s+/g," ").trim();return x.length>80?x.slice(0,80)+"…":(x||"New message");
+  }
+  var pushTok=lsGet("pushTok",""),swMsg=false;
+  function pushInit(){
+    try{
+      var q=new URLSearchParams(location.search).get("open");
+      if(q){history.replaceState(null,"",location.pathname);setTimeout(function(){if(getC()[q])openDM(q)},900)}
+    }catch(e){}
+    if(!PUSH_VAPID||!PUSH_URL||!db||!me||!uid||!ntfOn())return;
+    if(!("serviceWorker" in navigator)||!("Notification" in window)||Notification.permission!=="granted")return;
+    try{if(!firebase.messaging||!firebase.messaging.isSupported())return}catch(e){return}
+    navigator.serviceWorker.register("sw.js").then(function(reg){
+      if(!swMsg){swMsg=true;navigator.serviceWorker.addEventListener("message",function(e){if(e.data&&e.data.open&&getC()[e.data.open])openDM(e.data.open)})}
+      return firebase.messaging().getToken({vapidKey:PUSH_VAPID,serviceWorkerRegistration:reg});
+    }).then(function(tok){
+      if(!tok)return;
+      if(pushTok&&pushTok!==tok)db.ref("rooms/_tok/"+uid+"/"+pushTok).remove().catch(function(){});
+      pushTok=tok;lsSet("pushTok",tok);
+      db.ref("rooms/_tok/"+uid+"/"+tok).set(1).catch(function(){});
+    }).catch(function(){});
+  }
+  function pushOff(){
+    try{if(pushTok&&db&&uid)db.ref("rooms/_tok/"+uid+"/"+pushTok).remove().catch(function(){})}catch(e){}
+    pushTok="";lsSet("pushTok","");
+  }
+  function pushNotify(to,o){
+    if(!PUSH_URL||!to||!uid)return;
+    var t=o.type||"text";
+    try{fetch(PUSH_URL,{method:"POST",mode:"no-cors",keepalive:true,headers:{"Content-Type":"text/plain"},
+      body:JSON.stringify({key:PUSH_KEY,to:to,k:uid,from:myName||(me&&me.name)||"Chatly",type:t,text:t==="text"?String(o.text||"").slice(0,120):""})}).catch(function(){})}catch(e){}
+  }
+  window.__pushInit=pushInit;window.__pushOff=pushOff;
+  function sysNotify(title,body,k){
+    try{
+      if(!("Notification" in window)||Notification.permission!=="granted")return;
+      var o={body:body,tag:"c_"+k,renotify:true,data:{k:k}};
+      var fb=function(){try{var n=new Notification(title,o);n.onclick=function(){try{window.focus()}catch(e){}openDM(k);n.close()}}catch(e){}};
+      if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration)navigator.serviceWorker.getRegistration().then(function(r){if(r&&r.showNotification)r.showNotification(title,o);else fb()}).catch(fb);
+      else fb();
+    }catch(e){}
+  }
+  function incoming(k,d){
+    var viewing=isDM&&curOther===k&&document.visibilityState==="visible"&&$("chat").style.display!=="none";
+    if(viewing){markRead(k);return}
+    if(!ntfOn()||getB()[k])return;
+    var nm=dispName(k,nameOf(k)),pv=msgPrev(d);
+    try{if(navigator.vibrate)navigator.vibrate(150)}catch(e){}
+    if(document.visibilityState==="visible")toast("💬 "+nm+" sent you a message: "+pv);
+    else sysNotify(nm,"sent you a message: "+pv,k);
+  }
+  function msgWatchAll(){
+    if(!db||!me)return;
+    var c=getC();
+    Object.keys(c).forEach(function(k){
+      if(c[k].st!=="ok"||MW[k])return;
+      if(!lsGet("rd_"+k,0))lsSet("rd_"+k,Date.now());
+      var q=db.ref("rooms/"+dmId(k)+"/messages").limitToLast(30),ready=false;MW[k]=q;UK[k]={};UNR[k]=0;
+      q.on("child_added",function(sn){
+        var d=sn.val()||{};
+        if(!d||d.uid===uid||d.uid==null)return;
+        var t=typeof d.t==="number"?d.t:Date.now();
+        if(t>(LT[k]||0))LT[k]=t;
+        if(t<=lsGet("rd_"+k,0)||UK[k][sn.key])return;
+        UK[k][sn.key]=1;
+        var viewing=isDM&&curOther===k&&document.visibilityState==="visible";
+        if(!viewing)UNR[k]=(UNR[k]||0)+1;
+        if(ready){incoming(k,d);schedRender()}
+      },function(){});
+      q.once("value",function(){ready=true;schedRender()},function(){ready=true});
+    });
+  }
+  function ntfStop(){
+    Object.keys(PW).forEach(function(k){try{PW[k].off()}catch(e){}});PW={};ONL={};
+    Object.keys(MW).forEach(function(k){try{MW[k].off()}catch(e){}});MW={};UNR={};UK={};LT={};
+    presStop();pushOff();updTitle();
+  }
+  document.addEventListener("visibilitychange",function(){
+    if(!presRefMe)return;
+    if(document.visibilityState==="visible"){presRefMe.onDisconnect().set(TSV());presRefMe.set(1);if(isDM&&curOther)markRead(curOther)}
+    else presRefMe.set(TSV());
+  });
+  window.addEventListener("pagehide",function(){if(presRefMe)presRefMe.set(TSV())});
+  document.addEventListener("pointerdown",function ask(){
+    document.removeEventListener("pointerdown",ask);
+    try{if(me&&ntfOn()&&"Notification" in window&&Notification.permission==="default"){var p=Notification.requestPermission(function(){pushInit()});if(p&&p.then)p.then(pushInit)}}catch(e){}
+  });
   function renderContacts(){
     var box=$("clist");box.innerHTML="";
-    skWatchAll();nkWatchAll();
+    skWatchAll();nkWatchAll();presWatchAll();msgWatchAll();
     var c=getC(),b=getB();
     var ks=Object.keys(c).filter(function(k){
       var o=c[k];if(o.st!=="ok")return true;
@@ -865,8 +1015,12 @@ var firebaseConfig = {
       var sp=null;
       if(stxt){sp=document.createElement("span");sp.className="skb"+(sk.risk?" risk":"");sp.textContent=stxt}
       nn.appendChild(nl);nn.appendChild(sm);
-      r.appendChild(av);r.appendChild(nn);
+      var aw=document.createElement("div");aw.className="avw";aw.appendChild(av);
+      if(o.st==="ok"){var dt=document.createElement("span");dt.className="dot";aw.appendChild(dt);r.setAttribute("data-k",k);if(ONL[k]===1)r.classList.add("on")}
+      if(UNR[k]>0)r.classList.add("unr");
+      r.appendChild(aw);r.appendChild(nn);
       if(sp)r.appendChild(sp);
+      if(UNR[k]>0){var ub=document.createElement("span");ub.className="ub";ub.textContent=UNR[k]>99?"99+":UNR[k];r.appendChild(ub)}
       if(o.st==="req"){
         var y=document.createElement("i");y.className="ok";y.textContent="✓";
         var n=document.createElement("i");n.textContent="✕";
@@ -884,6 +1038,7 @@ var firebaseConfig = {
   }
   function openDM(k){
     var c=getC()[k];if(!c)return;
+    markRead(k);
     enterChat(dmId(k),{dm:true,other:k,title:dispName(k,c.name)});
   }
   function startCon(){
@@ -1115,7 +1270,7 @@ var firebaseConfig = {
     myName=me.name;dpCache[me.un]=me.dp||"";
     $("auth").style.display="none";$("home").style.display="flex";
     $("nm").textContent=me.name;fillAv($("meDp"),{name:me.name,un:me.un,st:"ok"});
-    startCon();renderContacts();renderRecent();nkSyncAll();
+    presStart();pushInit();startCon();renderContacts();renderRecent();nkSyncAll();
   }
   $("aGo").onclick=function(){
     if(!configured){aerr("Firebase is not configured");return}
@@ -1161,7 +1316,7 @@ var firebaseConfig = {
     confirmBox("Logout?","You will need your username and password to log in again.","Logout",function(){
       if(conMain){conMain.off();conMain=null}
       Object.keys(skW).forEach(function(k){skW[k].off()});skW={};SKM={};Object.keys(nkW).forEach(function(k){nkW[k].off()});nkW={};NKM={};
-      Object.keys(dpW).forEach(function(u){dpW[u].off()});dpW={};dpCache={};
+      Object.keys(dpW).forEach(function(u){dpW[u].off()});dpW={};dpCache={};ntfStop();
       CON={};me=null;lsSet("me",null);myName="";
       $("home").style.display="none";$("auth").style.display="flex";
       $("aPin").value="";setMode(false);
@@ -1641,7 +1796,7 @@ var firebaseConfig = {
     }
     st.className="";
     var ids=Object.keys(pres).filter(function(k){return k!==cid});
-    if(isDM)st.textContent=ids.length?"In chat":"Private chat";
+    if(isDM)st.textContent=ids.length?"In chat":(ONL[curOther]===1?"Online":"Offline");
     else{
       var p=ids.length?(pres[ids[0]]||{}):null;
       st.textContent=p?String(p.name||"Guest").slice(0,20)+(ids.length>1?" +"+(ids.length-1):"")+" is in chat":"Room";
@@ -1803,9 +1958,11 @@ var firebaseConfig = {
     if(gameW){gameW.off();gameW=null}if(scW){scW.off();scW=null}G=null;SC={};$("ttOv").style.display="none";
     skStop();dgStop();
     if(db)db.ref(".info/connected").off();
+    presHook();
     clearInterval(statusInt);statusInt=null;
   }
   function goHome(){
+    if(isDM&&curOther)markRead(curOther);
     closeChat();
     $("chat").style.display="none";$("home").style.display="flex";
     isDM=false;curOther="";
@@ -1992,7 +2149,7 @@ var firebaseConfig = {
   function pushMsg(o,fm){
     if(RP){o.rp={k:RP.k,u:RP.u,c:RP.c,n:RP.n,x:RP.x,y:RP.y};clearReply()}
     var r=ref.push(),k=r.key;pend[k]=1;
-    r.set(o).then(function(){delete pend[k];setTick(k)}).catch(function(){delete pend[k];if(info[k]){removeEl(k)}sys(fm)});
+    r.set(o).then(function(){delete pend[k];setTick(k);if(isDM&&curOther)pushNotify(curOther,o)}).catch(function(){delete pend[k];if(info[k]){removeEl(k)}sys(fm)});
   }
   function sendMsg(){
     var v=$("txt").value.trim();
@@ -2618,6 +2775,8 @@ var firebaseConfig = {
 </script>
 
 <div id="stg" class="ov"><div class="box glass"><h3>⚙ Chatly Settings</h3>
+<div class="srw"><span>🔔 Notifications</span><div class="sw" id="swNtf"></div></div>
+<div id="ntfH" style="display:none;font-size:12px;color:var(--sub);margin:-6px 0 12px"></div>
 <div class="srw" style="margin-bottom:8px"><span>🎭 Style</span></div>
 <div class="thm" id="sty"><button type="button" data-s="glass">🔮 Glass</button><button type="button" data-s="clean">▫️ Clean</button></div>
 <div class="srw" style="margin-bottom:8px"><span>🌗 Mode</span></div>
@@ -2636,7 +2795,7 @@ if(!g&&dk)R.setAttribute('data-theme','dark');else R.removeAttribute('data-theme
 if(g)R.setAttribute('data-style','glass');else R.removeAttribute('data-style');
 R.setAttribute('data-mode',st.m);
 if(g&&dk&&gr)R.setAttribute('data-orig','1');else R.removeAttribute('data-orig');
-R.style.setProperty('--on',g&&dk&&gr?'#063':'#fff');var pl=st.c.toLowerCase();R.style.setProperty('--pu2',pl==='#7c3aed'||pl==='#6b58c7'?'#25d366':'#7c3aed');
+var h=st.c.replace('#','');if(h.length===3)h=h.replace(/./g,'$&$&');var rr=parseInt(h.substr(0,2),16),gg=parseInt(h.substr(2,2),16),bb=parseInt(h.substr(4,2),16),lt=(rr*299+gg*587+bb*114)/1000>140;R.style.setProperty('--on',lt?'#111':'#fff');if(lt)R.setAttribute('data-lt','1');else R.removeAttribute('data-lt');var pl=st.c.toLowerCase();R.style.setProperty('--pu2',pl==='#7c3aed'||pl==='#6b58c7'?'#25d366':'#7c3aed');
 if(mt)mt.content=g?(dk?'#0f2027':'#e9e6fb'):dk?'#12111b':st.c;
 document.querySelectorAll('#sty button').forEach(function(e){e.classList.toggle('on',e.dataset.s===st.s)});
 document.querySelectorAll('#mod button').forEach(function(e){e.classList.toggle('on',e.dataset.m===st.m)});
@@ -2648,6 +2807,13 @@ cols.forEach(function(c){var i=document.createElement('i');i.style.background=c;
 var ci=document.createElement('input');ci.type='color';ci.id='cc';ci.title='Custom color';ci.oninput=function(){st.c=ci.value;sv()};box.appendChild(ci);
 document.querySelectorAll('#sty button').forEach(function(e){e.onclick=function(){st.s=e.dataset.s;sv()}});document.querySelectorAll('#mod button').forEach(function(e){e.onclick=function(){st.m=e.dataset.m;sv()}});
 var ov=document.getElementById('stg');
+var nt=document.getElementById('swNtf'),nh=document.getElementById('ntfH');
+function nv(){try{return JSON.parse(localStorage.getItem('ntf')||'1')}catch(e){return 1}}
+function nu(){nt.classList.toggle('on',nv()===1);var m='';if(nv()===1){if(!('Notification' in window))m='System notifications are not supported in this browser. In-app alerts only.';else if(Notification.permission==='denied')m='Blocked in browser settings. Allow notifications for this site.'}nh.textContent=m;nh.style.display=m?'block':'none'}
+nt.onclick=function(){var v=nv()===1?0:1;try{localStorage.setItem('ntf',JSON.stringify(v))}catch(e){}
+if(v&&'Notification' in window&&Notification.permission==='default'){try{var p=Notification.requestPermission(function(){nu();if(window.__pushInit)window.__pushInit()});if(p&&p.then)p.then(function(){nu();if(window.__pushInit)window.__pushInit()})}catch(e){}}
+if(v){if(window.__pushInit)window.__pushInit()}else{if(window.__pushOff)window.__pushOff()}nu()};
+document.querySelector('.top h1').addEventListener('click',nu);nu();
 function op(){ov.style.display='flex'}
 document.querySelector('.top h1').addEventListener('click',op);
 document.getElementById('stgX').onclick=function(){ov.style.display='none'};
