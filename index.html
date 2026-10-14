@@ -118,6 +118,18 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
 .ov .db button{flex:1;margin:0;padding:12px;width:auto}
 .ov button.dng{background:#ff5a5f;color:#fff}
 #ferr{color:#ff8a8a;font-size:13px;min-height:18px;margin:-4px 0 6px}
+#mediaComposer{position:fixed;inset:0;z-index:99990;display:none;flex-direction:column;background:#080b10;color:#fff;padding:0;}
+#mcTop{height:52px;display:flex;align-items:center;gap:12px;padding:0 14px;border-bottom:1px solid #ffffff22;flex:none}
+#mcClose{width:38px;height:38px;border:0;border-radius:50%;background:#ffffff18;color:#fff;font-size:22px}
+#mcTitle{font-size:16px;font-weight:700;flex:1}
+#mcPreview{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:12px;overflow:hidden}
+#mcPreview img,#mcPreview video{display:block;max-width:100%;max-height:100%;object-fit:contain;border-radius:4px}
+#mcBottom{padding:12px 14px calc(14px + env(safe-area-inset-bottom));background:#111820;border-top:1px solid #ffffff20;flex:none}
+#mcTools{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+#mcCaption{flex:1;min-width:0;border:0;outline:0;border-radius:24px;background:#26313b;color:#fff;padding:13px 16px;font-size:16px;margin:0}
+#mcOnce{display:flex;align-items:center;gap:7px;white-space:nowrap;font-size:13px;font-weight:600}
+#mcOnce input{width:20px;height:20px;accent-color:#25d366;margin:0}
+#mcSend{display:block;width:100%;height:48px;border:0;border-radius:26px;background:#25d366;color:#063b2b;font-size:16px;font-weight:800;margin:0}
 #viewer{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.93)}
 #viewer img{max-width:100%;max-height:100%}
 #toast{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:50;background:rgba(0,0,0,.78);color:#fff;padding:8px 16px;border-radius:18px;font-size:14px;display:none;max-width:80%;text-align:center}
@@ -616,6 +628,11 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
   <button class="alt" id="dgX" style="margin:0">Close</button>
 </div></div>
 <div id="gPop" class="ov" style="z-index:70"><div class="box glass" style="text-align:center"><div id="gPopI" style="font-size:46px;line-height:1.1;margin-bottom:6px">⏰</div><h3 id="gPopT"></h3><p id="gPopP"></p><div id="gPopAct" style="display:none"></div><button id="gPopOk" style="margin:0">OK</button></div></div>
+<div id="mediaComposer" aria-modal="true" role="dialog">
+  <div id="mcTop"><button type="button" id="mcClose" aria-label="Close">‹</button><div id="mcTitle">Send photo</div></div>
+  <div id="mcPreview"></div>
+  <div id="mcBottom"><div id="mcTools"><input id="mcCaption" type="text" maxlength="1000" placeholder="Add a caption…" autocomplete="off"><label id="mcOnce"><input id="mcOnceCheck" type="checkbox"> View once</label></div><button type="button" id="mcSend">➤ Send</button></div>
+</div>
 <div id="viewer"><img id="vimg" alt=""><div id="vld">⏳ Loading HD photo...</div></div>
 <div id="toast"></div>
 
@@ -1762,8 +1779,6 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     var data=typeof d.data==="string"?d.data:"";
     if(d.viewOnce && d.eaten){
       var used=document.createElement("div");used.className="vu-used";used.textContent="✓ View once media opened";el.appendChild(used);
-    }else if(d.viewOnce && mine){
-      var sentOnce=document.createElement("div");sentOnce.className="vu-used";sentOnce.textContent="👁 View once media sent";el.appendChild(sentOnce);
     }else if(d.viewOnce && (d.type==="image"||d.type==="video")){
       var vo=document.createElement("button");vo.className="vu-open";vo.type="button";
       vo.textContent=(d.type==="image"?"📷":"🎥")+" View once · Tap to open";
@@ -1799,6 +1814,9 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       var txt=String(d.text||"").slice(0,1000);
       var t=document.createElement("div");t.textContent=txt;el.appendChild(t);
       if(onlyEmoji(txt))el.classList.add("big");
+    }
+    if((d.type==="image"||d.type==="video")&&d.caption){
+      var cap=document.createElement("div");cap.className="media-caption";cap.style.cssText="font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:5px";cap.textContent=String(d.caption).slice(0,1000);el.appendChild(cap);
     }
     var tm=document.createElement("div");tm.className="tm";
     tm.appendChild(document.createTextNode(dt.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})));
@@ -2280,36 +2298,62 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       im.src=u;
     });
   }
-  var sendViewOnce=false;
-  function sendMedia(type,data,dur){
+  var pendingMedia=null, pendingObjectUrl=null;
+  function sendMedia(type,data,dur,caption,viewOnce){
     if(!ref||isBlocked()||!canSend())return;
     var o={cid:cid,uid:uid,name:myName,type:type,data:data,t:firebase.database.ServerValue.TIMESTAMP};
-    if(sendViewOnce&&(type==="image"||type==="video")){o.viewOnce=true;sendViewOnce=false;}
+    if(viewOnce&&(type==="image"||type==="video")){o.viewOnce=true;}
+    if(caption)o.caption=String(caption).slice(0,1000);
     if(dur)o.dur=dur;
     pushMsg(o,"Failed to send (file may be too large)");
     afterSend();
   }
-  $("attach").onclick=function(){
-    var l=[
-      ["🖼 Photo (Gallery)",function(){sendViewOnce=false;$("fileImg").click()}],
-      ["🎞 Video (Gallery)",function(){sendViewOnce=false;$("fileVid").click()}],
-      ["👁 View Once Photo",function(){sendViewOnce=true;$("fileImg").click()}],
-      ["👁 View Once Video",function(){sendViewOnce=true;$("fileVid").click()}]
-    ];
-    l.push(["Cancel"]);
-    showSheet(l);
+  function closeMediaComposer(){
+    $("mediaComposer").style.display="none";
+    var pr=$("mcPreview");while(pr.firstChild)pr.removeChild(pr.firstChild);
+    if(pendingObjectUrl){URL.revokeObjectURL(pendingObjectUrl);pendingObjectUrl=null;}
+    pendingMedia=null;$("mcCaption").value="";$("mcOnceCheck").checked=false;
+  }
+  $("mcClose").onclick=closeMediaComposer;
+  $("mcSend").onclick=function(){
+    if(!pendingMedia)return;
+    var item=pendingMedia,caption=$("mcCaption").value.trim(),once=$("mcOnceCheck").checked;
+    $("mcSend").disabled=true;$("mcSend").textContent="Sending…";
+    sendMedia(item.type,item.data,0,caption,once);
+    $("mcSend").disabled=false;$("mcSend").textContent="➤ Send";
+    closeMediaComposer();
   };
+  $("attach").onclick=function(){
+    showSheet([
+      ["🖼 Photo (Gallery)",function(){$("fileImg").click()}],
+      ["🎞 Video (Gallery)",function(){$("fileVid").click()}],
+      ["Cancel"]
+    ]);
+  };
+  function openMediaComposer(type,data,file){
+    pendingMedia={type:type,data:data};
+    if(pendingObjectUrl){URL.revokeObjectURL(pendingObjectUrl);pendingObjectUrl=null;}
+    var pr=$("mcPreview");while(pr.firstChild)pr.removeChild(pr.firstChild);
+    $("mcTitle").textContent=type==="image"?"Send photo":"Send video";
+    var el;
+    if(type==="image"){
+      el=document.createElement("img");el.alt="Photo preview";el.src=data;
+    }else{
+      pendingObjectUrl=URL.createObjectURL(file);el=document.createElement("video");el.src=pendingObjectUrl;el.controls=true;el.playsInline=true;el.muted=true;
+    }
+    pr.appendChild(el);$("mcCaption").value="";$("mcOnceCheck").checked=false;
+    $("mediaComposer").style.display="flex";
+    setTimeout(function(){$("mcCaption").focus()},150);
+  }
   function onPick(){
     var f=this.files&&this.files[0];this.value="";
-    if(!f||!ref){sendViewOnce=false;return;}
+    if(!f||!ref)return;
     if(f.type.indexOf("image/")===0){
-      sys("Sending photo...");
-      imgToData(f).then(function(d){sendMedia("image",d)}).catch(function(){sys("Could not open photo")});
+      imgToData(f).then(function(d){openMediaComposer("image",d,f)}).catch(function(){sys("Could not open photo")});
     }else if(f.type.indexOf("video/")===0){
       if(f.size>3*1024*1024){sys("Video is too large. Maximum 3 MB.");return}
-      sys("Sending video...");
-      blobToData(f).then(function(d){sendMedia("video",d)}).catch(function(){sys("Could not read video")});
-    }else {sendViewOnce=false;sys("Only photos or videos can be sent");}
+      blobToData(f).then(function(d){openMediaComposer("video",d,f)}).catch(function(){sys("Could not read video")});
+    }else {sys("Only photos or videos can be sent");}
   }
   $("fileImg").onchange=onPick;
   $("fileVid").onchange=onPick;
