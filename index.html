@@ -118,18 +118,35 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
 .ov .db button{flex:1;margin:0;padding:12px;width:auto}
 .ov button.dng{background:#ff5a5f;color:#fff}
 #ferr{color:#ff8a8a;font-size:13px;min-height:18px;margin:-4px 0 6px}
-#mediaComposer{position:fixed;inset:0;z-index:99990;display:none;flex-direction:column;background:#080b10;color:#fff;padding:0;}
-#mcTop{height:52px;display:flex;align-items:center;gap:12px;padding:0 14px;border-bottom:1px solid #ffffff22;flex:none}
-#mcClose{width:38px;height:38px;border:0;border-radius:50%;background:#ffffff18;color:#fff;font-size:22px}
-#mcTitle{font-size:16px;font-weight:700;flex:1}
-#mcPreview{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:12px;overflow:hidden}
-#mcPreview img,#mcPreview video{display:block;max-width:100%;max-height:100%;object-fit:contain;border-radius:4px}
-#mcBottom{padding:12px 14px calc(14px + env(safe-area-inset-bottom));background:#111820;border-top:1px solid #ffffff20;flex:none}
-#mcTools{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-#mcCaption{flex:1;min-width:0;border:0;outline:0;border-radius:24px;background:#26313b;color:#fff;padding:13px 16px;font-size:16px;margin:0}
-#mcOnce{display:flex;align-items:center;gap:7px;white-space:nowrap;font-size:13px;font-weight:600}
-#mcOnce input{width:20px;height:20px;accent-color:#25d366;margin:0}
-#mcSend{display:block;width:100%;height:48px;border:0;border-radius:26px;background:#25d366;color:#063b2b;font-size:16px;font-weight:800;margin:0}
+#mediaComposer{position:fixed;inset:0;z-index:99990;display:none;flex-direction:column;background:#000;color:#fff;padding:0;}
+#mcTop{position:absolute;top:0;left:0;right:0;z-index:3;display:flex;align-items:center;gap:8px;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 0;pointer-events:none}
+#mcTop>*{pointer-events:auto}
+#mcClose{flex:none;width:44px;height:44px;border:0;border-radius:50%;background:rgba(22,26,32,.88);color:#fff;font-size:0;padding:0;margin:0;display:flex;align-items:center;justify-content:center}
+#mcClose svg{width:22px;height:22px}
+#mcTitle{display:none}
+#edTools{display:none;margin-left:auto;min-width:0}
+#edRow{display:flex;justify-content:flex-end;gap:8px}
+#edRow button{width:44px;height:44px;flex:none;border:0;border-radius:50%;background:rgba(22,26,32,.88);color:#fff;display:flex;align-items:center;justify-content:center;padding:0;margin:0}
+#edRow button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#edRow button.on{background:#fff;color:#000}
+#edRow button b{font-size:18px;font-weight:700;letter-spacing:-.5px}
+#mcPreview{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:calc(68px + env(safe-area-inset-top,0px)) 0 6px;overflow:hidden;background:#000}
+#mcPreview img,#mcPreview video{display:block;max-width:100%;max-height:100%;object-fit:contain}
+#mcBottom{flex:none;padding:6px 0 calc(10px + env(safe-area-inset-bottom,0px));background:#000}
+#edSub{margin:0 14px 8px;border-radius:22px;background:rgba(22,26,32,.92);padding:8px 10px}
+#mcTools{display:flex;align-items:center;gap:10px;margin:0 12px 10px;padding:0 8px 0 16px;min-height:52px;border-radius:28px;background:#171b21}
+#mcTools .mcAdd{flex:none;width:26px;height:26px;stroke:#d9dde2;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#mcCaption{flex:1;min-width:0;border:0;outline:0;border-radius:0;background:transparent;color:#fff;padding:14px 0;font-size:17px;margin:0}
+#mcCaption::placeholder{color:#aeb4bb}
+#mcOnce{flex:none;display:flex;align-items:center;cursor:pointer}
+#mcOnce input{display:none}
+#mcOnce span{width:40px;height:40px;border-radius:50%;border:2px dashed #ffffffcc;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:#fff;box-sizing:border-box}
+#mcOnce input:checked+span{background:#25d366;border:2px solid #25d366;color:#063b2b}
+#mcRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px 0;background:#0b0f14;border-top:1px solid #ffffff10;margin-top:2px}
+#mcTo{min-width:0;max-width:calc(100% - 76px);border-radius:22px;background:#1b2027;padding:12px 18px;font-size:16px;color:#e6e9ec;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mcSend{flex:none;width:58px;height:58px;border:0;border-radius:50%;background:#fff;color:#000;margin:0;padding:0;display:flex;align-items:center;justify-content:center}
+#mcSend svg{width:26px;height:26px;fill:#000}
+#mcSend:disabled{opacity:.6}
 #viewer{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.93)}
 #viewer img{max-width:100%;max-height:100%}
 #toast{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:50;background:rgba(0,0,0,.78);color:#fff;padding:8px 16px;border-radius:18px;font-size:14px;display:none;max-width:80%;text-align:center}
@@ -473,9 +490,6 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
   .vu-open{display:block;width:100%;max-width:260px;padding:18px 16px;border:1px solid rgba(255,255,255,.2);border-radius:14px;background:rgba(124,58,237,.22);color:inherit;font:600 15px inherit;text-align:center;cursor:pointer}
   .vu-used{padding:12px 14px;border-radius:12px;background:rgba(128,128,128,.12);color:var(--sub);font-size:13px}
 /* ===== WhatsApp-style attach sheet / camera / view once ===== */
-#mcOnce input{display:none}
-#mcOnce span{width:46px;height:46px;border-radius:50%;border:2px dashed #ffffffaa;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;color:#fff;cursor:pointer}
-#mcOnce input:checked+span{background:#25d366;border:2px solid #25d366;color:#063b2b}
 #attSheet{position:fixed;inset:0;z-index:30;display:none;align-items:flex-end;background:rgba(0,0,0,.45)}
 #attSheet .as-box{width:100%;border-radius:26px 26px 0 0;padding:10px 14px calc(22px + env(safe-area-inset-bottom,0px));color:var(--text);background:var(--glass)}
 #attSheet .as-grip{display:block;width:44px;height:5px;border-radius:3px;background:var(--bd);margin:2px auto 18px}
@@ -501,19 +515,14 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
 .vu-ic{flex:none;width:26px;height:26px;border-radius:50%;border:2px dashed currentColor;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
 .vu-mine.on .vu-ic{border-style:solid;background:#25d366;border-color:#25d366;color:#063b2b}
 .vu-mine.on b{color:#53bdeb}
-#edTools{display:none;flex:none;background:#111820;padding:6px 10px 0;border-top:1px solid #ffffff20}
-#edRow{display:flex;justify-content:space-around}
-#edRow button{background:none;border:0;color:#fff;font-size:20px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 12px;margin:0;border-radius:12px}
-#edRow button small{font-size:11px}
-#edRow button.on{background:#25d36633;color:#25d366}
-#edSub{display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 0}
+#edSub{display:flex;align-items:center;justify-content:center;gap:10px}
 #edSub:empty{display:none}
 .edc{width:26px;height:26px;border-radius:50%;border:2px solid #fff6;padding:0;margin:0;flex:none}
 .edc.on{border-color:#fff;transform:scale(1.25)}
 #edSub input{flex:1;min-width:0;margin:0;background:#26313b;color:#fff;border:0;border-radius:18px;padding:10px 14px;font-size:16px}
 #edSub button.eb{margin:0;padding:9px 18px;border-radius:18px;border:0;background:#26313b;color:#fff;font-weight:700;flex:none}
 #edSub button.eb.ok{background:#25d366;color:#063b2b}
-#edCv{max-width:100%;max-height:100%;touch-action:none;border-radius:4px}
+#edCv{max-width:100%;max-height:100%;touch-action:none;border-radius:0}
 .vu-open{display:inline-flex;align-items:center;gap:6px;width:auto;max-width:200px;padding:7px 12px;border-radius:12px;font:600 13px inherit}
 .vu-mine{padding:3px 4px;gap:7px;font-size:13px;min-width:0}
 .vu-ic{width:22px;height:22px;font-size:12px}
@@ -677,10 +686,21 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
 </div></div>
 <div id="gPop" class="ov" style="z-index:70"><div class="box glass" style="text-align:center"><div id="gPopI" style="font-size:46px;line-height:1.1;margin-bottom:6px">⏰</div><h3 id="gPopT"></h3><p id="gPopP"></p><div id="gPopAct" style="display:none"></div><button id="gPopOk" style="margin:0">OK</button></div></div>
 <div id="mediaComposer" aria-modal="true" role="dialog">
-  <div id="mcTop"><button type="button" id="mcClose" aria-label="Close">‹</button><div id="mcTitle">Send photo</div></div>
+  <div id="mcTop"><button type="button" id="mcClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div id="mcTitle">Send photo</div>
+    <div id="edTools"><div id="edRow">
+      <button type="button" data-e="crop" aria-label="Crop"><svg viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14M2 6h14a2 2 0 0 1 2 2v14"/></svg></button>
+      <button type="button" data-e="rot" aria-label="Rotate"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"/></svg></button>
+      <button type="button" data-e="text" aria-label="Text"><b>Aa</b></button>
+      <button type="button" data-e="draw" aria-label="Draw"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/></svg></button>
+      <button type="button" data-e="undo" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+    </div></div>
+  </div>
   <div id="mcPreview"></div>
-  <div id="edTools"><div id="edSub"></div><div id="edRow"><button type="button" data-e="draw">✏️<small>Draw</small></button><button type="button" data-e="text">T<small>Text</small></button><button type="button" data-e="crop">✂️<small>Crop</small></button><button type="button" data-e="rot">⟳<small>Rotate</small></button><button type="button" data-e="undo">↶<small>Undo</small></button></div></div>
-  <div id="mcBottom"><div id="mcTools"><input id="mcCaption" type="text" maxlength="1000" placeholder="Add a caption…" autocomplete="off"><label id="mcOnce" title="View once"><input id="mcOnceCheck" type="checkbox"><span>1</span></label></div><button type="button" id="mcSend">➤ Send</button></div>
+  <div id="mcBottom">
+    <div id="edSub"></div>
+    <div id="mcTools"><svg class="mcAdd" viewBox="0 0 24 24"><path d="M12 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-6M4 17l4.5-4.5 3.5 3.5 2.5-2.5L19 18M17 3v6M14 6h6"/></svg><input id="mcCaption" type="text" maxlength="1000" placeholder="Add a caption…" autocomplete="off"><label id="mcOnce" title="View once"><input id="mcOnceCheck" type="checkbox"><span>1</span></label></div>
+    <div id="mcRow"><div id="mcTo"></div><button type="button" id="mcSend" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3.4 20.4l17.5-7.5a1 1 0 0 0 0-1.8L3.4 3.6a1 1 0 0 0-1.4 1.2L4 11l9 1-9 1-2 6.2a1 1 0 0 0 1.4 1.2z"/></svg></button></div>
+  </div>
 </div>
 <div id="attSheet"><div class="as-box glass"><i class="as-grip"></i><div class="as-grid">
   <button type="button" data-a="gal"><span>🖼️</span>Gallery</button>
@@ -2402,9 +2422,9 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   $("mcSend").onclick=function(){
     if(!pendingMedia)return;
     var item=pendingMedia,caption=$("mcCaption").value.trim(),once=$("mcOnceCheck").checked;
-    $("mcSend").disabled=true;$("mcSend").textContent="Sending…";
+    $("mcSend").disabled=true;
     sendMedia(item.type,(item.type==="image"&&ed.dirty&&ed.base)?edExport():item.data,0,caption,once);
-    $("mcSend").disabled=false;$("mcSend").textContent="➤ Send";
+    $("mcSend").disabled=false;
     closeMediaComposer();
   };
   $("attach").onclick=function(){presetOnce=false;$("attSheet").style.display="flex"};
@@ -2413,7 +2433,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     pendingMedia={type:type,data:data};
     if(pendingObjectUrl){URL.revokeObjectURL(pendingObjectUrl);pendingObjectUrl=null;}
     var pr=$("mcPreview");while(pr.firstChild)pr.removeChild(pr.firstChild);
-    $("mcTitle").textContent=type==="image"?"Send photo":"Send video";
+    $("mcTitle").textContent=type==="image"?"Send photo":"Send video";var w=$("who");$("mcTo").textContent=w?w.textContent:"";
     var el;
     if(type==="image"){
       el=edInit(data);
