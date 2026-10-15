@@ -214,6 +214,7 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
 .fbox .ft b{display:block;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:190px}
 .fbox .ft small{display:block;font-size:11px;opacity:.75;margin-top:1px}
 .fbox .fd{flex:none;font-size:17px;opacity:.85}
+.edl{opacity:.8;font-style:italic;margin-right:2px}
 /* selection mode */
 .m.ssel{box-shadow:0 0 0 2px #25d366!important}
 .m.ssel::after{content:"✓";position:absolute;top:-7px;left:-7px;width:20px;height:20px;border-radius:50%;background:#25d366;color:#063b2b;font-size:12px;font-weight:800;line-height:20px;text-align:center}
@@ -637,7 +638,7 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
 </div>
 
 <div id="chat">
-  <header class="glass" id="selBar" style="display:none"><button class="hb" id="selX" aria-label="Cancel">✕</button><div class="t"><b id="selN">1 selected</b></div><button class="hb" id="selMore" aria-label="More">⋯</button><button class="hb" id="selDel" aria-label="Delete">🗑</button></header>
+  <header class="glass" id="selBar" style="display:none"><button class="hb" id="selX" aria-label="Cancel">✕</button><div class="t"><b id="selN">1 selected</b></div><button class="hb" id="selEdit" aria-label="Edit" style="display:none">✏️</button><button class="hb" id="selMore" aria-label="More">⋯</button><button class="hb" id="selEat" aria-label="Feed to insect">🐛</button><button class="hb" id="selDel" aria-label="Delete">🗑</button></header>
   <header class="glass" id="mainHdr">
     <button class="hb" id="back">←</button><div class="av" id="hdp" style="display:none;width:36px;height:36px;font-size:20px"></div>
     <div class="t" id="hT" style="cursor:pointer"><div style="display:flex;align-items:center;gap:6px;min-width:0"><b id="who" style="min-width:0">Chat</b><span class="skb" id="hstk" style="display:none"></span></div><small id="status">connecting...</small></div>
@@ -1163,55 +1164,11 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     var x=String(d.text||"").replace(/\s+/g," ").trim();return x.length>80?x.slice(0,80)+"…":(x||"New message");
   }
   var pushTok=lsGet("pushTok",""),swMsg=false;
-  // ---- Android app (Capacitor): native push + screenshot / screen-recording alert ----
-  var NATIVE=false;try{NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())}catch(e){}
-  function nPlug(n){try{return (window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins[n])||null}catch(e){return null}}
-  var nPushBound=false,guardOn=false,guardLast=0,guardRec=false;
-  function nativePushInit(){
-    var P=nPlug("PushNotifications");
-    if(!P||!db||!me||!uid||!ntfOn())return;
-    if(!nPushBound){
-      nPushBound=true;
-      P.addListener("registration",function(t){
-        var tok=t&&t.value;if(!tok||!db||!uid)return;
-        if(pushTok&&pushTok!==tok)db.ref("rooms/_tok/"+uid+"/"+pushTok).remove().catch(function(){});
-        pushTok=tok;lsSet("pushTok",tok);
-        db.ref("rooms/_tok/"+uid+"/"+tok).set(1).catch(function(){});
-      });
-      P.addListener("registrationError",function(){});
-      P.addListener("pushNotificationActionPerformed",function(a){
-        var k=a&&a.notification&&a.notification.data&&a.notification.data.open;
-        if(k)setTimeout(function(){if(getC()[k])openDM(k)},700);
-      });
-    }
-    try{P.createChannel({id:"msgs",name:"Messages",description:"New message alerts",importance:5,visibility:1,vibration:true}).catch(function(){})}catch(e){}
-    P.requestPermissions().then(function(r){if(r&&r.receive==="granted")return P.register()}).catch(function(){});
-  }
-  function guardAlert(kind){
-    // chat khula ho tabhi dusre ko alert jaye
-    if(!ref||!curCode||$("chat").style.display==="none"||isBlocked()||!canSend())return;
-    var n=Date.now();if(n-guardLast<8000)return;guardLast=n;
-    var nm=myName||(me&&me.name)||"Someone";
-    var txt=kind==="record"?"🔴 "+nm+" started screen recording":"📸 "+nm+" took a screenshot";
-    var sv=RP;RP=null;
-    try{pushMsg({cid:cid,uid:uid,name:myName,text:txt,t:firebase.database.ServerValue.TIMESTAMP},"Alert could not be sent")}finally{RP=sv}
-  }
-  function guardInit(){
-    var G=nPlug("ScreenGuard");if(!G||guardOn)return;guardOn=true;
-    G.addListener("capture",function(e){
-      var kd=e&&e.kind;
-      if(kd==="recordstop"){guardRec=false;return}
-      if(kd==="record")guardRec=true;
-      guardAlert(kd);
-    });
-    G.start().catch(function(){guardOn=false});
-  }
   function pushInit(){
     try{
       var q=new URLSearchParams(location.search).get("open");
       if(q){history.replaceState(null,"",location.pathname);setTimeout(function(){if(getC()[q])openDM(q)},900)}
     }catch(e){}
-    if(NATIVE){guardInit();nativePushInit();return}
     if(!PUSH_VAPID||!PUSH_URL||!db||!me||!uid||!ntfOn())return;
     if(!("serviceWorker" in navigator)||!("Notification" in window)||Notification.permission!=="granted")return;
     try{if(!firebase.messaging||!firebase.messaging.isSupported())return}catch(e){return}
@@ -1922,9 +1879,44 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(nb)requestAnimationFrame(function(){mg.scrollTop=mg.scrollHeight});
     if(!isBlocked()&&canSend())$("txt").focus();
   }
+  var EDK=null;
   function clearReply(){
     RP=null;if(rpEl){rpEl.classList.remove("rsel");rpEl=null}
+    if(EDK){EDK=null;$("txt").value="";updSend()}
     $("rpBar").style.display="none";
+  }
+  // ---- edit message (WhatsApp jaisa) ----
+  function editMsg(key){
+    var f=info[key];if(!f||!f.mine||!f.d||f.d.eaten)return;
+    if(isBlocked()||!canSend()){toast("Can't edit right now");return}
+    clearReply();
+    EDK=key;rpEl=els[key];if(rpEl)rpEl.classList.add("rsel");
+    $("rpN").textContent="✏️ Edit message";$("rpT").textContent=String(f.d.text||"").slice(0,80);
+    $("rpBar").style.display="flex";
+    var t=$("txt");t.value=String(f.d.text||"");updSend();
+    t.focus();try{t.setSelectionRange(t.value.length,t.value.length)}catch(e){}
+  }
+  function doEdit(v){
+    var k=EDK,f=info[k];
+    if(!v){toast("Message can't be empty");return}
+    if(!f||!f.mine||!ref||f.d.eaten){clearReply();toast("Can't edit this message");return}
+    if(v===f.d.text){clearReply();return}
+    var u={text:v,edited:true};
+    ref.child(k).update(u).catch(function(){toast("Edit failed")});
+    f.d.text=v;f.d.edited=true;cachePush(k,f.d);applyEdit(k);
+    clearReply();stopTyping();
+  }
+  function applyEdit(key){
+    var f=info[key],el=els[key];if(!f||!el||!f.d||f.d.eaten)return;
+    var t=el.querySelector(".mt");
+    if(t&&typeof f.d.text==="string"){
+      var x=String(f.d.text).slice(0,1000);
+      if(t.textContent!==x){t.textContent=x;el.classList.toggle("big",!!onlyEmoji(x))}
+    }
+    if(f.d.edited&&!el.querySelector(".edl")){
+      var tm=el.querySelector(".tm");
+      if(tm){var e=document.createElement("span");e.className="edl";e.textContent="edited";tm.insertBefore(e,tm.firstChild)}
+    }
   }
   $("rpX").onclick=clearReply;
 
@@ -1934,6 +1926,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     var l=[];
     if(!(f.d&&f.d.eaten))l.push(["↩️ Reply",function(){setReply(key)}]);
     if(f.d&&!f.d.eaten&&(!f.d.type||f.d.type==="text")&&typeof f.d.text==="string"&&f.d.text)l.push(["📋 Copy",function(){copy(f.d.text,"Message copied")}]);
+    if(f.mine&&f.d&&!f.d.eaten&&!f.d.viewOnce&&!pend[key]&&(!f.d.type||f.d.type==="text")&&typeof f.d.text==="string"&&f.d.text)l.push(["✏️ Edit",function(){editMsg(key)}]);
     if(!(f.d&&f.d.eaten))l.push(["🐛 Feed to insect",function(){sendEat(key)}]);
     l.push(["🗑 Delete for me",function(){hideKey(key);removeEl(key)}]);
     if(f.mine)l.push(["🗑 Delete for everyone",function(){if(ref)ref.child(key).remove()},"danger"]);
@@ -2000,6 +1993,12 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(!n){exitSel();return}
     $("selN").textContent=n+" selected";
     $("selMore").style.display=n===1?"":"none";
+    var ed=false;
+    if(n===1){
+      var k0=Object.keys(sel)[0],f0=info[k0];
+      ed=!!(f0&&f0.mine&&f0.d&&!f0.d.eaten&&!f0.d.viewOnce&&!pend[k0]&&(!f0.d.type||f0.d.type==="text")&&typeof f0.d.text==="string"&&f0.d.text);
+    }
+    $("selEdit").style.display=ed?"":"none";
   }
   function toggleSel(key,on){
     var el=els[key];if(!el||!info[key])return;
@@ -2028,6 +2027,18 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   }
   $("selX").onclick=exitSel;
   $("selDel").onclick=selDelete;
+  $("selEat").onclick=function(){
+    var keys=Object.keys(sel).filter(function(k){return info[k]&&!info[k].d.eaten}).sort();
+    if(!keys.length){toast("Already eaten");return}
+    exitSel();
+    var i=0;
+    (function nx(){
+      if(i>=keys.length)return;
+      if($("bugs").children.length>=7){setTimeout(nx,800);return}
+      sendEat(keys[i++]);setTimeout(nx,1300);
+    })();
+  };
+  $("selEdit").onclick=function(){var k=Object.keys(sel)[0];exitSel();if(k)editMsg(k)};
   $("selMore").onclick=function(){var k=Object.keys(sel)[0];exitSel();if(k)openMenu(k)};
   $("back").addEventListener("click",function(){if(selMode)exitSel()});
 
@@ -2154,7 +2165,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       el.appendChild(fb);
     }else{
       var txt=String(d.text||"").slice(0,1000);
-      var t=document.createElement("div");t.textContent=txt;el.appendChild(t);
+      var t=document.createElement("div");t.className="mt";t.textContent=txt;el.appendChild(t);
       if(onlyEmoji(txt))el.classList.add("big");
     }
     if((d.type==="image"||d.type==="video")&&d.caption){
@@ -2211,6 +2222,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       }
     }
     if(key&&d.eaten)applyEaten(key);
+    if(key&&d.edited)applyEdit(key);
     (prepFrag||$("msgs")).appendChild(el);if(!prepFrag)scroll();
   }
   function applyEaten(key){
@@ -2415,6 +2427,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     clearInterval(statusInt);statusInt=null;
   }
   function goHome(){
+    if(selMode)exitSel();
     if(isDM&&curOther)markRead(curOther);
     closeChat();
     $("chat").style.display="none";$("home").style.display="flex";
@@ -2639,7 +2652,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
         q.on("child_changed",function(s){
           var f=info[s.key];if(!f)return;
           f.d=s.val()||f.d;cachePush(s.key,f.d);
-          setTick(s.key);if(f.d.eaten&&!eating[s.key])applyEaten(s.key);
+          setTick(s.key);applyEdit(s.key);if(f.d.eaten&&!eating[s.key])applyEaten(s.key);
         });
         if(cached.length)reconcile(myRef,id);
       },function(){sys("Permission error. Check Firebase rules.")});
@@ -2663,7 +2676,6 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     statusInt=setInterval(updStatus,2000);
     updStatus();
     if(!isBlocked()&&canSend())$("txt").focus();
-    if(NATIVE&&guardRec)setTimeout(function(){guardAlert("record")},1500);
   }
 
   // ---- send ----
@@ -2701,6 +2713,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   }
   function sendMsg(){
     var v=$("txt").value.trim();
+    if(EDK){if(!isBlocked()&&canSend())doEdit(v);return}
     if(!v||!ref||isBlocked()||!canSend())return;
     $("txt").value="";updSend();
     if($("emo").style.display!=="flex")$("txt").focus();
@@ -4045,26 +4058,33 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     fs.forEach(function(f){if(f.type.indexOf("image/")===0)blobToData(f).then(function(d){saveStk(d,false)})});
   };
 
-  // ---- back button: sirf upar wali screen band ho ----
+  // ---- back button: sirf upar wali screen band ho, app kabhi band nahi ----
   (function(){
-    var IDS=["chat","menu","dlg","pv","us","jd","ep","cr","em","pc","fg","ttOv","dgOv","viewer"],stack=[],depth=0,skip=0;
+    var IDS=["chat","menu","dlg","nkDlg","pv","us","jd","ep","cr","em","pc","fg","stg","ttOv","dgOv","gPop","viewer","emo","rpBar","selBar"],stack=[],depth=0,pending=0;
     function vis(id){var e=$(id);return !!(e&&e.style.display&&e.style.display!=="none")}
+    function guard(){try{history.pushState({g:1},"")}catch(e){}}
     function reconcile(){
       IDS.forEach(function(id){
         var on=vis(id),i=stack.indexOf(id);
         if(on&&i<0)stack.push(id);else if(!on&&i>=0)stack.splice(i,1);
       });
       while(depth<stack.length){try{history.pushState({l:stack[depth]},"")}catch(e){}depth++}
-      if(depth>stack.length){var n=depth-stack.length;depth=stack.length;skip=1;history.go(-n)}
+      if(depth>stack.length){var n=depth-stack.length;depth=stack.length;pending++;history.go(-n)}
     }
     var mo=new MutationObserver(reconcile);
     IDS.forEach(function(id){var e=$(id);if(e)mo.observe(e,{attributes:true,attributeFilter:["style"]})});
+    guard(); // neeche ek extra entry: root par back karne se app band nahi hoga
     window.addEventListener("popstate",function(){
-      if(skip){skip=0;return}
-      if(!stack.length)return;
+      if(pending>0){pending--;return}
+      if(!stack.length){guard();return}
       depth=Math.max(0,depth-1);
       var top=stack.pop();
-      if(top==="chat")goHome();else $(top).style.display="none";
+      if(top==="chat")goHome();
+      else if(top==="selBar")exitSel();
+      else if(top==="menu")closeMenu();
+      else if(top==="rpBar")clearReply();
+      else if(top==="emo")closeEmo();
+      else if($(top))$(top).style.display="none";
     });
   })();
 
