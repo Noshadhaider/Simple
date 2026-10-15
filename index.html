@@ -2595,6 +2595,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       var r=new FileReader();r.onload=function(){res(r.result)};r.onerror=rej;r.readAsDataURL(b);
     });
   }
+  function fixVid(d,ty){var b=String(ty||"video/webm").split(";")[0]||"video/webm";d=String(d);return "data:"+b+";base64,"+d.slice(d.lastIndexOf(",")+1)}
   function imgToData(file){
     return new Promise(function(res,rej){
       var u=URL.createObjectURL(file),im=new Image();
@@ -3046,10 +3047,10 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
         rc.onstop=function(){
           if(done)return;done=true;
           try{if(ac)ac.close()}catch(e){}
-          var blob=new Blob(chunks,{type:rc.mimeType||mt||"video/webm"});
+          var blob=new Blob(chunks,{type:String(rc.mimeType||mt||"video/webm").split(";")[0]});
           if(blob.size>3*1024*1024)return reject("Video is "+vdMB(blob.size)+" after editing (max 3 MB). Trim it shorter.");
           if(!blob.size)return reject("Could not edit video");
-          blobToData(blob).then(function(d){resolve({data:d,url:URL.createObjectURL(blob)})},function(){reject("Could not read video")});
+          blobToData(blob).then(function(d){resolve({data:fixVid(d,blob.type),url:URL.createObjectURL(blob)})},function(){reject("Could not read video")});
         };
         function stop(){try{v.pause()}catch(e){}setTimeout(function(){try{if(rc.state!=="inactive")rc.stop()}catch(e){}},200)}
         function frame(){
@@ -3297,11 +3298,11 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     try{rc=new MediaRecorder(cam.st,mt?{mimeType:mt,videoBitsPerSecond:600000,audioBitsPerSecond:48000}:{})}catch(x){toast("Could not start recording");return}
     rc.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data)};
     rc.onstop=function(){
-      var blob=new Blob(chunks,{type:rc.mimeType||mt||"video/webm"});
+      var blob=new Blob(chunks,{type:String(rc.mimeType||mt||"video/webm").split(";")[0]});
       camClose();
       if(!blob.size)return;
       if(blob.size>3*1024*1024){sys("Video is too large. Maximum 3 MB.");return}
-      blobToData(blob).then(function(d){openMediaComposer("video",d,blob)}).catch(function(){sys("Could not read video")});
+      blobToData(blob).then(function(d){openMediaComposer("video",fixVid(d,blob.type),blob)}).catch(function(){sys("Could not read video")});
     };
     cam.rec=rc;rc.start();$("camShut").classList.add("rec");
     var t0=Date.now();$("camTm").style.display="block";$("camTm").textContent="0:00";
