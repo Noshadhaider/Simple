@@ -2390,24 +2390,45 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   function idb(){
     if(IDBP)return IDBP;
     IDBP=new Promise(function(res,rej){
-      try{var r=indexedDB.open("chatly_cache",2);
-        r.onupgradeneeded=function(){var d=r.result;if(!d.objectStoreNames.contains("c"))d.createObjectStore("c");if(!d.objectStoreNames.contains("m"))d.createObjectStore("m")};
-        r.onsuccess=function(){res(r.result)};r.onerror=function(){rej()};r.onblocked=function(){rej()}}catch(e){rej()}
+      try{var r=indexedDB.open("raabta_msgs",1);
+        r.onupgradeneeded=function(){if(!r.result.objectStoreNames.contains("m"))r.result.createObjectStore("m")};
+        r.onsuccess=function(){res(r.result)};r.onerror=function(){rej()};r.onblocked=function(){}}catch(e){rej()}
     });
     return IDBP;
   }
-  // har message alag record: koi limit nahi, aur ek msg badalne par poora cache dobara nahi likhna padta
+  function legacyLoad(id){
+    return new Promise(function(res){
+      try{
+        var r=indexedDB.open("chatly_cache");
+        r.onupgradeneeded=function(){};
+        r.onblocked=function(){res([])};r.onerror=function(){res([])};
+        r.onsuccess=function(){
+          var d=r.result;
+          try{
+            if(!d.objectStoreNames.contains("c")){d.close();res([]);return}
+            var rq=d.transaction("c").objectStore("c").get(id);
+            rq.onsuccess=function(){var v=rq.result;d.close();res(Array.isArray(v)?v:[])};
+            rq.onerror=function(){d.close();res([])};
+          }catch(e){try{d.close()}catch(x){}res([])}
+        };
+      }catch(e){res([])}
+    });
+  }
   function cacheLoad(id){
-    return idb().then(function(d){return new Promise(function(res){
-      var tx=d.transaction(["c","m"],"readwrite"),c=tx.objectStore("c"),m=tx.objectStore("m");
-      var old=c.get(id);
-      old.onsuccess=function(){
-        if(Array.isArray(old.result)){old.result.forEach(function(x){if(x&&x.k)m.put(x,id+CSEP+x.k)});c.delete(id)}
-        var rq=m.getAll(IDBKeyRange.bound(id+CSEP,id+CSEP+"\uffff"));
+    return Promise.all([
+      idb().then(function(d){return new Promise(function(res){
+        var rq=d.transaction("m").objectStore("m").getAll(IDBKeyRange.bound(id+CSEP,id+CSEP+"\uffff"));
         rq.onsuccess=function(){res(rq.result||[])};rq.onerror=function(){res([])};
-      };
-      old.onerror=function(){res([])};
-    })}).catch(function(){return[]});
+      })}).catch(function(){return[]}),
+      legacyLoad(id)
+    ]).then(function(r){
+      var seen={},out=[];
+      r[0].forEach(function(x){if(x&&x.k&&!seen[x.k]){seen[x.k]=1;out.push(x)}});
+      r[1].forEach(function(x){
+        if(x&&x.k&&!seen[x.k]){seen[x.k]=1;out.push(x);cacheDirty[id+CSEP+x.k]=x;cacheSave()}
+      });
+      return out;
+    });
   }
   function cacheFlush(){
     if(cacheT){clearTimeout(cacheT);cacheT=null}
@@ -2513,12 +2534,14 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     cacheId=id;cacheArr=[];
     function tv(d){return typeof d.t==="number"?d.t:9e15}
     function byT(a,b){return tv(a.d)-tv(b.d)}
-    cacheLoad(id).then(function(cached){
-      if(ref!==myRef)return;
+    var began=false;
+    function begin(cached){
+      if(began||ref!==myRef)return;began=true;
+      cached=(Array.isArray(cached)?cached:[]).filter(function(x){return x&&x.k&&x.d&&typeof x.d==="object"});
       cached.sort(byT);
       cacheArr=cached.slice();
       quiet=true;
-      try{cached.forEach(function(x){addMsg(x.d,x.k)})}finally{quiet=false}
+      try{cached.forEach(function(x){try{addMsg(x.d,x.k)}catch(e){}})}finally{quiet=false}
       // cache hai to sirf naye msgs download honge (thoda overlap rakha taaki koi miss na ho), warna last 100
       var q;
       if(cached.length){
@@ -2546,7 +2569,9 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
         });
         if(cached.length)reconcile(myRef,id);
       },function(){sys("Permission error. Check Firebase rules.")});
-    });
+    }
+    cacheLoad(id).then(begin,function(){begin([])});
+    setTimeout(function(){begin([])},3500);
     joinPresence(id);
     joinTyping(id);
     bugSeen={};
