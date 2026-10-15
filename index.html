@@ -170,6 +170,7 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
 .vdW.paused .vdPlay{display:flex}
 .vdCol button{width:auto;margin:0;padding:7px 12px;border-radius:14px;border:0;background:#2a2f37;color:#fff;font-size:13px;font-weight:600}
 .vdCol button.vdDel{margin-left:auto;background:#3a1d1d;color:#ff9a9a}
+#offBar{display:none;position:fixed;left:50%;top:calc(3px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:100001;padding:3px 12px;border-radius:12px;background:rgba(180,35,42,.95);color:#fff;font-size:12px;font-weight:600;pointer-events:none;white-space:nowrap}
 #vdTools{display:none;margin-left:auto;min-width:0}
 #vdRow{display:flex;justify-content:flex-end;gap:6px}
 #vdRow button{width:38px;height:38px;flex:none;border:0;border-radius:50%;background:rgba(22,26,32,.88);color:#fff;display:flex;align-items:center;justify-content:center;padding:0;margin:0}
@@ -759,6 +760,7 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
   <button class="alt" id="dgX" style="margin:0">Close</button>
 </div></div>
 <div id="gPop" class="ov" style="z-index:70"><div class="box glass" style="text-align:center"><div id="gPopI" style="font-size:46px;line-height:1.1;margin-bottom:6px">⏰</div><h3 id="gPopT"></h3><p id="gPopP"></p><div id="gPopAct" style="display:none"></div><button id="gPopOk" style="margin:0">OK</button></div></div>
+<div id="offBar">No internet · showing saved messages</div>
 <div id="oldLd"><i></i></div>
 <div id="mediaComposer" aria-modal="true" role="dialog">
   <div id="mcTop"><button type="button" id="mcClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div id="mcTitle">Send photo</div>
@@ -1903,7 +1905,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     else e.style.display="none";
   }
   function loadOlder(){
-    if(oldBusy||oldDone||!ref||!db)return;
+    if(oldBusy||oldDone||!ref||!db||navigator.onLine===false)return;
     var myRef=ref;
     if(!oldKey){var ks=Object.keys(info).sort();if(!ks.length)return;oldKey=ks[0]}
     oldBusy=true;oldSpin(true);
@@ -1914,6 +1916,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       if(arr.length<40)oldDone=true;
       if(arr.length){
         oldKey=arr[0].k;
+        arr.forEach(function(x){if(!hidden[x.k])cachePush(x.k,x.d)});
         if(curClr&&arr.every(function(x){return typeof x.d.t==="number"&&x.d.t<=curClr}))oldDone=true;
         var m=$("msgs"),h0=m.scrollHeight,t0=m.scrollTop;
         var frag=document.createDocumentFragment(),sv=lastDay,sq=quiet;
@@ -2185,7 +2188,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   // ---- status: typing / chat me hai ----
   function updStatus(){
     var st=$("status");
-    if(!connected){st.textContent="connecting...";st.className="";return}
+    if(!connected){st.textContent=navigator.onLine===false?"offline · saved messages":"connecting...";st.className="";return}
     var t=now(),tn=[];
     Object.keys(typOthers).forEach(function(k){
       var o=typOthers[k]||{};
@@ -2383,42 +2386,62 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   $("code").addEventListener("keydown",function(e){if(e.key==="Enter"){$("jd").style.display="none";enter($("code").value)}});
 
   // ---- local message cache (IndexedDB): purane msgs turant dikhen, dobara download na hon ----
-  var IDBP=null,cacheArr=[],cacheT=null,cacheId="",quiet=false;
+  var IDBP=null,cacheArr=[],cacheT=null,cacheId="",quiet=false,cacheDirty={},cacheGone={},CSEP="\u0001";
   function idb(){
     if(IDBP)return IDBP;
     IDBP=new Promise(function(res,rej){
-      try{var r=indexedDB.open("chatly_cache",1);
-        r.onupgradeneeded=function(){r.result.createObjectStore("c")};
-        r.onsuccess=function(){res(r.result)};r.onerror=function(){rej()}}catch(e){rej()}
+      try{var r=indexedDB.open("chatly_cache",2);
+        r.onupgradeneeded=function(){var d=r.result;if(!d.objectStoreNames.contains("c"))d.createObjectStore("c");if(!d.objectStoreNames.contains("m"))d.createObjectStore("m")};
+        r.onsuccess=function(){res(r.result)};r.onerror=function(){rej()};r.onblocked=function(){rej()}}catch(e){rej()}
     });
     return IDBP;
   }
+  // har message alag record: koi limit nahi, aur ek msg badalne par poora cache dobara nahi likhna padta
   function cacheLoad(id){
     return idb().then(function(d){return new Promise(function(res){
-      var rq=d.transaction("c").objectStore("c").get(id);
-      rq.onsuccess=function(){res(Array.isArray(rq.result)?rq.result:[])};
-      rq.onerror=function(){res([])};
+      var tx=d.transaction(["c","m"],"readwrite"),c=tx.objectStore("c"),m=tx.objectStore("m");
+      var old=c.get(id);
+      old.onsuccess=function(){
+        if(Array.isArray(old.result)){old.result.forEach(function(x){if(x&&x.k)m.put(x,id+CSEP+x.k)});c.delete(id)}
+        var rq=m.getAll(IDBKeyRange.bound(id+CSEP,id+CSEP+"\uffff"));
+        rq.onsuccess=function(){res(rq.result||[])};rq.onerror=function(){res([])};
+      };
+      old.onerror=function(){res([])};
     })}).catch(function(){return[]});
   }
   function cacheFlush(){
     if(cacheT){clearTimeout(cacheT);cacheT=null}
-    if(!cacheId)return;
-    var id=cacheId,a=cacheArr.slice(-100);
-    idb().then(function(d){d.transaction("c","readwrite").objectStore("c").put(a,id)}).catch(function(){});
+    var dirty=cacheDirty,gone=cacheGone;cacheDirty={};cacheGone={};
+    var dk=Object.keys(dirty),gk=Object.keys(gone);
+    if(!dk.length&&!gk.length)return;
+    idb().then(function(d){
+      var m=d.transaction("m","readwrite").objectStore("m");
+      dk.forEach(function(k){m.put(dirty[k],k)});
+      gk.forEach(function(k){m.delete(k)});
+    }).catch(function(){});
   }
   function cacheSave(){if(!cacheT)cacheT=setTimeout(cacheFlush,600)}
   function cachePush(k,d){
     if(d&&d.viewOnce&&d.uid===uid&&d.data){d=Object.assign({},d);delete d.data}
+    var fk=cacheId+CSEP+k;
+    cacheDirty[fk]={k:k,d:d};delete cacheGone[fk];
     for(var i=0;i<cacheArr.length;i++)if(cacheArr[i].k===k){cacheArr[i].d=d;cacheSave();return}
     cacheArr.push({k:k,d:d});
-    if(cacheArr.length>150)cacheArr=cacheArr.slice(-100);
     cacheSave();
   }
   function cacheDel(k){
-    var n=cacheArr.length;
+    var fk=cacheId+CSEP+k;
+    delete cacheDirty[fk];cacheGone[fk]=1;
     cacheArr=cacheArr.filter(function(x){return x.k!==k});
-    if(cacheArr.length!==n)cacheSave();
+    cacheSave();
   }
+  // ---- offline: banner + service worker (app bina internet ke khule) ----
+  function offUpd(){
+    var b=$("offBar");if(b)b.style.display=navigator.onLine===false?"block":"none";
+    try{updStatus()}catch(e){}
+  }
+  window.addEventListener("online",offUpd);window.addEventListener("offline",offUpd);offUpd();
+  try{if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register("sw.js").catch(function(){})}catch(e){}
   // chat khulne ke baad: jo msgs door se delete hue wo hatao, aur apne msgs ke tick refresh karo
   function reconcile(myRef,id){
     try{
