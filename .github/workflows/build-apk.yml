@@ -1,0 +1,419 @@
+name: Build Chatly APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Prepare web app
+        env:
+          PUSH_URL: ${{ secrets.PUSH_URL }}
+          PUSH_KEY: ${{ secrets.PUSH_KEY }}
+        run: |
+          set -e
+          test -f index.html || { echo "index.html repo ke root mein nahi hai"; exit 1; }
+          mkdir -p apk/www
+          cp index.html apk/www/index.html
+          python3 - <<'PY'
+          import os
+          p = "apk/www/index.html"
+          s = open(p, encoding="utf-8").read()
+          url = os.environ.get("PUSH_URL", "").strip()
+          key = os.environ.get("PUSH_KEY", "").strip()
+          a = 'var PUSH_URL   = "";'
+          b = 'var PUSH_KEY   = "";'
+          if url and a in s:
+              s = s.replace(a, 'var PUSH_URL   = "%s";' % url)
+          if key and b in s:
+              s = s.replace(b, 'var PUSH_KEY   = "%s";' % key)
+          open(p, "w", encoding="utf-8").write(s)
+          print("PUSH_URL set:", bool(url), "| PUSH_KEY set:", bool(key))
+          PY
+
+      - name: Create Capacitor Android project
+        run: |
+          set -e
+          cd apk
+          cat > package.json <<'JSON'
+          {
+            "name": "chatly-apk",
+            "version": "1.0.0",
+            "private": true,
+            "dependencies": {
+              "@capacitor/android": "^7.0.0",
+              "@capacitor/cli": "^7.0.0",
+              "@capacitor/core": "^7.0.0",
+              "@capacitor/push-notifications": "^7.0.0"
+            }
+          }
+          JSON
+          cat > capacitor.config.json <<'JSON'
+          {
+            "appId": "com.noshad.chatly",
+            "appName": "Chatly",
+            "webDir": "www",
+            "server": { "androidScheme": "https" },
+            "plugins": {
+              "PushNotifications": { "presentationOptions": ["badge", "sound", "alert"] }
+            }
+          }
+          JSON
+          npm install
+          npx cap add android
+          npx cap sync android
+
+      - name: Add screenshot detector, push, signing, icon
+        env:
+          GSJ: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          KS_B64: ${{ secrets.KEYSTORE_B64 }}
+        run: |
+          set -e
+          cd apk
+          pip install pillow
+          PKG=android/app/src/main/java/com/noshad/chatly
+          mkdir -p "$PKG"
+          cat > "$PKG/MainActivity.java" <<'JAVA'
+          package com.noshad.chatly;
+
+          import android.os.Bundle;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  registerPlugin(ScreenGuardPlugin.class);
+                  super.onCreate(savedInstanceState);
+              }
+          }
+          JAVA
+          cat > "$PKG/ScreenGuardPlugin.java" <<'JAVA'
+          package com.noshad.chatly;
+
+          import android.Manifest;
+          import android.app.Activity;
+          import android.content.ContentResolver;
+          import android.database.ContentObserver;
+          import android.database.Cursor;
+          import android.net.Uri;
+          import android.os.Build;
+          import android.os.Bundle;
+          import android.os.Handler;
+          import android.os.Looper;
+          import android.provider.MediaStore;
+          import android.view.WindowManager;
+
+          import androidx.core.content.ContextCompat;
+
+          import com.getcapacitor.JSObject;
+          import com.getcapacitor.PermissionState;
+          import com.getcapacitor.Plugin;
+          import com.getcapacitor.PluginCall;
+          import com.getcapacitor.PluginMethod;
+          import com.getcapacitor.annotation.CapacitorPlugin;
+          import com.getcapacitor.annotation.Permission;
+          import com.getcapacitor.annotation.PermissionCallback;
+
+          import java.util.concurrent.Executor;
+          import java.util.function.Consumer;
+
+          @CapacitorPlugin(
+              name = "ScreenGuard",
+              permissions = {
+                  @Permission(alias = "media", strings = { Manifest.permission.READ_MEDIA_IMAGES }),
+                  @Permission(alias = "storage", strings = { Manifest.permission.READ_EXTERNAL_STORAGE })
+              }
+          )
+          public class ScreenGuardPlugin extends Plugin {
+
+              private boolean started = false;
+              private Object capCb = null;   // Android 14+  screenshot callback
+              private Object recCb = null;   // Android 15+  screen recording callback
+              private ContentObserver observer = null; // Android 13 aur neeche: gallery watcher
+              private long lastId = -1;
+
+              private String legacyAlias() {
+                  return Build.VERSION.SDK_INT >= 33 ? "media" : "storage";
+              }
+
+              @PluginMethod
+              public void start(PluginCall call) {
+                  started = true;
+                  if (Build.VERSION.SDK_INT >= 34 || getPermissionState(legacyAlias()) == PermissionState.GRANTED) {
+                      registerAll();
+                      call.resolve();
+                  } else {
+                      requestPermissionForAlias(legacyAlias(), call, "permResult");
+                  }
+              }
+
+              @PermissionCallback
+              private void permResult(PluginCall call) {
+                  if (getPermissionState(legacyAlias()) == PermissionState.GRANTED) {
+                      registerAll();
+                      call.resolve();
+                  } else {
+                      call.reject("permission denied");
+                  }
+              }
+
+              @Override
+              protected void handleOnStart() {
+                  if (started) registerAll();
+              }
+
+              @Override
+              protected void handleOnStop() {
+                  unregisterAll();
+              }
+
+              @Override
+              protected void handleOnDestroy() {
+                  unregisterAll();
+              }
+
+              private void emit(String kind) {
+                  JSObject o = new JSObject();
+                  o.put("kind", kind);
+                  notifyListeners("capture", o);
+              }
+
+              private void registerAll() {
+                  final Activity a = getActivity();
+                  if (a == null) return;
+                  Executor ex = ContextCompat.getMainExecutor(a);
+
+                  if (Build.VERSION.SDK_INT >= 34) {
+                      if (capCb == null) {
+                          try {
+                              Activity.ScreenCaptureCallback cb = new Activity.ScreenCaptureCallback() {
+                                  @Override
+                                  public void onScreenCaptured() {
+                                      emit("shot");
+                                  }
+                              };
+                              a.registerScreenCaptureCallback(ex, cb);
+                              capCb = cb;
+                          } catch (Throwable t) { /* ignore */ }
+                      }
+                  } else if (observer == null && getPermissionState(legacyAlias()) == PermissionState.GRANTED) {
+                      try {
+                          final ContentResolver cr = getContext().getContentResolver();
+                          observer = new ContentObserver(new Handler(Looper.getMainLooper())) {
+                              @Override
+                              public void onChange(boolean selfChange, Uri uri) {
+                                  checkLatestImage(cr);
+                              }
+                          };
+                          cr.registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, true, observer);
+                      } catch (Throwable t) { observer = null; }
+                  }
+
+                  if (Build.VERSION.SDK_INT >= 35 && recCb == null) {
+                      try {
+                          Consumer<Integer> cb = new Consumer<Integer>() {
+                              @Override
+                              public void accept(Integer state) {
+                                  if (state == null) return;
+                                  if (state == WindowManager.SCREEN_RECORDING_STATE_VISIBLE) emit("record");
+                                  else emit("recordstop");
+                              }
+                          };
+                          int st = a.getWindowManager().addScreenRecordingCallback(ex, cb);
+                          recCb = cb;
+                          if (st == WindowManager.SCREEN_RECORDING_STATE_VISIBLE) emit("record");
+                      } catch (Throwable t) { /* ignore */ }
+                  }
+              }
+
+              @SuppressWarnings("unchecked")
+              private void unregisterAll() {
+                  final Activity a = getActivity();
+                  try {
+                      if (capCb != null && a != null && Build.VERSION.SDK_INT >= 34) {
+                          a.unregisterScreenCaptureCallback((Activity.ScreenCaptureCallback) capCb);
+                      }
+                  } catch (Throwable t) { /* ignore */ }
+                  capCb = null;
+                  try {
+                      if (recCb != null && a != null && Build.VERSION.SDK_INT >= 35) {
+                          a.getWindowManager().removeScreenRecordingCallback((Consumer<Integer>) recCb);
+                      }
+                  } catch (Throwable t) { /* ignore */ }
+                  recCb = null;
+                  try {
+                      if (observer != null) getContext().getContentResolver().unregisterContentObserver(observer);
+                  } catch (Throwable t) { /* ignore */ }
+                  observer = null;
+              }
+
+              private void checkLatestImage(ContentResolver cr) {
+                  Cursor c = null;
+                  try {
+                      String[] proj = {
+                          MediaStore.Images.Media._ID,
+                          MediaStore.Images.Media.DISPLAY_NAME,
+                          MediaStore.Images.Media.DATA,
+                          MediaStore.Images.Media.DATE_ADDED
+                      };
+                      Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                      if (Build.VERSION.SDK_INT >= 26) {
+                          Bundle args = new Bundle();
+                          args.putStringArray(ContentResolver.QUERY_ARG_SORT_COLUMNS, new String[] { MediaStore.Images.Media.DATE_ADDED });
+                          args.putInt(ContentResolver.QUERY_ARG_SORT_DIRECTION, ContentResolver.QUERY_SORT_DIRECTION_DESCENDING);
+                          args.putInt(ContentResolver.QUERY_ARG_LIMIT, 1);
+                          c = cr.query(uri, proj, args, null);
+                      } else {
+                          c = cr.query(uri, proj, null, null, MediaStore.Images.Media.DATE_ADDED + " DESC LIMIT 1");
+                      }
+                      if (c != null && c.moveToFirst()) {
+                          long id = c.getLong(0);
+                          String name = c.getString(1);
+                          String data = c.getString(2);
+                          long added = c.getLong(3);
+                          String h = ((name == null ? "" : name) + " " + (data == null ? "" : data)).toLowerCase();
+                          boolean looks = h.contains("screenshot") || h.contains("screen_shot") || h.contains("screencap")
+                                  || h.contains("截屏") || h.contains("스크린샷");
+                          long nowS = System.currentTimeMillis() / 1000L;
+                          if (looks && id != lastId && Math.abs(nowS - added) < 20) {
+                              lastId = id;
+                              emit("shot");
+                          }
+                      }
+                  } catch (Throwable t) {
+                      /* ignore */
+                  } finally {
+                      if (c != null) c.close();
+                  }
+              }
+          }
+          JAVA
+          if [ -n "$GSJ" ]; then
+            printf '%s' "$GSJ" > android/app/google-services.json
+            echo "google-services.json added"
+          else
+            echo "::warning::GOOGLE_SERVICES_JSON secret nahi hai - push notification kaam nahi karegi"
+          fi
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > android/app/chatly.keystore
+          fi
+          python3 - <<'PY'
+          import os, re, io, base64, shutil, json
+
+          A = "android/app"
+
+          # ---- 1) AndroidManifest permissions ----
+          mp = A + "/src/main/AndroidManifest.xml"
+          m = open(mp, encoding="utf-8").read()
+          perms = [
+              '<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />',
+              '<uses-permission android:name="android.permission.VIBRATE" />',
+              '<uses-permission android:name="android.permission.DETECT_SCREEN_CAPTURE" />',
+              '<uses-permission android:name="android.permission.DETECT_SCREEN_RECORDING" />',
+              '<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />',
+              '<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />',
+          ]
+          add = ""
+          for p in perms:
+              name = re.search(r'android:name="([^"]+)"', p).group(1)
+              if name not in m:
+                  add += "    " + p + "\n"
+          m = m.replace("</manifest>", add + "</manifest>")
+          open(mp, "w", encoding="utf-8").write(m)
+          print("manifest patched")
+
+          # ---- 2) targetSdk 34 (Android 15 edge-to-edge se bachne ke liye) ----
+          vp = "android/variables.gradle"
+          v = open(vp, encoding="utf-8").read()
+          v = re.sub(r"targetSdkVersion\s*=\s*\d+", "targetSdkVersion = 34", v)
+          open(vp, "w", encoding="utf-8").write(v)
+          print("targetSdk set to 34")
+
+          # ---- 3) google-services.json check ----
+          gs = A + "/google-services.json"
+          if os.path.exists(gs):
+              try:
+                  j = json.load(open(gs, encoding="utf-8"))
+                  pk = [c["client_info"]["android_client_info"]["package_name"] for c in j.get("client", [])]
+                  print("google-services packages:", pk)
+                  if "com.noshad.chatly" not in pk:
+                      print("::warning::google-services.json mein package com.noshad.chatly nahi hai - push kaam nahi karega")
+              except Exception as e:
+                  print("::warning::google-services.json parse nahi hui:", e)
+
+          # ---- 4) signing (taaki update install ho sake) ----
+          if os.path.exists(A + "/chatly.keystore"):
+              g = open(A + "/build.gradle", encoding="utf-8").read()
+              g += """
+
+          android {
+              signingConfigs {
+                  chatly {
+                      storeFile file('chatly.keystore')
+                      storeType 'pkcs12'
+                      storePassword 'chatly123'
+                      keyAlias 'chatly'
+                      keyPassword 'chatly123'
+                  }
+              }
+              buildTypes {
+                  debug {
+                      signingConfig signingConfigs.chatly
+                  }
+              }
+          }
+          """
+              open(A + "/build.gradle", "w", encoding="utf-8").write(g)
+              print("signing configured")
+          else:
+              print("::warning::KEYSTORE_B64 secret nahi hai - har build ki signature alag hogi, update ke liye pehle purani app uninstall karni padegi")
+
+          # ---- 5) launcher icon (aapke logo se) ----
+          try:
+              from PIL import Image
+              s = open("www/index.html", encoding="utf-8").read()
+              mt = re.search(r'<link rel="apple-touch-icon" href="data:image/png;base64,([^"]+)"', s)
+              img = Image.open(io.BytesIO(base64.b64decode(mt.group(1)))).convert("RGBA")
+              res = A + "/src/main/res"
+              for d, sz in {"mdpi": 48, "hdpi": 72, "xhdpi": 96, "xxhdpi": 144, "xxxhdpi": 192}.items():
+                  dd = res + "/mipmap-" + d
+                  os.makedirs(dd, exist_ok=True)
+                  im = img.resize((sz, sz), Image.LANCZOS)
+                  im.save(dd + "/ic_launcher.png")
+                  im.save(dd + "/ic_launcher_round.png")
+              shutil.rmtree(res + "/mipmap-anydpi-v26", ignore_errors=True)
+              print("icon set")
+          except Exception as e:
+              print("::warning::icon set nahi hua:", e)
+          PY
+
+      - name: Build APK
+        run: |
+          set -e
+          cd apk/android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+          cp app/build/outputs/apk/debug/app-debug.apk ../../Chatly.apk
+
+      - name: Publish APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: Chatly APK ${{ github.run_number }}
+          files: Chatly.apk
+          make_latest: true
