@@ -147,6 +147,29 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
 #mcSend{flex:none;width:44px;height:44px;border:0;border-radius:50%;background:#fff;color:#000;margin:0;padding:0;display:flex;align-items:center;justify-content:center}
 #mcSend svg{width:20px;height:20px;fill:#000}
 #mcSend:disabled{opacity:.6}
+#mcSend{background:#25d366}
+#mcSend svg{fill:#fff}
+#vdRow button{pointer-events:auto}
+#vdTop{display:none;position:absolute;left:0;right:0;top:calc(62px + env(safe-area-inset-top,0px));z-index:4;padding:0 22px;pointer-events:none}
+.vdOn #mcPreview{padding-top:calc(186px + env(safe-area-inset-top,0px))}
+#vdStrip{position:relative;height:56px;display:none;touch-action:none;user-select:none;-webkit-user-select:none;pointer-events:none}
+#vdThumbs{position:absolute;left:0;top:0;right:0;bottom:0;display:flex;overflow:hidden;border-radius:4px;background:#1b2027}
+#vdShL,#vdShR{position:absolute;top:0;bottom:0;background:rgba(0,0,0,.62);pointer-events:none}
+#vdShL{left:0}
+#vdSel{position:absolute;top:0;bottom:0;border:2.5px solid #fff;border-radius:4px;box-sizing:border-box;pointer-events:none}
+#vdPH{position:absolute;top:-2px;bottom:-2px;width:2px;margin-left:-1px;background:#fff;opacity:.9;pointer-events:none}
+.vdH{position:absolute;top:0;width:44px;height:56px;margin-left:-22px;display:flex;align-items:center;justify-content:center;pointer-events:auto;touch-action:none}
+.vdH::after{content:"";width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+#vdChips{display:flex;align-items:center;gap:8px;margin-top:10px}
+#vdMuteB{width:48px;height:48px;border-radius:50%;background:rgba(22,26,32,.88);border:0;color:#fff;padding:0;margin:0;display:flex;align-items:center;justify-content:center;flex:none;pointer-events:auto}
+#vdMuteB svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#vdInfoT{padding:12px 18px;border-radius:24px;background:rgba(22,26,32,.88);color:#fff;font-size:16px;line-height:1.1}
+#vdInfoT.bad{color:#ff9a9a}
+.vdPlay{position:absolute;left:50%;top:50%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;pointer-events:none}
+.vdPlay svg{width:40px;height:40px}
+.vdW.paused .vdPlay{display:flex}
+.vdCol button{width:auto;margin:0;padding:7px 12px;border-radius:14px;border:0;background:#2a2f37;color:#fff;font-size:13px;font-weight:600}
+.vdCol button.vdDel{margin-left:auto;background:#3a1d1d;color:#ff9a9a}
 #vdTools{display:none;margin-left:auto;min-width:0}
 #vdRow{display:flex;justify-content:flex-end;gap:6px}
 #vdRow button{width:38px;height:38px;flex:none;border:0;border-radius:50%;background:rgba(22,26,32,.88);color:#fff;display:flex;align-items:center;justify-content:center;padding:0;margin:0}
@@ -747,11 +770,12 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
       <button type="button" data-e="undo" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
     </div></div>
     <div id="vdTools"><div id="vdRow">
-      <button type="button" data-v="trim" aria-label="Trim"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"/></svg></button>
       <button type="button" data-v="text" aria-label="Text"><b>Aa</b></button>
-      <button type="button" data-v="mute" aria-label="Mute"><svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4zM22 9l-6 6M16 9l6 6"/></svg></button>
-      <button type="button" data-v="reset" aria-label="Reset"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
     </div></div>
+  </div>
+  <div id="vdTop">
+    <div id="vdStrip"><div id="vdThumbs"></div><div id="vdShL"></div><div id="vdShR"></div><div id="vdSel"></div><i id="vdPH"></i><i class="vdH" id="vdHL"></i><i class="vdH" id="vdHR"></i></div>
+    <div id="vdChips"><button type="button" id="vdMuteB" aria-label="Sound"></button><div id="vdInfoT"></div></div>
   </div>
   <div id="mcPreview"></div>
   <div id="vdBusy"><div id="vdBusyT">Preparing video…</div><div class="bar"><div id="vdBar"></div></div></div>
@@ -2671,7 +2695,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     });
     if(tooBig){
       var bi=queue.indexOf(tooBig.it);if(bi>=0&&bi!==qi)showItem(bi);
-      vd.mode="trim";vdPanel();
+      vdInfo();
       toast("Video is "+vdMB(tooBig.it.size)+" (max 3 MB). Trim it shorter, then send.");
       return;
     }
@@ -2698,7 +2722,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   $("attach").onclick=function(){presetOnce=false;$("attSheet").style.display="flex"};
   $("attSheet").onclick=function(e){if(e.target===this)this.style.display="none"};
   function openMediaComposer(type,data,file){
-    addItems([{type:type,data:data,url:(type==="video"&&file)?URL.createObjectURL(file):null}]);
+    addItems([{type:type,data:data,url:(type==="video"&&file)?URL.createObjectURL(file):null,size:(file&&file.size)||0}]);
   }
   function onPick(){
     var fs=Array.prototype.slice.call(this.files||[]);this.value="";
@@ -2709,7 +2733,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       if(f.type.indexOf("video/")===0){
         if(f.size>150*1024*1024){sys("Video is too large to open. Maximum 150 MB.");return Promise.resolve(null)}
         if(f.size>3*1024*1024)return Promise.resolve({type:"video",data:null,url:URL.createObjectURL(f),big:true,size:f.size});
-        return blobToData(f).then(function(d){return {type:"video",data:d,url:URL.createObjectURL(f)}}).catch(function(){sys("Could not read video");return null});
+        return blobToData(f).then(function(d){return {type:"video",data:d,url:URL.createObjectURL(f),size:f.size}}).catch(function(){sys("Could not read video");return null});
       }
       sys("Only photos or videos can be sent");return Promise.resolve(null);
     });
@@ -2740,18 +2764,21 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
 
 
   // ---- photo editor: draw / text / crop / rotate / undo ----
-  // ---- video editor: trim / text / mute ----
-  var vd={it:null,v:null,w:null,start:0,end:0,dur:0,texts:[],sel:-1,muted:false,mode:"trim",busy:false};
+  // ---- video editor (WhatsApp style): filmstrip trim / text / mute ----
+  var vd={it:null,v:null,w:null,start:0,end:0,dur:0,texts:[],sel:-1,muted:false,busy:false,tok:0};
   var VCOLS=["#ffffff","#ffeb3b","#ff3b30","#25d366","#2f7de1","#000000"];
   function vdBps(len,muted){return Math.max(250000,Math.min(1500000,Math.floor(2.4*1024*1024*8/Math.max(1,len))-(muted?0:64000)))}
   function vdEst(len,muted,size,dur){var b=vdBps(len,muted),e=len*(b+(muted?0:48000))/8;if(size>0&&dur>0)e=Math.min(e,size*(len/dur)*1.15);return e}
   function vdMB(b){return (b/1048576).toFixed(1)+" MB"}
-  function vdFmt(x){x=Math.max(0,x);var m=Math.floor(x/60),y=x-m*60;return m+":"+(y<10?"0":"")+y.toFixed(1)}
+  function vdTm(x){x=Math.max(0,Math.round(x));var m=Math.floor(x/60),y=x%60;return m+":"+(y<10?"0":"")+y}
   function vdSh(c){return c==="#000000"?"0 1px 4px rgba(255,255,255,.85)":"0 1px 4px rgba(0,0,0,.85)"}
   function vdOff(){
+    vd.tok++;
     if(vd.v)try{vd.v.pause()}catch(e){}
     vd.it=null;vd.v=null;vd.w=null;vd.texts=[];vd.sel=-1;
-    $("vdTools").style.display="none";$("edSub").innerHTML="";
+    $("mediaComposer").classList.remove("vdOn");
+    $("vdTools").style.display="none";$("vdTop").style.display="none";
+    $("vdThumbs").innerHTML="";$("edSub").innerHTML="";
   }
   function vdEdited(it){
     if(it.big)return true;var s=it.vd;if(!s)return false;
@@ -2765,6 +2792,12 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     v.addEventListener("timeupdate",f);
     try{v.currentTime=1e101}catch(e){cb(0)}
   }
+  function vdPlay(){
+    var v=vd.v;if(!v)return;
+    v.muted=vd.muted;
+    var p=v.play();
+    if(p&&p.catch)p.catch(function(){v.muted=true;var q=v.play();if(q&&q.catch)q.catch(function(){})});
+  }
   function vdFit(){
     if(!vd.v||!vd.w)return;
     var pr=$("mcPreview"),cs=getComputedStyle(pr);
@@ -2777,6 +2810,69 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     var H=vd.w.clientHeight;
     [].forEach.call(vd.w.querySelectorAll(".vdT"),function(n,k){var t=vd.texts[k];if(t)n.style.fontSize=(t.s*H)+"px"});
   }
+  function vdPlayhead(){
+    if(!vd.v||!(vd.dur>0))return;
+    var W=$("vdStrip").clientWidth,t=Math.min(vd.end,Math.max(vd.start,vd.v.currentTime));
+    $("vdPH").style.left=(t/vd.dur*W)+"px";
+  }
+  function vdLayout(){
+    var st=$("vdStrip");
+    if(!(vd.dur>0)){st.style.display="none";return}
+    st.style.display="block";
+    var W=st.clientWidth,l=vd.start/vd.dur*W,r=vd.end/vd.dur*W;
+    $("vdHL").style.left=l+"px";$("vdHR").style.left=r+"px";
+    $("vdSel").style.left=l+"px";$("vdSel").style.width=Math.max(0,r-l)+"px";
+    $("vdShL").style.width=l+"px";$("vdShR").style.left=r+"px";$("vdShR").style.width=Math.max(0,W-r)+"px";
+    vdPlayhead();
+  }
+  function vdInfo(){
+    var it=vd.it;if(!it)return;
+    var el=$("vdInfoT"),len=vd.dur>0?(vd.end-vd.start):(vd.v&&isFinite(vd.v.duration)?vd.v.duration:0);
+    var hasTxt=vd.texts.some(function(t){return t.txt&&String(t.txt).trim()});
+    var cut=vd.dur>0&&(vd.start>0.05||vd.end<vd.dur-0.05);
+    var edited=it.big||cut||vd.muted||hasTxt;
+    var size=it.size||0,txt=len>0?vdTm(len):"",bad=false;
+    if(size>0){
+      if(!edited)txt+=(txt?" \u2022 ":"")+vdMB(size);
+      else{
+        var est=vd.dur>0?vdEst(len,vd.muted,size,vd.dur):size;
+        bad=vd.dur>0&&est>3*1024*1024*0.97;
+        txt+=(txt?" \u2022 ":"")+"~"+vdMB(est)+(bad?" (max 3 MB)":"");
+      }
+    }
+    el.textContent=txt;el.className=bad?"bad":"";el.style.display=txt?"block":"none";
+  }
+  function vdMuteIcon(){
+    $("vdMuteB").innerHTML=vd.muted
+      ?'<svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4zM22 9l-6 6M16 9l6 6"/></svg>'
+      :'<svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+  }
+  function vdThumbs(it,tok){
+    var box=$("vdThumbs");box.innerHTML="";
+    if(!(vd.dur>0))return;
+    var W=$("vdStrip").clientWidth||320,H=56,N=Math.max(4,Math.round(W/42)),tw=W/N,i=0;
+    var tv=document.createElement("video");tv.muted=true;tv.playsInline=true;tv.preload="auto";
+    var stopTv=function(){try{tv.removeAttribute("src");tv.load()}catch(e){}};
+    function next(){
+      if(tok!==vd.tok||i>=N){stopTv();return}
+      var c=document.createElement("canvas");c.width=Math.round(tw*1.5);c.height=Math.round(H*1.5);
+      c.style.cssText="width:"+(100/N)+"%;height:100%;flex:none";
+      box.appendChild(c);
+      var done=false;
+      var fin=function(){
+        if(done)return;done=true;tv.onseeked=null;
+        try{
+          var vw=tv.videoWidth,vh=tv.videoHeight;
+          if(vw&&vh){var sc=Math.max(c.width/vw,c.height/vh),dw=vw*sc,dh=vh*sc;c.getContext("2d").drawImage(tv,(c.width-dw)/2,(c.height-dh)/2,dw,dh)}
+        }catch(e){}
+        i++;next();
+      };
+      tv.onseeked=fin;setTimeout(fin,2000);
+      try{tv.currentTime=Math.min(Math.max(0,vd.dur-0.05),(i+0.5)/N*vd.dur)}catch(e){fin()}
+    }
+    tv.onloadeddata=function(){tv.onloadeddata=null;next()};
+    tv.src=it.url||it.data;
+  }
   function vdNode(i){return vd.w?vd.w.querySelectorAll(".vdT")[i]:null}
   function vdTexts(){
     if(!vd.w)return;
@@ -2788,7 +2884,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       e.onpointerdown=function(ev){
         ev.preventDefault();ev.stopPropagation();
         var r=vd.w.getBoundingClientRect();
-        if(vd.sel!==i||vd.mode!=="text"){vd.mode="text";vdSelect(i)}
+        if(vd.sel!==i)vdSelect(i);
         try{e.setPointerCapture(ev.pointerId)}catch(x){}
         e.onpointermove=function(m){
           var tt=vd.texts[i];if(!tt)return;
@@ -2803,96 +2899,110 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   }
   function vdSelect(i){
     vd.sel=i;
-    [].forEach.call(vd.w.querySelectorAll(".vdT"),function(n,k){n.classList.toggle("sel",k===i)});
+    if(vd.w)[].forEach.call(vd.w.querySelectorAll(".vdT"),function(n,k){n.classList.toggle("sel",k===i)});
     vdPanel();
   }
   function vdAddText(){
     if(!vd.w)return;
     if(vd.texts.length>=5){toast("Maximum 5 texts");return}
     vd.texts.push({txt:"Text",x:50,y:50,c:"#ffffff",s:.07});
-    vd.mode="text";vdTexts();vdSelect(vd.texts.length-1);
+    vdTexts();vdSelect(vd.texts.length-1);vdInfo();
     setTimeout(function(){var tx=$("vdTx");if(tx){tx.focus();tx.select()}},80);
   }
   function vdPanel(){
     var box=$("edSub");box.innerHTML="";
-    [].forEach.call($("vdRow").querySelectorAll("button"),function(b){
-      var m=b.getAttribute("data-v");
-      b.classList.toggle("on",(m==="trim"&&vd.mode==="trim")||(m==="text"&&vd.mode==="text")||(m==="mute"&&vd.muted));
+    var t=vd.texts[vd.sel];if(!t)return;
+    box.innerHTML='<input class="vdTx" id="vdTx" maxlength="80" placeholder="Type text\u2026" autocomplete="off"><div class="vdCol" id="vdCol"></div>';
+    var tx=$("vdTx");tx.value=t.txt;
+    tx.oninput=function(){t.txt=tx.value;var n=vdNode(vd.sel);if(n)n.textContent=tx.value||" ";vdInfo()};
+    var col=$("vdCol");
+    VCOLS.forEach(function(c){
+      var d=document.createElement("i");d.style.background=c;if(t.c===c)d.className="on";
+      d.onclick=function(){
+        t.c=c;var n=vdNode(vd.sel);if(n){n.style.color=c;n.style.textShadow=vdSh(c)}
+        [].forEach.call(col.querySelectorAll("i"),function(k){k.className=k===d?"on":""});
+      };
+      col.appendChild(d);
     });
-    if(vd.mode==="trim"){
-      if(!(vd.dur>0)){box.innerHTML='<div class="vdRow2">Trim is not available for this video</div>';return}
-      box.innerHTML='<div class="vdRow2"><span>Start</span><input type="range" id="vdA"><em id="vdAe"></em></div><div class="vdRow2"><span>End</span><input type="range" id="vdB"><em id="vdBe"></em></div><div class="vdRow2" id="vdLen" style="justify-content:center;opacity:.8"></div><div class="vdRow2" id="vdInfo" style="justify-content:center;font-size:12px;text-align:center"></div>';
-      var A=$("vdA"),B=$("vdB");
-      A.min=B.min=0;A.max=B.max=vd.dur;A.step=B.step=0.1;A.value=vd.start;B.value=vd.end;
-      var upd=function(){$("vdAe").textContent=vdFmt(vd.start);$("vdBe").textContent=vdFmt(vd.end);$("vdLen").textContent="Length "+(vd.end-vd.start).toFixed(1)+"s";
-        var inf=$("vdInfo");
-        if(inf&&vd.it&&vd.it.big){var est=vdEst(vd.end-vd.start,vd.muted,vd.it.size,vd.dur),ok=est<=3*1024*1024*0.97;inf.textContent="Original "+vdMB(vd.it.size)+" · after trim ~"+vdMB(est)+" (max 3 MB)"+(ok?" ✓":" - too big, trim more");inf.style.color=ok?"#7ee2a8":"#ff9a9a"}};
-      A.oninput=function(){var x=parseFloat(A.value);if(x>vd.end-0.5)x=Math.max(0,vd.end-0.5);vd.start=x;A.value=x;vd.v.currentTime=x;upd()};
-      B.oninput=function(){var x=parseFloat(B.value);if(x<vd.start+0.5)x=Math.min(vd.dur,vd.start+0.5);vd.end=x;B.value=x;vd.v.currentTime=Math.max(vd.start,x-0.4);upd()};
-      upd();
-    }else{
-      var t=vd.texts[vd.sel];
-      if(!t){box.innerHTML='<div class="vdRow2">Tap Aa to add text</div>';return}
-      box.innerHTML='<input class="vdTx" id="vdTx" maxlength="80" placeholder="Type text…" autocomplete="off"><div class="vdCol" id="vdCol"></div><div class="vdRow2"><span>Size</span><input type="range" id="vdSz" min="3" max="16" step="0.5"></div>';
-      var tx=$("vdTx");tx.value=t.txt;
-      tx.oninput=function(){t.txt=tx.value;var n=vdNode(vd.sel);if(n)n.textContent=tx.value||" "};
-      var col=$("vdCol");
-      VCOLS.forEach(function(c){
-        var d=document.createElement("i");d.style.background=c;if(t.c===c)d.className="on";
-        d.onclick=function(){
-          t.c=c;var n=vdNode(vd.sel);if(n){n.style.color=c;n.style.textShadow=vdSh(c)}
-          [].forEach.call(col.querySelectorAll("i"),function(k){k.className=k===d?"on":""});
-        };
-        col.appendChild(d);
-      });
-      var del=document.createElement("button");del.type="button";del.textContent="Delete";
-      del.onclick=function(){vd.texts.splice(vd.sel,1);vd.sel=-1;vdTexts();vdPanel()};
-      col.appendChild(del);
-      var sz=$("vdSz");sz.value=t.s*100;
-      sz.oninput=function(){t.s=parseFloat(sz.value)/100;var n=vdNode(vd.sel);if(n&&vd.w)n.style.fontSize=(t.s*vd.w.clientHeight)+"px"};
-    }
+    var mk=function(label,cls,fn){var b=document.createElement("button");b.type="button";b.textContent=label;if(cls)b.className=cls;b.onclick=fn;col.appendChild(b)};
+    var sz=function(f){return function(){t.s=Math.min(.2,Math.max(.03,t.s*f));var n=vdNode(vd.sel);if(n&&vd.w)n.style.fontSize=(t.s*vd.w.clientHeight)+"px"}};
+    mk("A\u2212","",sz(1/1.2));mk("A+","",sz(1.2));
+    mk("Delete","vdDel",function(){vd.texts.splice(vd.sel,1);vd.sel=-1;vdTexts();vdPanel();vdInfo()});
+  }
+  function vdTick(){
+    if(!vd.v||vd.v.paused)return;
+    vdPlayhead();
+    if(vd.end>0&&vd.dur>0&&vd.v.currentTime>=vd.end-0.03)vd.v.currentTime=vd.start;
+    requestAnimationFrame(vdTick);
   }
   function vdInit(it){
     vdOff();
     var s=it.vd||{};
-    vd.it=it;vd.start=s.start||0;vd.end=s.end||0;vd.dur=s.dur||0;vd.texts=s.texts||[];vd.sel=-1;vd.muted=!!s.muted;vd.mode="trim";
-    var w=document.createElement("div");w.className="vdW";
+    vd.it=it;vd.start=s.start||0;vd.end=s.end||0;vd.dur=s.dur||0;vd.texts=s.texts||[];vd.sel=-1;vd.muted=!!s.muted;
+    var tok=vd.tok;
+    $("mediaComposer").classList.add("vdOn");
+    $("vdTools").style.display="block";$("vdTop").style.display="block";
+    var w=document.createElement("div");w.className="vdW paused";
     var v=document.createElement("video");
-    v.src=it.url||it.data;v.playsInline=true;v.setAttribute("playsinline","");v.muted=true;v.autoplay=true;
-    w.appendChild(v);vd.v=v;vd.w=w;
+    v.src=it.url||it.data;v.playsInline=true;v.setAttribute("playsinline","");v.muted=vd.muted;
+    var pl=document.createElement("div");pl.className="vdPlay";pl.innerHTML='<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="#fff"/></svg>';
+    w.appendChild(v);w.appendChild(pl);vd.v=v;vd.w=w;
     v.onloadedmetadata=function(){
       vdFit();
-      var go=function(d){
-        if(vd.it!==it)return;
+      vdGetDur(v,function(d){
+        if(vd.it!==it||tok!==vd.tok)return;
         if(d>0&&!vd.dur){vd.dur=d;vd.end=d}
         if(vd.dur>0&&(!vd.end||vd.end>vd.dur))vd.end=vd.dur;
-        vdTexts();vdFit();vdPanel();
+        vdTexts();vdFit();vdLayout();vdInfo();
+        requestAnimationFrame(function(){if(tok===vd.tok){vdLayout();vdThumbs(it,tok)}});
         try{v.currentTime=vd.start}catch(e){}
-        var p=v.play();if(p&&p.catch)p.catch(function(){});
-      };
-      vdGetDur(v,go);
+        vdPlay();
+      });
     };
+    v.onplay=function(){w.classList.remove("paused");vdTick()};
+    v.onpause=function(){w.classList.add("paused")};
     v.ontimeupdate=function(){if(vd.end>0&&vd.dur>0&&v.currentTime>=vd.end-0.05){v.currentTime=vd.start}};
-    v.onended=function(){v.currentTime=vd.start;var p=v.play();if(p&&p.catch)p.catch(function(){})};
-    w.onclick=function(e){if(e.target.classList&&e.target.classList.contains("vdT"))return;if(v.paused){var p=v.play();if(p&&p.catch)p.catch(function(){})}else v.pause()};
-    $("vdTools").style.display="block";
-    vdPanel();
+    v.onended=function(){v.currentTime=vd.start;vdPlay()};
+    w.onclick=function(e){
+      if(e.target.classList&&e.target.classList.contains("vdT"))return;
+      if(vd.sel>=0){vd.sel=-1;[].forEach.call(w.querySelectorAll(".vdT"),function(n){n.classList.remove("sel")});vdPanel();return}
+      if(v.paused)vdPlay();else v.pause();
+    };
+    vdMuteIcon();vdInfo();
     return w;
   }
+  function vdDrag(h,isL){
+    h.onpointerdown=function(ev){
+      if(!vd.it||!(vd.dur>0))return;
+      ev.preventDefault();ev.stopPropagation();
+      try{h.setPointerCapture(ev.pointerId)}catch(x){}
+      var r=$("vdStrip").getBoundingClientRect(),was=vd.v&&!vd.v.paused;
+      if(vd.v)vd.v.pause();
+      h.onpointermove=function(m){
+        var t=Math.min(vd.dur,Math.max(0,(m.clientX-r.left)/r.width*vd.dur)),gap=Math.min(0.5,vd.dur);
+        if(isL){vd.start=Math.max(0,Math.min(t,vd.end-gap));try{vd.v.currentTime=vd.start}catch(e){}}
+        else{vd.end=Math.min(vd.dur,Math.max(t,vd.start+gap));try{vd.v.currentTime=Math.max(vd.start,vd.end-0.3)}catch(e){}}
+        vdLayout();vdInfo();
+      };
+      h.onpointerup=h.onpointercancel=function(){
+        h.onpointermove=null;
+        try{vd.v.currentTime=vd.start}catch(e){}
+        if(was)vdPlay();
+      };
+    };
+  }
+  vdDrag($("vdHL"),true);vdDrag($("vdHR"),false);
+  $("vdMuteB").onclick=function(){
+    if(!vd.it)return;
+    vd.muted=!vd.muted;if(vd.v)vd.v.muted=vd.muted;
+    vdMuteIcon();vdInfo();
+  };
   $("vdRow").onclick=function(e){
     var b=e.target.closest?e.target.closest("button"):null;if(!b||!vd.it)return;
-    var m=b.getAttribute("data-v");
-    if(m==="trim"){vd.mode="trim";vdPanel()}
-    else if(m==="text"){vdAddText()}
-    else if(m==="mute"){vd.muted=!vd.muted;toast(vd.muted?"Sound will be removed":"Sound kept");vdPanel()}
-    else if(m==="reset"){
-      vd.start=0;vd.end=vd.dur;vd.texts=[];vd.sel=-1;vd.muted=false;vd.mode="trim";
-      try{vd.v.currentTime=0}catch(x){}
-      vdTexts();vdPanel();
-    }
+    if(b.getAttribute("data-v")==="text")vdAddText();
   };
-  window.addEventListener("resize",vdFit);
-  window.addEventListener("orientationchange",function(){setTimeout(vdFit,200)});
+  window.addEventListener("resize",function(){vdFit();vdLayout()});
+  window.addEventListener("orientationchange",function(){setTimeout(function(){vdFit();vdLayout()},200)});
   function vdExport(it,prog){
     return new Promise(function(resolve,reject){
       var s=it.vd,v=document.createElement("video"),done=false,ac=null,rc=null,started=false;
