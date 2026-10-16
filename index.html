@@ -72,6 +72,9 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
 .m .tm{font-size:10px;color:var(--sub);text-align:right;margin-top:2px}
 .m.big{background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;font-size:38px;line-height:1.15;padding:2px 4px}
 .sys{align-self:center;color:var(--sub);font-size:12px;padding:4px 12px;border-radius:12px;background:var(--glass2)}
+.sys.scn{background:rgba(220,38,38,.2)!important;color:#ff7b7b!important;border:1px solid rgba(255,107,107,.4);font-weight:600;font-size:13px;text-align:center;max-width:90%;margin:6px auto;padding:7px 14px;-webkit-user-select:none;user-select:none}
+.tm .edl{opacity:.7;margin-right:4px;font-style:italic}
+#selBar #selBug{font-size:18px}
 .tick{margin-left:4px;font-weight:700;letter-spacing:-2px}
 .tick.sent,.tick.dlv{color:var(--sub)}
 .tick.seen{color:#53bdeb}
@@ -214,7 +217,6 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
 .fbox .ft b{display:block;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:190px}
 .fbox .ft small{display:block;font-size:11px;opacity:.75;margin-top:1px}
 .fbox .fd{flex:none;font-size:17px;opacity:.85}
-.edl{opacity:.8;font-style:italic;margin-right:2px}
 /* selection mode */
 .m.ssel{box-shadow:0 0 0 2px #25d366!important}
 .m.ssel::after{content:"✓";position:absolute;top:-7px;left:-7px;width:20px;height:20px;border-radius:50%;background:#25d366;color:#063b2b;font-size:12px;font-weight:800;line-height:20px;text-align:center}
@@ -638,7 +640,7 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
 </div>
 
 <div id="chat">
-  <header class="glass" id="selBar" style="display:none"><button class="hb" id="selX" aria-label="Cancel">✕</button><div class="t"><b id="selN">1 selected</b></div><button class="hb" id="selEdit" aria-label="Edit" style="display:none">✏️</button><button class="hb" id="selMore" aria-label="More">⋯</button><button class="hb" id="selEat" aria-label="Feed to insect">🐛</button><button class="hb" id="selDel" aria-label="Delete">🗑</button></header>
+  <header class="glass" id="selBar" style="display:none"><button class="hb" id="selX" aria-label="Cancel">✕</button><div class="t"><b id="selN">1 selected</b></div><button class="hb" id="selMore" aria-label="More">⋯</button><button class="hb" id="selBug" aria-label="Feed to insect">🐛</button><button class="hb" id="selDel" aria-label="Delete">🗑</button></header>
   <header class="glass" id="mainHdr">
     <button class="hb" id="back">←</button><div class="av" id="hdp" style="display:none;width:36px;height:36px;font-size:20px"></div>
     <div class="t" id="hT" style="cursor:pointer"><div style="display:flex;align-items:center;gap:6px;min-width:0"><b id="who" style="min-width:0">Chat</b><span class="skb" id="hstk" style="display:none"></span></div><small id="status">connecting...</small></div>
@@ -1164,11 +1166,55 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     var x=String(d.text||"").replace(/\s+/g," ").trim();return x.length>80?x.slice(0,80)+"…":(x||"New message");
   }
   var pushTok=lsGet("pushTok",""),swMsg=false;
+  // ---- Android app (Capacitor): native push + screenshot / screen-recording alert ----
+  var NATIVE=false;try{NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())}catch(e){}
+  function nPlug(n){try{return (window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins[n])||null}catch(e){return null}}
+  var nPushBound=false,guardOn=false,guardLast=0,guardRec=false;
+  function nativePushInit(){
+    var P=nPlug("PushNotifications");
+    if(!P||!db||!me||!uid||!ntfOn())return;
+    if(!nPushBound){
+      nPushBound=true;
+      P.addListener("registration",function(t){
+        var tok=t&&t.value;if(!tok||!db||!uid)return;
+        if(pushTok&&pushTok!==tok)db.ref("rooms/_tok/"+uid+"/"+pushTok).remove().catch(function(){});
+        pushTok=tok;lsSet("pushTok",tok);
+        db.ref("rooms/_tok/"+uid+"/"+tok).set(1).catch(function(){});
+      });
+      P.addListener("registrationError",function(){});
+      P.addListener("pushNotificationActionPerformed",function(a){
+        var k=a&&a.notification&&a.notification.data&&a.notification.data.open;
+        if(k)setTimeout(function(){if(getC()[k])openDM(k)},700);
+      });
+    }
+    try{P.createChannel({id:"msgs",name:"Messages",description:"New message alerts",importance:5,visibility:1,vibration:true}).catch(function(){})}catch(e){}
+    P.requestPermissions().then(function(r){if(r&&r.receive==="granted")return P.register()}).catch(function(){});
+  }
+  function guardAlert(kind){
+    // chat khula ho tabhi dusre ko alert jaye
+    if(!ref||!curCode||$("chat").style.display==="none"||isBlocked()||!canSend())return;
+    var n=Date.now();if(n-guardLast<8000)return;guardLast=n;
+    var nm=myName||(me&&me.name)||"Someone";
+    var txt=kind==="record"?"🔴 "+nm+" started screen recording":"📸 "+nm+" took a screenshot";
+    var sv=RP;RP=null;
+    try{pushMsg({cid:cid,uid:uid,name:myName,type:"sys",text:txt,t:firebase.database.ServerValue.TIMESTAMP},"Alert could not be sent")}finally{RP=sv}
+  }
+  function guardInit(){
+    var G=nPlug("ScreenGuard");if(!G||guardOn)return;guardOn=true;
+    G.addListener("capture",function(e){
+      var kd=e&&e.kind;
+      if(kd==="recordstop"){guardRec=false;return}
+      if(kd==="record")guardRec=true;
+      guardAlert(kd);
+    });
+    G.start().catch(function(){guardOn=false});
+  }
   function pushInit(){
     try{
       var q=new URLSearchParams(location.search).get("open");
       if(q){history.replaceState(null,"",location.pathname);setTimeout(function(){if(getC()[q])openDM(q)},900)}
     }catch(e){}
+    if(NATIVE){guardInit();nativePushInit();return}
     if(!PUSH_VAPID||!PUSH_URL||!db||!me||!uid||!ntfOn())return;
     if(!("serviceWorker" in navigator)||!("Notification" in window)||Notification.permission!=="granted")return;
     try{if(!firebase.messaging||!firebase.messaging.isSupported())return}catch(e){return}
@@ -1190,7 +1236,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(!PUSH_URL||!to||!uid)return;
     var t=o.type||"text";
     try{fetch(PUSH_URL,{method:"POST",mode:"no-cors",keepalive:true,headers:{"Content-Type":"text/plain"},
-      body:JSON.stringify({key:PUSH_KEY,to:to,k:uid,from:myName||(me&&me.name)||"Chatly",type:t,text:t==="text"?String(o.text||"").slice(0,120):""})}).catch(function(){})}catch(e){}
+      body:JSON.stringify({key:PUSH_KEY,to:to,k:uid,from:myName||(me&&me.name)||"Chatly",type:t,text:(t==="text"||t==="sys")?String(o.text||"").slice(0,120):""})}).catch(function(){})}catch(e){}
   }
   window.__pushInit=pushInit;window.__pushOff=pushOff;
   function sysNotify(title,body,k){
@@ -1869,7 +1915,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   }
   function setReply(key){
     var f=info[key];if(!f||!f.d||f.d.eaten)return;
-    clearReply();
+    cancelEdit();clearReply();
     var d=f.d;
     RP={k:key,u:f.mine?uid:(d.uid||""),c:d.cid||"",n:String(f.mine?myName:(d.name||nameOf(curOther))||"Guest").slice(0,20),x:snip(d),y:d.type||"text"};
     rpEl=els[key];if(rpEl)rpEl.classList.add("rsel");
@@ -1879,54 +1925,54 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(nb)requestAnimationFrame(function(){mg.scrollTop=mg.scrollHeight});
     if(!isBlocked()&&canSend())$("txt").focus();
   }
-  var EDK=null;
   function clearReply(){
     RP=null;if(rpEl){rpEl.classList.remove("rsel");rpEl=null}
-    if(EDK){EDK=null;$("txt").value="";updSend()}
     $("rpBar").style.display="none";
   }
-  // ---- edit message (WhatsApp jaisa) ----
-  function editMsg(key){
-    var f=info[key];if(!f||!f.mine||!f.d||f.d.eaten)return;
-    if(isBlocked()||!canSend()){toast("Can't edit right now");return}
-    clearReply();
-    EDK=key;rpEl=els[key];if(rpEl)rpEl.classList.add("rsel");
-    $("rpN").textContent="✏️ Edit message";$("rpT").textContent=String(f.d.text||"").slice(0,80);
-    $("rpBar").style.display="flex";
-    var t=$("txt");t.value=String(f.d.text||"");updSend();
-    t.focus();try{t.setSelectionRange(t.value.length,t.value.length)}catch(e){}
-  }
-  function doEdit(v){
-    var k=EDK,f=info[k];
-    if(!v){toast("Message can't be empty");return}
-    if(!f||!f.mine||!ref||f.d.eaten){clearReply();toast("Can't edit this message");return}
-    if(v===f.d.text){clearReply();return}
-    var u={text:v,edited:true};
-    ref.child(k).update(u).catch(function(){toast("Edit failed")});
-    f.d.text=v;f.d.edited=true;cachePush(k,f.d);applyEdit(k);
-    clearReply();stopTyping();
-  }
-  function applyEdit(key){
-    var f=info[key],el=els[key];if(!f||!el||!f.d||f.d.eaten)return;
-    var t=el.querySelector(".mt");
-    if(t&&typeof f.d.text==="string"){
-      var x=String(f.d.text).slice(0,1000);
-      if(t.textContent!==x){t.textContent=x;el.classList.toggle("big",!!onlyEmoji(x))}
-    }
-    if(f.d.edited&&!el.querySelector(".edl")){
-      var tm=el.querySelector(".tm");
-      if(tm){var e=document.createElement("span");e.className="edl";e.textContent="edited";tm.insertBefore(e,tm.firstChild)}
-    }
-  }
-  $("rpX").onclick=clearReply;
+  $("rpX").onclick=function(){clearReply();cancelEdit()};
 
   // ---- message menu ----
+  // ---- message edit (WhatsApp jaisa) ----
+  var EDK=null,EDIT_MS=15*60*1000;
+  function refreshText(key){
+    var f=info[key];if(!f||!f.tx||!f.d)return;
+    var txt=String(f.d.text||"").slice(0,1000);
+    if(f.tx.textContent!==txt)f.tx.textContent=txt;
+    var el=els[key];if(el)el.classList.toggle("big",onlyEmoji(txt));
+    if(f.d.ed&&f.tmEl&&!f.tmEl.querySelector(".edl")){
+      var e=document.createElement("span");e.className="edl";e.textContent="edited";f.tmEl.insertBefore(e,f.tmEl.firstChild);
+    }
+  }
+  function startEdit(key){
+    var f=info[key];if(!f||!f.mine||!f.d||typeof f.d.text!=="string")return;
+    clearReply();EDK=key;
+    $("rpN").textContent="Edit message";$("rpT").textContent=snip(f.d);
+    $("rpBar").style.display="flex";
+    $("txt").value=f.d.text;updSend();
+    try{$("txt").focus()}catch(e){}
+  }
+  function cancelEdit(){
+    if(!EDK)return;
+    EDK=null;$("rpBar").style.display="none";$("txt").value="";updSend();
+  }
+  function saveEdit(){
+    var key=EDK,f=info[key],v=$("txt").value.trim().slice(0,1000);
+    if(!key||!f||!ref){cancelEdit();return}
+    if(!v||v===f.d.text){cancelEdit();return}
+    var old=f.d.text,oldEd=f.d.ed;
+    f.d.text=v;f.d.ed=1;refreshText(key);cachePush(key,f.d);
+    cancelEdit();
+    ref.child(key).update({text:v,ed:1}).catch(function(){
+      f.d.text=old;if(oldEd)f.d.ed=oldEd;else delete f.d.ed;refreshText(key);cachePush(key,f.d);
+      toast("Edit failed");
+    });
+  }
   function openMenu(key){
     var f=info[key];if(!f)return;
     var l=[];
     if(!(f.d&&f.d.eaten))l.push(["↩️ Reply",function(){setReply(key)}]);
     if(f.d&&!f.d.eaten&&(!f.d.type||f.d.type==="text")&&typeof f.d.text==="string"&&f.d.text)l.push(["📋 Copy",function(){copy(f.d.text,"Message copied")}]);
-    if(f.mine&&f.d&&!f.d.eaten&&!f.d.viewOnce&&!pend[key]&&(!f.d.type||f.d.type==="text")&&typeof f.d.text==="string"&&f.d.text)l.push(["✏️ Edit",function(){editMsg(key)}]);
+    if(f.mine&&f.d&&!f.d.eaten&&!f.d.viewOnce&&(!f.d.type||f.d.type==="text")&&typeof f.d.text==="string"&&f.d.text&&(typeof f.d.t!=="number"||now()-f.d.t<EDIT_MS))l.push(["✏️ Edit",function(){startEdit(key)}]);
     if(!(f.d&&f.d.eaten))l.push(["🐛 Feed to insect",function(){sendEat(key)}]);
     l.push(["🗑 Delete for me",function(){hideKey(key);removeEl(key)}]);
     if(f.mine)l.push(["🗑 Delete for everyone",function(){if(ref)ref.child(key).remove()},"danger"]);
@@ -1993,15 +2039,9 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(!n){exitSel();return}
     $("selN").textContent=n+" selected";
     $("selMore").style.display=n===1?"":"none";
-    var ed=false;
-    if(n===1){
-      var k0=Object.keys(sel)[0],f0=info[k0];
-      ed=!!(f0&&f0.mine&&f0.d&&!f0.d.eaten&&!f0.d.viewOnce&&!pend[k0]&&(!f0.d.type||f0.d.type==="text")&&typeof f0.d.text==="string"&&f0.d.text);
-    }
-    $("selEdit").style.display=ed?"":"none";
   }
   function toggleSel(key,on){
-    var el=els[key];if(!el||!info[key])return;
+    var el=els[key];if(!el||!info[key]||info[key].sys)return;
     if(on===undefined)on=!sel[key];
     if(on){sel[key]=1;el.classList.add("ssel")}else{delete sel[key];el.classList.remove("ssel")}
     updSel();
@@ -2026,19 +2066,12 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     showSheet(l);
   }
   $("selX").onclick=exitSel;
-  $("selDel").onclick=selDelete;
-  $("selEat").onclick=function(){
-    var keys=Object.keys(sel).filter(function(k){return info[k]&&!info[k].d.eaten}).sort();
-    if(!keys.length){toast("Already eaten");return}
+  $("selBug").onclick=function(){
+    var keys=Object.keys(sel).filter(function(k){return info[k]&&!info[k].sys&&!(info[k].d&&info[k].d.eaten)});
     exitSel();
-    var i=0;
-    (function nx(){
-      if(i>=keys.length)return;
-      if($("bugs").children.length>=7){setTimeout(nx,800);return}
-      sendEat(keys[i++]);setTimeout(nx,1300);
-    })();
+    keys.slice(0,10).forEach(function(k,i){setTimeout(function(){if(info[k])sendEat(k)},i*1400)});
   };
-  $("selEdit").onclick=function(){var k=Object.keys(sel)[0];exitSel();if(k)editMsg(k)};
+  $("selDel").onclick=selDelete;
   $("selMore").onclick=function(){var k=Object.keys(sel)[0];exitSel();if(k)openMenu(k)};
   $("back").addEventListener("click",function(){if(selMode)exitSel()});
 
@@ -2093,6 +2126,13 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     }
     var dt=new Date(typeof d.t==="number"?d.t:Date.now()),dk=dt.toDateString();
     if(dk!==lastDay){lastDay=dk;var dsp=document.createElement("div");dsp.className="sys";dsp.setAttribute("data-day",String(dt.getTime()));dsp.textContent=dayLabel(dt);(prepFrag||$("msgs")).appendChild(dsp);if(!prepFrag)scroll()}
+    if(d.type==="sys"){
+      var sn=document.createElement("div");sn.className="sys scn";
+      sn.textContent=String(d.text||"").slice(0,200)+" · "+dt.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+      if(key){els[key]=sn;info[key]={mine:false,d:d,tick:null,stxt:null,vu:null,sys:1}}
+      (prepFrag||$("msgs")).appendChild(sn);if(!prepFrag)scroll();
+      return;
+    }
     var el=document.createElement("div");el.className="m glass"+(mine?" me":"");
     if(!mine&&!isDM){var n=document.createElement("div");n.className="n";n.textContent=dispName(d.uid,String(d.name||"Guest").slice(0,20));el.appendChild(n)}
     if(d.rp&&typeof d.rp==="object"){
@@ -2109,7 +2149,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       el.appendChild(q);
     }
     var data=typeof d.data==="string"?d.data:"";
-    var vuEl=null;
+    var vuEl=null,txEl=null;
     if(d.viewOnce && mine && (d.type==="image"||d.type==="video")){
       vuEl=document.createElement("div");vuEl.className="vu-mine";el.appendChild(vuEl);
     }else if(d.viewOnce && (d.opened||d.eaten||(d.seen&&d.seen[cid]))){
@@ -2165,13 +2205,14 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       el.appendChild(fb);
     }else{
       var txt=String(d.text||"").slice(0,1000);
-      var t=document.createElement("div");t.className="mt";t.textContent=txt;el.appendChild(t);
+      var t=document.createElement("div");t.textContent=txt;el.appendChild(t);txEl=t;
       if(onlyEmoji(txt))el.classList.add("big");
     }
     if((d.type==="image"||d.type==="video")&&d.caption){
       var cap=document.createElement("div");cap.className="media-caption";cap.style.cssText="font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:5px";cap.textContent=String(d.caption).slice(0,1000);el.appendChild(cap);
     }
     var tm=document.createElement("div");tm.className="tm";
+    if(d.ed){var edl=document.createElement("span");edl.className="edl";edl.textContent="edited";tm.appendChild(edl)}
     tm.appendChild(document.createTextNode(dt.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})));
     var tick=null,stxt=null;
     if(mine){
@@ -2182,7 +2223,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     el.appendChild(tm);
     if(key){
       els[key]=el;
-      info[key]={mine:mine,d:d,tick:tick,stxt:stxt,vu:vuEl};
+      info[key]={mine:mine,d:d,tick:tick,stxt:stxt,vu:vuEl,tx:txEl,tmEl:tm};
       var pt=null,px=0,py=0,sw=false,dx=0,skipSw=false,lpF=false,mv=false;
       var icon=document.createElement("span");icon.className="swi";icon.textContent="↩";el.appendChild(icon);
       var cancelPress=function(){if(pt){clearTimeout(pt);pt=null}};
@@ -2222,7 +2263,6 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       }
     }
     if(key&&d.eaten)applyEaten(key);
-    if(key&&d.edited)applyEdit(key);
     (prepFrag||$("msgs")).appendChild(el);if(!prepFrag)scroll();
   }
   function applyEaten(key){
@@ -2428,6 +2468,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   }
   function goHome(){
     if(selMode)exitSel();
+    cancelEdit();
     if(isDM&&curOther)markRead(curOther);
     closeChat();
     $("chat").style.display="none";$("home").style.display="flex";
@@ -2652,7 +2693,8 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
         q.on("child_changed",function(s){
           var f=info[s.key];if(!f)return;
           f.d=s.val()||f.d;cachePush(s.key,f.d);
-          setTick(s.key);applyEdit(s.key);if(f.d.eaten&&!eating[s.key])applyEaten(s.key);
+          refreshText(s.key);
+          setTick(s.key);if(f.d.eaten&&!eating[s.key])applyEaten(s.key);
         });
         if(cached.length)reconcile(myRef,id);
       },function(){sys("Permission error. Check Firebase rules.")});
@@ -2676,6 +2718,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     statusInt=setInterval(updStatus,2000);
     updStatus();
     if(!isBlocked()&&canSend())$("txt").focus();
+    if(NATIVE&&guardRec)setTimeout(function(){guardAlert("record")},1500);
   }
 
   // ---- send ----
@@ -2712,8 +2755,8 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     try{x.send(JSON.stringify(o))}catch(e){setProg(k,null);viaSdk()}
   }
   function sendMsg(){
+    if(EDK){saveEdit();return}
     var v=$("txt").value.trim();
-    if(EDK){if(!isBlocked()&&canSend())doEdit(v);return}
     if(!v||!ref||isBlocked()||!canSend())return;
     $("txt").value="";updSend();
     if($("emo").style.display!=="flex")$("txt").focus();
@@ -4058,34 +4101,41 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     fs.forEach(function(f){if(f.type.indexOf("image/")===0)blobToData(f).then(function(d){saveStk(d,false)})});
   };
 
-  // ---- back button: sirf upar wali screen band ho, app kabhi band nahi ----
+  // ---- back button: sirf upar wali screen band ho ----
   (function(){
-    var IDS=["chat","menu","dlg","nkDlg","pv","us","jd","ep","cr","em","pc","fg","stg","ttOv","dgOv","gPop","viewer","emo","rpBar","selBar"],stack=[],depth=0,pending=0;
+    var IDS=["chat","selBar","menu","dlg","pv","us","jd","ep","cr","em","pc","fg","ttOv","dgOv","viewer"],stack=[],depth=0,skip=0,pp=false;
     function vis(id){var e=$(id);return !!(e&&e.style.display&&e.style.display!=="none")}
-    function guard(){try{history.pushState({g:1},"")}catch(e){}}
     function reconcile(){
       IDS.forEach(function(id){
         var on=vis(id),i=stack.indexOf(id);
         if(on&&i<0)stack.push(id);else if(!on&&i>=0)stack.splice(i,1);
       });
       while(depth<stack.length){try{history.pushState({l:stack[depth]},"")}catch(e){}depth++}
-      if(depth>stack.length){var n=depth-stack.length;depth=stack.length;pending++;history.go(-n)}
+      if(depth>stack.length){var n=depth-stack.length;depth=stack.length;skip=1;history.go(-n)}
     }
     var mo=new MutationObserver(reconcile);
     IDS.forEach(function(id){var e=$(id);if(e)mo.observe(e,{attributes:true,attributeFilter:["style"]})});
-    guard(); // neeche ek extra entry: root par back karne se app band nahi hoga
-    window.addEventListener("popstate",function(){
-      if(pending>0){pending--;return}
-      if(!stack.length){guard();return}
+    function closeTop(){
       depth=Math.max(0,depth-1);
       var top=stack.pop();
-      if(top==="chat")goHome();
-      else if(top==="selBar")exitSel();
-      else if(top==="menu")closeMenu();
-      else if(top==="rpBar")clearReply();
-      else if(top==="emo")closeEmo();
-      else if($(top))$(top).style.display="none";
+      if(top==="chat")goHome();else if(top==="selBar")exitSel();else $(top).style.display="none";
+    }
+    window.addEventListener("popstate",function(){
+      if(skip){skip=0;return}
+      pp=true;
+      if(!stack.length)return;
+      closeTop();
     });
+    // Android app: back dabane par sirf upar wali cheez band ho; home par app minimize (band nahi)
+    if(NATIVE){
+      var AP=nPlug("App");
+      if(AP)AP.addListener("backButton",function(){
+        if(stack.length){
+          pp=false;try{history.back()}catch(e){}
+          setTimeout(function(){if(!pp&&stack.length)closeTop()},350);
+        }else{try{AP.minimizeApp()}catch(e){}}
+      });
+    }
   })();
 
   // ---- invites: chat band ho tab bhi popup ----
