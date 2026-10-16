@@ -640,7 +640,7 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
 </div>
 
 <div id="chat">
-  <header class="glass" id="selBar" style="display:none"><button class="hb" id="selX" aria-label="Cancel">✕</button><div class="t"><b id="selN">1 selected</b></div><button class="hb" id="selMore" aria-label="More">⋯</button><button class="hb" id="selBug" aria-label="Feed to insect">🐛</button><button class="hb" id="selDel" aria-label="Delete">🗑</button></header>
+  <header class="glass" id="selBar" style="display:none"><button class="hb" id="selX" aria-label="Cancel">✕</button><div class="t"><b id="selN">1 selected</b></div><button class="hb" id="selEdit" aria-label="Edit" style="display:none">✏️</button><button class="hb" id="selMore" aria-label="More">⋯</button><button class="hb" id="selBug" aria-label="Feed to insect">🐛</button><button class="hb" id="selDel" aria-label="Delete">🗑</button></header>
   <header class="glass" id="mainHdr">
     <button class="hb" id="back">←</button><div class="av" id="hdp" style="display:none;width:36px;height:36px;font-size:20px"></div>
     <div class="t" id="hT" style="cursor:pointer"><div style="display:flex;align-items:center;gap:6px;min-width:0"><b id="who" style="min-width:0">Chat</b><span class="skb" id="hstk" style="display:none"></span></div><small id="status">connecting...</small></div>
@@ -2039,6 +2039,8 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(!n){exitSel();return}
     $("selN").textContent=n+" selected";
     $("selMore").style.display=n===1?"":"none";
+    var ek=n===1?Object.keys(sel)[0]:null,ef=ek&&info[ek];
+    $("selEdit").style.display=(ef&&ef.mine&&ef.d&&!ef.d.eaten&&!ef.d.viewOnce&&(!ef.d.type||ef.d.type==="text")&&typeof ef.d.text==="string"&&ef.d.text&&(typeof ef.d.t!=="number"||now()-ef.d.t<EDIT_MS))?"":"none";
   }
   function toggleSel(key,on){
     var el=els[key];if(!el||!info[key]||info[key].sys)return;
@@ -2072,6 +2074,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     keys.slice(0,10).forEach(function(k,i){setTimeout(function(){if(info[k])sendEat(k)},i*1400)});
   };
   $("selDel").onclick=selDelete;
+  $("selEdit").onclick=function(){var k=Object.keys(sel)[0];exitSel();if(k)startEdit(k)};
   $("selMore").onclick=function(){var k=Object.keys(sel)[0];exitSel();if(k)openMenu(k)};
   $("back").addEventListener("click",function(){if(selMode)exitSel()});
 
@@ -4117,6 +4120,8 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     IDS.forEach(function(id){var e=$(id);if(e)mo.observe(e,{attributes:true,attributeFilter:["style"]})});
     function closeTop(){
       depth=Math.max(0,depth-1);
+      var si=stack.indexOf("selBar");
+      if(selMode&&si>=0){stack.splice(si,1);exitSel();return}
       var top=stack.pop();
       if(top==="chat")goHome();else if(top==="selBar")exitSel();else $(top).style.display="none";
     }
