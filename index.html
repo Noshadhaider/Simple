@@ -72,7 +72,7 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
 .m .tm{font-size:10px;color:var(--sub);text-align:right;margin-top:2px}
 .m.big{background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;font-size:38px;line-height:1.15;padding:2px 4px}
 .sys{align-self:center;color:var(--sub);font-size:12px;padding:4px 12px;border-radius:12px;background:var(--glass2)}
-.sys.scn{background:rgba(220,38,38,.2)!important;color:#ff7b7b!important;border:1px solid rgba(255,107,107,.4);font-weight:600;font-size:13px;text-align:center;max-width:90%;margin:6px auto;padding:7px 14px;-webkit-user-select:none;user-select:none}
+.sys.scn{background:transparent!important;color:#ff4d6d!important;border:0;border-top:1px solid rgba(255,77,109,.35);border-bottom:1px solid rgba(255,77,109,.35);border-radius:0;font-weight:800;font-size:13px;text-align:center;width:92%;max-width:92%;margin:10px auto;padding:7px 10px;letter-spacing:.2px;-webkit-user-select:none;user-select:none}
 .tm .edl{opacity:.7;margin-right:4px;font-style:italic}
 #selBar #selBug{font-size:18px}
 .tick{margin-left:4px;font-weight:700;letter-spacing:-2px}
@@ -98,16 +98,15 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
 
 /* emoji picker */
-#emo{display:none;flex-direction:column;margin:0 8px 8px;border-radius:20px;height:236px;overflow:hidden}
+#emo{display:none;flex-direction:column;margin:0 8px 8px;border-radius:20px;height:276px;overflow:hidden}
+#emo .eq{padding:8px 8px 4px;flex:none}
+#emo .eq input{width:100%;margin:0;padding:9px 14px;border-radius:14px;font-size:15px;box-sizing:border-box}
 #emo .cats{display:flex;border-bottom:1px solid var(--bd);flex:none}
 #emo .cats button{flex:1;margin:0;padding:8px 0;background:none;color:#fff;font-size:19px;border-radius:0;width:auto;opacity:.5}
 #emo .cats button.on{opacity:1;background:var(--glass2)}
 #emo .grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(8,1fr);align-content:start;padding:6px;gap:2px;-webkit-overflow-scrolling:touch}
 #emo .grid button{margin:0;padding:3px 0;background:none;font-size:27px;line-height:1.2;border-radius:10px;width:auto}
 #emo .grid button:active{background:var(--glass)}
-#emo{margin:6px 8px 8px}
-#emoSr{flex:none;padding:6px 8px 2px}
-#emoSr input{margin:0;padding:8px 12px;font-size:14px;border-radius:12px}
 #emo .none{grid-column:1/-1;text-align:center;color:var(--sub);font-size:13px;padding:20px 0}
 
 /* popups */
@@ -606,6 +605,30 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
 .vu-mine{padding:3px 4px;gap:7px;font-size:13px;min-width:0}
 .vu-ic{width:22px;height:22px;font-size:12px}
 .vu-used{padding:6px 10px;border-radius:10px;font-size:12px}
+#ggBanner{display:none;align-items:center;gap:10px;padding:8px 12px;margin:6px 10px 0;border-radius:14px;font-size:14px;font-weight:600}
+#ggBanner span{flex:1;min-width:0}
+#ggBanner button{width:auto;margin:0;padding:6px 16px;border-radius:14px}
+#ggOv .box{max-width:440px;max-height:100%;overflow-y:auto;text-align:center;padding:14px}
+#ggCv{width:100%;aspect-ratio:1/1;background:#fff;border-radius:14px;touch-action:none;display:block;margin:0 auto 8px;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+#ggWord{font-size:26px;font-weight:800;letter-spacing:4px;margin:2px 0 4px;min-height:34px;word-break:break-word}
+#ggS{font-size:13px;color:var(--sub);margin-bottom:8px}
+#ggTools{display:none;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin-bottom:10px}
+#ggTools i{font-style:normal;width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;flex:none;color:#333}
+#ggTools i.on{border-color:#fff;box-shadow:0 0 0 2px var(--acc)}
+#ggTools i.sz{background:var(--glass2);color:var(--text)}
+#ggGuess{display:none;gap:8px;margin-bottom:8px}
+#ggGuess input{flex:1;min-width:0;margin:0}#ggGuess button{width:auto;margin:0;padding:0 16px}
+#ggFeed{font-size:13px;text-align:left;min-height:18px;color:var(--sub);margin:4px 0 8px}
+#ggFeed .ok{color:#25d366;font-weight:700}#ggFeed .gs{opacity:.8;font-style:italic}
+#ggLb{margin:6px 0 10px}
+.ggp{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:12px;background:var(--glass2);margin:4px 0;font-size:14px;text-align:left}
+.ggp b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ggp.me{outline:2px solid var(--acc)}.ggp .sc{font-weight:800;flex:none}
+#gcList{max-height:42vh;overflow-y:auto;margin:8px 0;text-align:left}
+.gcr{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:12px;cursor:pointer}
+.gcr b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gcr.on{background:rgba(37,211,102,.2)}.gck{width:22px;flex:none;color:#25d366;font-weight:800}
+.gcn{padding:14px;text-align:center;color:var(--sub);font-size:14px}
 </style>
 </head>
 <body>
@@ -635,7 +658,7 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
   <div class="top"><h1><svg width="28" height="28" viewBox="0 0 64 64" style="vertical-align:-6px;margin-right:8px"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c3aed"/><stop offset="1" stop-color="#25d366"/></linearGradient></defs><rect width="64" height="64" rx="15" fill="url(#lg2)"/><path d="M45.0 19.1A17 17 0 1 0 45.0 40.9" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/><path d="M15 38L10 54L29 47z" fill="#fff"/><circle cx="32" cy="30" r="4.2" fill="#fff"/></svg>Chatly</h1><div class="av" id="meDp"></div></div>
   <div class="sbar"><input id="sq" placeholder="Search by username" maxlength="15" autocomplete="off" autocapitalize="none"></div>
   <div id="list">
-    <div id="sres"></div><div id="clist"></div><div id="recent"></div>
+    <div id="sres"></div><div id="glist"></div><div id="clist"></div><div id="recent"></div>
     <div id="empty">No conversations yet.<br>Search above or tap 👥 to message someone.</div>
     <div id="err"></div>
   </div>
@@ -643,10 +666,11 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
 </div>
 
 <div id="chat">
-  <header class="glass" id="selBar" style="display:none"><button class="hb" id="selX" aria-label="Cancel">✕</button><div class="t"><b id="selN">1 selected</b></div><button class="hb" id="selEdit" aria-label="Edit" style="display:none">✏️</button><button class="hb" id="selMore" aria-label="More">⋯</button><button class="hb" id="selBug" aria-label="Feed to insect">🐛</button><button class="hb" id="selDel" aria-label="Delete">🗑</button></header>
+  <header class="glass" id="selBar" style="display:none"><button class="hb" id="selX" aria-label="Cancel">✕</button><div class="t"><b id="selN">1 selected</b></div><button class="hb" id="selMore" aria-label="More">⋯</button><button class="hb" id="selBug" aria-label="Feed to insect">🐛</button><button class="hb" id="selDel" aria-label="Delete">🗑</button></header>
   <header class="glass" id="mainHdr">
     <button class="hb" id="back">←</button><div class="av" id="hdp" style="display:none;width:36px;height:36px;font-size:20px"></div>
     <div class="t" id="hT" style="cursor:pointer"><div style="display:flex;align-items:center;gap:6px;min-width:0"><b id="who" style="min-width:0">Chat</b><span class="skb" id="hstk" style="display:none"></span></div><small id="status">connecting...</small></div>
+    <button class="hb" id="ggBtn" title="Draw &amp; Guess (group)" style="display:none">🎨</button>
     <button class="hb" id="dgBtn" title="Games" style="display:none">🎮</button>
     <button class="hb" id="bugBtn" title="Release insect">🐞</button>
     <div class="avs" id="hav"></div>
@@ -654,6 +678,7 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
     <button class="hb" id="moreBtn">⋮</button>
   </header>
   <div id="skBar" class="glass"></div>
+  <div id="ggBanner" class="glass"></div>
   <div id="msgs"></div>
   <div id="rec" class="glass">
     <div class="dot"></div><div class="tmr" id="tmr">0:00</div>
@@ -676,7 +701,7 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
     <button type="button" id="mic" title="Voice message">🎤</button>
     <button type="submit" id="send">➤</button>
   </form>
-  <div id="emo" class="glass"><div class="cats" id="emoCats"></div><div id="emoSr"><input id="emoQ" type="search" placeholder="🔍 Search emoji (love, hasna, fire...)" autocomplete="off" enterkeyhint="search"></div><div class="grid" id="emoGrid"></div></div>
+  <div id="emo" class="glass"><div class="eq"><input id="emoQ" placeholder="🔍 Search emoji" autocomplete="off" autocapitalize="none" enterkeyhint="search"></div><div class="cats" id="emoCats"></div><div class="grid" id="emoGrid"></div></div>
   <div id="bugPick" class="glass"></div>
   <div id="bugs"></div>
 </div>
@@ -764,6 +789,29 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
   <div id="dgLg" style="min-height:18px;font-size:13px;color:var(--sub);margin-bottom:10px"></div>
   <div id="dgAct"></div>
   <button class="alt" id="dgX" style="margin:0">Close</button>
+</div></div>
+<div id="gcr" class="ov"><div class="box glass" style="max-height:100%;overflow-y:auto">
+  <h3 id="gcT">👥 New group</h3>
+  <input id="gcName" placeholder="Group name" maxlength="25" autocomplete="off">
+  <div class="chip" id="gcSub" style="margin:8px 0 0">0 selected</div>
+  <div id="gcList"></div>
+  <button id="gcGo">Create group</button>
+  <button class="alt" id="gcX" style="margin:8px 0 0">Cancel</button>
+</div></div>
+<div id="ggOv" class="ov"><div class="box glass">
+  <h3>🎨 Draw &amp; Guess · Group</h3>
+  <div class="chip" id="ggInfo" style="margin-bottom:6px"></div>
+  <div id="ggWord"></div><div id="ggS"></div>
+  <div id="ggBody"></div>
+  <div id="ggPlay" style="display:none">
+    <canvas id="ggCv" width="600" height="600"></canvas>
+    <div id="ggTools"></div>
+    <div id="ggGuess"><input id="ggIn" placeholder="Type your guess" maxlength="30" autocomplete="off" autocapitalize="none"><button type="button" id="ggGo">Guess</button></div>
+    <div id="ggFeed"></div>
+  </div>
+  <div id="ggLb"></div>
+  <div id="ggAct"></div>
+  <button class="alt" id="ggX" style="margin:0">Close</button>
 </div></div>
 <div id="gPop" class="ov" style="z-index:70"><div class="box glass" style="text-align:center"><div id="gPopI" style="font-size:46px;line-height:1.1;margin-bottom:6px">⏰</div><h3 id="gPopT"></h3><p id="gPopP"></p><div id="gPopAct" style="display:none"></div><button id="gPopOk" style="margin:0">OK</button></div></div>
 <div id="offBar">No internet · showing saved messages</div>
@@ -1200,7 +1248,22 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     var nm=myName||(me&&me.name)||"Someone";
     var txt=kind==="record"?"🔴 "+nm+" started screen recording":"📸 "+nm+" took a screenshot";
     var sv=RP;RP=null;
-    try{pushMsg({cid:cid,uid:uid,name:myName,type:"sys",text:txt,t:firebase.database.ServerValue.TIMESTAMP},"Alert could not be sent")}finally{RP=sv}
+    try{pushMsg({cid:cid,uid:uid,name:myName,type:"sys",sk:(kind==="record"?"rec":"shot"),text:txt,t:firebase.database.ServerValue.TIMESTAMP},"Alert could not be sent")}finally{RP=sv}
+  }
+  var nLinksOn=false;
+  function openFromUrl(u){
+    var m=/^chatly:\/\/open\/(dm|g)\/(.+)$/.exec(String(u||""));if(!m)return;
+    var kind=m[1],id=decodeURIComponent(m[2]),tries=0;
+    (function go(){
+      if(!me||!db){if(tries++<40)setTimeout(go,300);return}
+      if(kind==="dm"){if(getC()[id])openDM(id);else if(tries++<20)setTimeout(go,300)}
+      else{if(GRPS[id])openGroup(id);else if(tries++<30)setTimeout(go,300)}
+    })();
+  }
+  function nativeLinks(){
+    if(nLinksOn)return;var A=nPlug("App");if(!A)return;nLinksOn=true;
+    A.addListener("appUrlOpen",function(e){openFromUrl(e&&e.url)});
+    try{A.getLaunchUrl().then(function(r){if(r&&r.url)openFromUrl(r.url)}).catch(function(){})}catch(e){}
   }
   function guardInit(){
     var G=nPlug("ScreenGuard");if(!G||guardOn)return;guardOn=true;
@@ -1211,13 +1274,14 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       guardAlert(kd);
     });
     G.start().catch(function(){guardOn=false});
+    try{G.keepAlive({on:lsGet("keepAlive",1)===1}).catch(function(){})}catch(e){}
   }
   function pushInit(){
     try{
       var q=new URLSearchParams(location.search).get("open");
       if(q){history.replaceState(null,"",location.pathname);setTimeout(function(){if(getC()[q])openDM(q)},900)}
     }catch(e){}
-    if(NATIVE){guardInit();nativePushInit();return}
+    if(NATIVE){nativeLinks();guardInit();nativePushInit();return}
     if(!PUSH_VAPID||!PUSH_URL||!db||!me||!uid||!ntfOn())return;
     if(!("serviceWorker" in navigator)||!("Notification" in window)||Notification.permission!=="granted")return;
     try{if(!firebase.messaging||!firebase.messaging.isSupported())return}catch(e){return}
@@ -1235,11 +1299,11 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     try{if(pushTok&&db&&uid)db.ref("rooms/_tok/"+uid+"/"+pushTok).remove().catch(function(){})}catch(e){}
     pushTok="";lsSet("pushTok","");
   }
-  function pushNotify(to,o){
+  function pushNotify(to,o,key){
     if(!PUSH_URL||!to||!uid)return;
     var t=o.type||"text";
     try{fetch(PUSH_URL,{method:"POST",mode:"no-cors",keepalive:true,headers:{"Content-Type":"text/plain"},
-      body:JSON.stringify({key:PUSH_KEY,to:to,k:uid,from:myName||(me&&me.name)||"Chatly",type:t,text:(t==="text"||t==="sys")?String(o.text||"").slice(0,120):""})}).catch(function(){})}catch(e){}
+      body:JSON.stringify({key:PUSH_KEY,to:to,k:uid,from:myName||(me&&me.name)||"Chatly",un:(me&&me.un)||"",type:t,text:(t==="text"||t==="sys")?String(o.text||"").slice(0,120):"",m:key||"",room:dmId(to)})}).catch(function(){})}catch(e){}
   }
   window.__pushInit=pushInit;window.__pushOff=pushOff;
   function sysNotify(title,body,k){
@@ -1257,8 +1321,8 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(!ntfOn()||getB()[k])return;
     var nm=dispName(k,nameOf(k)),pv=msgPrev(d);
     try{if(navigator.vibrate)navigator.vibrate(150)}catch(e){}
-    if(document.visibilityState==="visible")toast("💬 "+nm+" sent you a message: "+pv);
-    else sysNotify(nm,"sent you a message: "+pv,k);
+    if(document.visibilityState==="visible")toast(d.type==="sys"&&d.lv!=="i"?pv:"💬 "+nm+": "+pv);
+    else sysNotify(nm,pv,k);
   }
   function msgWatchAll(){
     if(!db||!me)return;
@@ -1274,6 +1338,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
         if(t>(LT[k]||0))LT[k]=t;
         if(t<=lsGet("rd_"+k,0)||UK[k][sn.key])return;
         UK[k][sn.key]=1;
+        if(!(d.delivered&&Object.keys(d.delivered).length))db.ref("rooms/"+dmId(k)+"/messages/"+sn.key+"/delivered/"+cid).set(true).catch(function(){});
         var viewing=isDM&&curOther===k&&document.visibilityState==="visible";
         if(!viewing)UNR[k]=(UNR[k]||0)+1;
         if(ready){incoming(k,d);schedRender()}
@@ -1284,7 +1349,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   function ntfStop(){
     Object.keys(PW).forEach(function(k){try{PW[k].off()}catch(e){}});PW={};ONL={};
     Object.keys(MW).forEach(function(k){try{MW[k].off()}catch(e){}});MW={};UNR={};UK={};LT={};
-    presStop();pushOff();updTitle();
+    presStop();pushOff();stopGroups();updTitle();
   }
   document.addEventListener("visibilitychange",function(){
     if(!presRefMe)return;
@@ -1307,7 +1372,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     var la=lsGet("la_"+uid,{});
     function ak(k){return Math.max(typeof c[k].t==="number"?c[k].t:0,la[k]||0)}
     ks.sort(function(x,y){return ak(y)-ak(x)});
-    $("empty").style.display=(ks.length||getRecent().length)?"none":"block";
+    $("empty").style.display=(ks.length||getRecent().length||Object.keys(GRPS).length)?"none":"block";
     if(!ks.length)return;
     var h=document.createElement("h3");h.textContent="Chats";box.appendChild(h);
     ks.forEach(function(k){
@@ -1406,8 +1471,11 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   }
   function askClear(){
     confirmBox("🧹 Clear chat?","Only your copy of the chat will be cleared. The other person is not affected.","Clear",function(){
-      Object.keys(info).forEach(hideKey);
+      // screenshot / recording ke notice kabhi nahi mitte
+      var keepN=Object.keys(info).filter(function(k){return info[k].sys&&info[k].d&&info[k].d.lv!=="i"}).map(function(k){return {k:k,d:info[k].d}});
+      Object.keys(info).forEach(function(k){if(!info[k].sys||(info[k].d&&info[k].d.lv==="i"))hideKey(k)});
       els={};info={};lastDay="";oldKey="";oldDone=true;$("msgs").innerHTML="";
+      keepN.forEach(function(x){try{addMsg(x.d,x.k)}catch(e){}});
       sys("Chat cleared (for you only)");
     });
   }
@@ -1431,6 +1499,15 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
         [bl?"✅ Unblock":"🚫 Block",function(){bl?unblock(k):askBlock(k)}],
         ["🗑 Delete chat",function(){askDelete(k)},"danger"],
         ["👤 Remove contact",function(){askRemove(k)},"danger"],
+        ["Cancel"]
+      ]);
+    }else if(curGrp){
+      var gg0=curGrp;
+      showSheet([
+        ["🧹 Clear my chat",askClear],
+        ["👥 Members",function(){grpInfo(gg0).then(function(i){var n=(i&&i.m)?Object.keys(i.m).map(function(k){return i.m[k]}).join(", "):"";confirmBox("👥 "+((i&&i.name)||"Group"),n||"No members","OK",function(){})})}],
+        ["➕ Add members",function(){gcOpen("add",gg0)}],
+        ["🚪 Leave group",function(){confirmBox("Leave group?","You will no longer get messages from this group.","Leave",function(){grpLeave(gg0)})},"danger"],
         ["Cancel"]
       ]);
     }else{
@@ -1579,7 +1656,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     myName=me.name;dpCache[me.un]=me.dp||"";
     $("auth").style.display="none";$("home").style.display="flex";
     $("nm").textContent=me.name;fillAv($("meDp"),{name:me.name,un:me.un,st:"ok"});
-    presStart();pushInit();startCon();renderContacts();renderRecent();nkSyncAll();
+    presStart();pushInit();startCon();startGroups();renderContacts();renderRecent();nkSyncAll();
   }
   $("aGo").onclick=function(){
     if(!configured){aerr("Firebase is not configured");return}
@@ -2042,8 +2119,6 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(!n){exitSel();return}
     $("selN").textContent=n+" selected";
     $("selMore").style.display=n===1?"":"none";
-    var ek=n===1?Object.keys(sel)[0]:null,ef=ek&&info[ek];
-    $("selEdit").style.display=(ef&&ef.mine&&ef.d&&!ef.d.eaten&&!ef.d.viewOnce&&(!ef.d.type||ef.d.type==="text")&&typeof ef.d.text==="string"&&ef.d.text&&(typeof ef.d.t!=="number"||now()-ef.d.t<EDIT_MS))?"":"none";
   }
   function toggleSel(key,on){
     var el=els[key];if(!el||!info[key]||info[key].sys)return;
@@ -2077,7 +2152,6 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     keys.slice(0,10).forEach(function(k,i){setTimeout(function(){if(info[k])sendEat(k)},i*1400)});
   };
   $("selDel").onclick=selDelete;
-  $("selEdit").onclick=function(){var k=Object.keys(sel)[0];exitSel();if(k)startEdit(k)};
   $("selMore").onclick=function(){var k=Object.keys(sel)[0];exitSel();if(k)openMenu(k)};
   $("back").addEventListener("click",function(){if(selMode)exitSel()});
 
@@ -2108,7 +2182,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
 
   function okMsg(d){
     if(!d||typeof d!=="object"||(!d.uid&&!d.cid)||(!d.type&&typeof d.text!=="string"))return false;
-    if(curClr&&typeof d.t==="number"&&d.t<=curClr)return false;
+    if(curClr&&typeof d.t==="number"&&d.t<=curClr&&!(d.type==="sys"&&d.lv!=="i"))return false;
     if(isDM&&d.uid!==uid){
       if(isBlocked())return false;
       if(typeof d.t==="number"){
@@ -2133,8 +2207,13 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     var dt=new Date(typeof d.t==="number"?d.t:Date.now()),dk=dt.toDateString();
     if(dk!==lastDay){lastDay=dk;var dsp=document.createElement("div");dsp.className="sys";dsp.setAttribute("data-day",String(dt.getTime()));dsp.textContent=dayLabel(dt);(prepFrag||$("msgs")).appendChild(dsp);if(!prepFrag)scroll()}
     if(d.type==="sys"){
-      var sn=document.createElement("div");sn.className="sys scn";
-      sn.textContent=String(d.text||"").slice(0,200)+" · "+dt.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+      var sn=document.createElement("div");sn.className="sys"+(d.lv==="i"?"":" scn");
+      var stx=String(d.text||"").slice(0,200);
+      if(d.sk==="shot"||d.sk==="rec"){
+        var who=d.uid===uid?"You":dispName(d.uid,d.name||"Someone");
+        stx=(d.sk==="shot"?"📸 "+who+" took a screenshot!":"🔴 "+who+" started screen recording!");
+      }
+      sn.textContent=stx+" · "+dt.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
       if(key){els[key]=sn;info[key]={mine:false,d:d,tick:null,stxt:null,vu:null,sys:1}}
       (prepFrag||$("msgs")).appendChild(sn);if(!prepFrag)scroll();
       return;
@@ -2403,7 +2482,6 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     ["⚽","⚽ 🏀 🏈 ⚾ 🎾 🏐 🏉 🎱 🏓 🏸 🥊 🎯 🎮 🕹️ 🎲 ♟️ 🎨 🎬 🎤 🎧 🎸 🎹 🥁 🎺 🎻 🚗 🚕 🚌 🏎️ 🚓 🚑 🚒 🏍️ 🚲 ✈️ 🚀 🚁 ⛵ 🚢 🏠 🏰 🗼 🗽 🎁 🎈 🎉 🎊 📱 💻 ⌚ 📷 🔋 💡 💰 💎 🔑 🔒 🔔 📌 ✏️ 📚 📝 ⏰ 🧸 🛒"],
     ["❤️","❤️ 🧡 💛 💚 💙 💜 🖤 🤍 🤎 💔 ❣️ 💕 💞 💓 💗 💖 💘 💝 💯 💢 💥 💫 💦 💨 💤 ✨ 🎵 🎶 ✅ ❌ ❓ ❗ ⚠️ ⭕ 🔴 🟠 🟡 🟢 🔵 🟣 ⚫ ⚪ ▶️ ⏸️ 🔁 🔀 ➕ ➖ ✔️ ☑️ 🆗 🆒 🆕 🔞 🚫 ♻️ 🏁 🚩"]
   ];
-  var EMN=[["😀","grinning face"],["😃","smiling face with open mouth"],["😄","smiling face with open mouth and smiling eyes"],["😁","grinning face with smiling eyes smile hasna"],["😆","smiling face with open mouth and tightly-closed eyes"],["😅","smiling face with open mouth and cold sweat sweat"],["😂","face with tears of joy haha hasi laugh hasna"],["🤣","rolling on the floor laughing haha hasi laugh hasna"],["🥲","smiling face with tear"],["☺️","white smiling face"],["😊","smiling face with smiling eyes smile khush happy"],["😇","smiling face with halo angel"],["🙂","slightly smiling face"],["🙃","upside-down face"],["😉","winking face"],["😌","relieved face"],["😍","smiling face with heart-shaped eyes love pyar"],["🥰","smiling face with smiling eyes and three hearts love pyar"],["😘","face throwing a kiss kiss pyar"],["😗","kissing face"],["😙","kissing face with smiling eyes"],["😚","kissing face with closed eyes"],["😋","face savouring delicious food"],["😛","face with stuck-out tongue"],["😝","face with stuck-out tongue and tightly-closed eyes"],["😜","face with stuck-out tongue and winking eye mazak wink"],["🤪","grinning face with one large and one small eye"],["🤨","face with one eyebrow raised"],["🧐","face with monocle"],["🤓","nerd face"],["😎","smiling face with sunglasses cool"],["🥸","disguised face"],["🤩","grinning face with star eyes"],["🥳","face with party horn and party hat"],["😏","smirking face"],["😒","unamused face"],["😞","disappointed face"],["😔","pensive face"],["😟","worried face"],["😕","confused face"],["🙁","slightly frowning face"],["☹️","white frowning face"],["😣","persevering face"],["😖","confounded face"],["😫","tired face"],["😩","weary face"],["🥺","face with pleading eyes"],["😢","crying face sad udas cry"],["😭","loudly crying face ro rona cry sad"],["😤","face with look of triumph"],["😠","angry face gussa angry"],["😡","pouting face gussa angry"],["🤬","serious face with symbols covering mouth"],["🤯","shocked face with exploding head"],["😳","flushed face"],["🥵","overheated face"],["🥶","freezing face"],["😱","face screaming in fear"],["😨","fearful face"],["😰","face with open mouth and cold sweat"],["😥","disappointed but relieved face"],["😓","face with cold sweat"],["🤗","hugging face hug"],["🤔","thinking face soch think"],["🤭","smiling face with smiling eyes and hand covering mouth"],["🤫","face with finger covering closed lips"],["🤥","lying face"],["😶","face without mouth"],["😐","neutral face"],["😑","expressionless face"],["😬","grimacing face"],["🙄","face with rolling eyes"],["😯","hushed face"],["😦","frowning face with open mouth"],["😧","anguished face"],["😮","face with open mouth"],["😲","astonished face"],["🥱","yawning face"],["😴","sleeping face neend sleep"],["🤤","drooling face"],["😪","sleepy face"],["😵","dizzy face"],["🤐","zipper-mouth face"],["🥴","face with uneven eyes and wavy mouth"],["🤢","nauseated face"],["🤮","face with open mouth vomiting"],["🤧","sneezing face"],["😷","face with medical mask"],["🤒","face with thermometer"],["🤕","face with head-bandage"],["🤑","money-mouth face"],["🤠","face with cowboy hat"],["😈","smiling face with horns"],["👿","imp"],["👹","japanese ogre"],["👺","japanese goblin"],["🤡","clown face"],["💩","pile of poo"],["👻","ghost"],["💀","skull"],["☠️","skull and crossbones"],["👽","extraterrestrial alien"],["👾","alien monster"],["🤖","robot face"],["🎃","jack-o-lantern"],["👋","waving hand sign hi bye hello"],["🤚","raised back of hand"],["🖐️","raised hand with fingers splayed"],["✋","raised hand"],["🖖","raised hand with part between middle and ring fingers"],["👌","ok hand sign"],["🤌","pinched fingers"],["🤏","pinching hand"],["✌️","victory hand"],["🤞","hand with index and middle fingers crossed"],["🤟","i love you hand sign"],["🤘","sign of the horns"],["🤙","call me hand"],["👈","white left pointing backhand index"],["👉","white right pointing backhand index"],["👆","white up pointing backhand index"],["👇","white down pointing backhand index"],["☝️","white up pointing index"],["👍","thumbs up sign ok thumbs like"],["👎","thumbs down sign"],["✊","raised fist"],["👊","fisted hand sign"],["🤛","left-facing fist"],["🤜","right-facing fist"],["👏","clapping hands sign"],["🙌","person raising both hands in celebration"],["👐","open hands sign"],["🤲","palms up together"],["🤝","handshake"],["🙏","person with folded hands dua thanks pray"],["✍️","writing hand"],["💅","nail polish"],["🤳","selfie"],["💪","flexed biceps"],["🦾","mechanical arm"],["👀","eyes"],["👁️","eye"],["👅","tongue"],["👄","mouth"],["🧠","brain"],["👶","baby"],["🧒","child"],["👦","boy"],["👧","girl"],["🧑","adult"],["👨","man"],["👩","woman"],["🧔","bearded person"],["👴","older man"],["👵","older woman"],["🙍","person frowning"],["🙎","person with pouting face"],["🙅","face with no good gesture"],["🙆","face with ok gesture"],["💁","information desk person"],["🙋","happy person raising one hand"],["🙇","person bowing deeply"],["🤦","face palm"],["🤷","shrug"],["💃","dancer"],["🕺","man dancing"],["🏃","runner"],["🚶","pedestrian"],["🐶","dog face dog kutta"],["🐱","cat face cat billi"],["🐭","mouse face"],["🐹","hamster face"],["🐰","rabbit face"],["🦊","fox face"],["🐻","bear face"],["🐼","panda face"],["🐨","koala"],["🐯","tiger face"],["🦁","lion face"],["🐮","cow face cow gai"],["🐷","pig face"],["🐸","frog face"],["🐵","monkey face"],["🙈","see-no-evil monkey"],["🙉","hear-no-evil monkey"],["🙊","speak-no-evil monkey"],["🐔","chicken"],["🐧","penguin"],["🐦","bird"],["🐤","baby chick"],["🦆","duck"],["🦅","eagle"],["🦉","owl"],["🦇","bat"],["🐺","wolf face"],["🐗","boar"],["🐴","horse face"],["🦄","unicorn face"],["🐝","honeybee"],["🐛","bug"],["🦋","butterfly"],["🐌","snail"],["🐞","lady beetle"],["🐜","ant"],["🕷️","spider"],["🦂","scorpion"],["🐢","turtle"],["🐍","snake"],["🦎","lizard"],["🐙","octopus"],["🦑","squid"],["🦐","shrimp"],["🦀","crab"],["🐠","tropical fish"],["🐟","fish"],["🐬","dolphin"],["🐳","spouting whale"],["🐋","whale"],["🦈","shark"],["🐊","crocodile"],["🐅","tiger"],["🐆","leopard"],["🦓","zebra face"],["🦍","gorilla"],["🐘","elephant"],["🦛","hippopotamus"],["🐪","dromedary camel"],["🐫","bactrian camel"],["🦒","giraffe face"],["🦘","kangaroo"],["🐕","dog"],["🐈","cat"],["🐓","rooster"],["🦚","peacock"],["🦜","parrot"],["🦢","swan"],["🌸","cherry blossom flower phool"],["🌹","rose rose gulab phool"],["🌻","sunflower"],["🌼","blossom"],["🌷","tulip"],["🌲","evergreen tree"],["🌳","deciduous tree"],["🌴","palm tree"],["🌵","cactus"],["🍀","four leaf clover"],["🍁","maple leaf"],["🌈","rainbow"],["☀️","black sun with rays sun suraj"],["⭐","white medium star star tara"],["🌙","crescent moon moon chand"],["⚡","high voltage sign"],["🔥","fire fire aag"],["❄️","snowflake"],["💧","droplet"],["🌊","water wave"],["🍎","red apple"],["🍐","pear"],["🍊","tangerine"],["🍋","lemon"],["🍌","banana"],["🍉","watermelon"],["🍇","grapes"],["🍓","strawberry"],["🍒","cherries"],["🍑","peach"],["🥭","mango"],["🍍","pineapple"],["🥥","coconut"],["🥝","kiwifruit"],["🍅","tomato"],["🥑","avocado"],["🥦","broccoli"],["🥕","carrot"],["🌽","ear of maize"],["🌶️","hot pepper"],["🥔","potato"],["🍞","bread"],["🥐","croissant"],["🧀","cheese wedge"],["🍳","cooking"],["🥞","pancakes"],["🥓","bacon"],["🍔","hamburger burger khana food"],["🍟","french fries"],["🍕","slice of pizza"],["🌭","hot dog"],["🥪","sandwich"],["🌮","taco"],["🌯","burrito"],["🍝","spaghetti"],["🍜","steaming bowl"],["🍲","pot of food"],["🍛","curry and rice"],["🍣","sushi"],["🍱","bento box"],["🥟","dumpling"],["🍤","fried shrimp"],["🍙","rice ball"],["🍚","cooked rice"],["🍢","oden"],["🍡","dango"],["🍦","soft ice cream"],["🍧","shaved ice"],["🍨","ice cream"],["🍩","doughnut"],["🍪","cookie"],["🎂","birthday cake"],["🍰","shortcake"],["🧁","cupcake"],["🍫","chocolate bar"],["🍬","candy"],["🍭","lollipop"],["🍿","popcorn"],["☕","hot beverage"],["🍵","teacup without handle"],["🥤","cup with straw"],["🍺","beer mug"],["🍻","clinking beer mugs"],["🥂","clinking glasses"],["🍷","wine glass"],["🍹","tropical drink"],["🥛","glass of milk"],["⚽","soccer ball football"],["🏀","basketball and hoop"],["🏈","american football"],["⚾","baseball"],["🎾","tennis racquet and ball"],["🏐","volleyball"],["🏉","rugby football"],["🎱","billiards"],["🏓","table tennis paddle and ball"],["🏸","badminton racquet and shuttlecock"],["🥊","boxing glove"],["🎯","direct hit"],["🎮","video game"],["🕹️","joystick"],["🎲","game die"],["♟️","black chess pawn"],["🎨","artist palette"],["🎬","clapper board"],["🎤","microphone"],["🎧","headphone"],["🎸","guitar"],["🎹","musical keyboard"],["🥁","drum with drumsticks"],["🎺","trumpet"],["🎻","violin"],["🚗","automobile"],["🚕","taxi"],["🚌","bus"],["🏎️","racing car"],["🚓","police car"],["🚑","ambulance"],["🚒","fire engine"],["🏍️","racing motorcycle"],["🚲","bicycle"],["✈️","airplane"],["🚀","rocket"],["🚁","helicopter"],["⛵","sailboat"],["🚢","ship"],["🏠","house building"],["🏰","european castle"],["🗼","tokyo tower"],["🗽","statue of liberty"],["🎁","wrapped present"],["🎈","balloon"],["🎉","party popper party congrats"],["🎊","confetti ball"],["📱","mobile phone"],["💻","personal computer"],["⌚","watch"],["📷","camera"],["🔋","battery"],["💡","electric light bulb"],["💰","money bag"],["💎","gem stone"],["🔑","key"],["🔒","lock"],["🔔","bell"],["📌","pushpin"],["✏️","pencil"],["📚","books"],["📝","memo"],["⏰","alarm clock"],["🧸","teddy bear"],["🛒","shopping trolley"],["❤️","heavy black heart love dil pyar heart"],["🧡","orange heart"],["💛","yellow heart"],["💚","green heart"],["💙","blue heart"],["💜","purple heart"],["🖤","black heart"],["🤍","white heart"],["🤎","brown heart"],["💔","broken heart broken dil sad"],["❣️","heavy heart exclamation mark ornament"],["💕","two hearts"],["💞","revolving hearts"],["💓","beating heart"],["💗","growing heart"],["💖","sparkling heart"],["💘","heart with arrow"],["💝","heart with ribbon"],["💯","hundred points symbol"],["💢","anger symbol"],["💥","collision symbol"],["💫","dizzy symbol"],["💦","splashing sweat symbol"],["💨","dash symbol"],["💤","sleeping symbol"],["✨","sparkles"],["🎵","musical note"],["🎶","multiple musical notes"],["✅","white heavy check mark"],["❌","cross mark"],["❓","black question mark ornament"],["❗","heavy exclamation mark symbol"],["⚠️","warning sign"],["⭕","heavy large circle"],["🔴","large red circle"],["🟠","large orange circle"],["🟡","large yellow circle"],["🟢","large green circle"],["🔵","large blue circle"],["🟣","large purple circle"],["⚫","medium black circle"],["⚪","medium white circle"],["▶️","black right-pointing triangle"],["⏸️","double vertical bar"],["🔁","clockwise rightwards and leftwards open circle arrows"],["🔀","twisted rightwards arrows"],["➕","heavy plus sign"],["➖","heavy minus sign"],["✔️","heavy check mark"],["☑️","ballot box with check"],["🆗","squared ok"],["🆒","squared cool"],["🆕","squared new"],["🔞","no one under eighteen symbol"],["🚫","no entry sign"],["♻️","black universal recycling symbol"],["🏁","chequered flag"],["🚩","triangular flag on post"]];
   var emoCat=-1,emoBuilt=false;
   function getRecEmo(){return lsGet("recentEmo",[])}
   function addRecEmo(e){var a=getRecEmo().filter(function(x){return x!==e});a.unshift(e);lsSet("recentEmo",a.slice(0,32))}
@@ -2418,7 +2496,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     t.dispatchEvent(new Event("input"));
   }
   function showEmoCat(i){
-    emoCat=i;$("emoQ").value="";
+    emoCat=i;
     var cats=$("emoCats").children;
     for(var k=0;k<cats.length;k++)cats[k].className=(k===i+1)?"on":"";
     var g=$("emoGrid");g.innerHTML="";g.className="grid";g.scrollTop=0;
@@ -2432,20 +2510,6 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       g.appendChild(b);
     });
   }
-  function emoSearch(q){
-    var g=$("emoGrid");g.className="grid";g.scrollTop=0;g.innerHTML="";
-    var t=q.toLowerCase().split(/\s+/).filter(Boolean),n=0;
-    EMN.forEach(function(r){
-      for(var i=0;i<t.length;i++)if(r[1].indexOf(t[i])<0)return;
-      n++;var e=r[0],b=document.createElement("button");b.type="button";b.textContent=e;
-      b.onclick=function(){insertEmoji(e)};g.appendChild(b);
-    });
-    if(!n){var d=document.createElement("div");d.className="none";d.textContent="No emoji found";g.appendChild(d)}
-  }
-  $("emoQ").addEventListener("input",function(){
-    var q=this.value.trim();
-    if(q)emoSearch(q);else showEmoCat(emoCat);
-  });
   function buildEmo(){
     if(emoBuilt)return;emoBuilt=true;
     var c=$("emoCats");
@@ -2456,8 +2520,51 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     });
     var sb=document.createElement("button");sb.type="button";sb.textContent="🏷️";sb.onclick=showStk;c.appendChild(sb);
   }
+  // ---- emoji search ----
+  var EMS="😀 grin smile happy khush|😃 smile happy open mouth|😄 laugh happy smile hasna|😁 beam grin teeth|😆 laughing lol haha|😅 sweat smile nervous|🤣 rofl rolling laughing lol|😂 joy tears laugh lol hasi|🙂 slight smile|🙃 upside down|😉 wink|😊 blush smile happy|😇 angel halo innocent|🥰 love hearts smile pyar|😍 heart eyes love pyar|🤩 star struck wow|😘 kiss blow love|😗 kiss|😚 kiss closed eyes|😙 kiss smile|😋 yum tasty delicious|😛 tongue|😜 wink tongue crazy|🤪 zany crazy goofy|😝 tongue squint|🤑 money mouth rich paisa|🤗 hug hugging|🤭 giggle oops hand mouth|🤫 shush quiet secret chup|🤔 thinking hmm sochna|🤐 zipper mouth secret|🤨 raised eyebrow suspicious|😐 neutral|😑 expressionless|😶 no mouth silent|😏 smirk|😒 unamused annoyed|🙄 eye roll|😬 grimace awkward|😮‍💨 exhale relief sigh|🤥 lying liar pinocchio jhoot|😌 relieved calm|😔 pensive sad|😪 sleepy|🤤 drool|😴 sleep zzz neend|😷 mask sick|🤒 thermometer fever bukhar sick|🤕 bandage hurt injured|🤢 nauseated sick|🤮 vomit|🤧 sneeze cold|🥵 hot sweating garmi|🥶 cold freezing sardi|🥴 woozy drunk|😵 dizzy|🤯 mind blown shocked|🤠 cowboy|🥳 party celebrate birthday|😎 cool sunglasses|🤓 nerd geek|🧐 monocle|😕 confused|😟 worried|🙁 frown|☹️ sad frown|😮 open mouth wow|😯 hushed|😲 astonished shocked|😳 flushed blush embarrassed|🥺 pleading puppy eyes please|😦 frown open|😧 anguished|😨 fearful scared|😰 anxious sweat|😥 sad relieved|😢 cry tear sad rona|😭 sob crying loudly rona|😱 scream scared horror|😖 confounded|😣 persevere|😞 disappointed|😓 downcast sweat|😩 weary tired|😫 tired|🥱 yawn bored|😤 triumph angry steam|😡 angry mad gussa|😠 angry gussa|🤬 swearing cursing angry|😈 devil evil smile|👿 devil angry|💀 skull dead|☠️ skull crossbones|💩 poop|🤡 clown|👹 ogre|👻 ghost|👽 alien|🤖 robot|😺 cat smile|😻 cat heart eyes|🙈 see no evil monkey|🙉 hear no evil monkey|🙊 speak no evil monkey|💋 kiss lips|💌 love letter|💘 heart arrow cupid|💝 heart ribbon gift|💖 sparkling heart|💗 growing heart|💓 beating heart|💞 revolving hearts|💕 two hearts love pyar|💟 heart decoration|❣️ heart exclamation|💔 broken heart dil toot|❤️ red heart love dil pyar|🧡 orange heart|💛 yellow heart|💚 green heart|💙 blue heart|💜 purple heart|🖤 black heart|🤍 white heart|🤎 brown heart|💯 hundred 100 perfect|💢 anger|💥 boom collision|💫 dizzy star|💦 sweat droplets water|💨 dash wind|💬 speech bubble chat message|💭 thought bubble|💤 zzz sleep|👋 wave hello hi bye|🤚 raised back hand|🖐️ hand fingers|✋ raised hand stop|🖖 vulcan spock|👌 ok okay perfect|🤌 pinched fingers|🤏 pinch small|✌️ victory peace|🤞 crossed fingers luck|🤟 love you gesture|🤘 rock on|🤙 call me shaka|👈 point left|👉 point right|👆 point up|👇 point down|☝️ index up|👍 thumbs up like good|👎 thumbs down dislike bad|✊ fist raised|👊 punch fist|🤛 left fist|🤜 right fist|👏 clap applause|🙌 raising hands celebrate|👐 open hands|🤲 palms up|🤝 handshake deal|🙏 pray thanks please namaste dua|✍️ writing|💅 nail polish|🤳 selfie|💪 muscle strong flex|🦾 mechanical arm|🦵 leg|🦶 foot|👂 ear|👃 nose|🧠 brain|👀 eyes look|👁️ eye|👅 tongue|👄 mouth lips|👶 baby|🧒 child|👦 boy|👧 girl|👨 man|👩 woman|🧔 beard|👴 old man|👵 old woman|👮 police|🕵️ detective|💂 guard|👷 construction worker|🤴 prince|👸 princess|🦸 superhero|🧙 mage wizard|🧛 vampire|🧟 zombie|🙋 raising hand|🤦 facepalm|🤷 shrug|💃 dancer dance|🕺 man dancing|🚶 walking|🏃 running|🐶 dog puppy|🐱 cat kitten|🐭 mouse|🐹 hamster|🐰 rabbit bunny|🦊 fox|🐻 bear|🐼 panda|🐨 koala|🐯 tiger|🦁 lion|🐮 cow|🐷 pig|🐸 frog|🐵 monkey|🐔 chicken hen|🐧 penguin|🐦 bird|🦆 duck|🦅 eagle|🦉 owl|🦇 bat|🐺 wolf|🐗 boar|🐴 horse|🦄 unicorn|🐝 bee|🐛 bug caterpillar insect|🦋 butterfly|🐌 snail|🐞 ladybug|🐜 ant|🕷️ spider|🦂 scorpion|🐢 turtle|🐍 snake|🦎 lizard|🐙 octopus|🦑 squid|🦀 crab|🐠 fish|🐟 fish|🐬 dolphin|🐳 whale|🦈 shark|🐊 crocodile|🐆 leopard|🦓 zebra|🐘 elephant|🦒 giraffe|🐪 camel|🐑 sheep|🐐 goat|🕊️ dove peace|🌸 cherry blossom flower|🌹 rose flower|🌻 sunflower|🌼 blossom|🌷 tulip|🌱 seedling plant|🌲 tree evergreen|🌳 tree|🌴 palm tree|🌵 cactus|🍀 clover luck|🍁 maple leaf|🍂 fallen leaf autumn|🌍 earth world|🌙 moon crescent night chand|🌞 sun face|⭐ star|🌟 glowing star|✨ sparkles|⚡ lightning bolt|🔥 fire hot lit aag|🌈 rainbow|☀️ sun sunny dhoop|⛅ partly cloudy|☁️ cloud|🌧️ rain barish|⛈️ thunderstorm|❄️ snowflake|☃️ snowman|💧 droplet water|🌊 wave ocean sea|🍎 apple red|🍊 orange|🍋 lemon|🍌 banana|🍉 watermelon|🍇 grapes|🍓 strawberry|🍒 cherries|🍑 peach|🥭 mango aam|🍍 pineapple|🥥 coconut|🥝 kiwi|🍅 tomato|🥑 avocado|🥕 carrot|🌽 corn|🌶️ chili hot spicy mirch|🥔 potato aloo|🍞 bread|🥐 croissant|🧀 cheese|🍳 egg cooking|🥓 bacon|🍔 burger|🍟 fries|🍕 pizza|🌭 hot dog|🌮 taco|🌯 burrito|🍝 pasta spaghetti|🍜 noodles ramen|🍲 stew pot|🍛 curry rice biryani|🍚 rice|🍣 sushi|🍦 ice cream|🍰 cake|🎂 birthday cake|🍫 chocolate|🍬 candy|🍩 donut|🍪 cookie biscuit|☕ coffee tea chai hot drink|🍵 green tea|🥤 cup drink soda|🍺 beer|🍷 wine|⚽ soccer football|🏀 basketball|🏈 american football|⚾ baseball|🎾 tennis|🏐 volleyball|🏏 cricket bat|🏑 hockey|🎱 pool 8 ball|🏓 ping pong|🥊 boxing glove|🎯 target dart bullseye|🎮 video game controller gaming|🎲 dice game|♟️ chess|🎵 music note|🎶 music notes|🎤 microphone sing|🎧 headphones music|🎸 guitar|🎹 piano keyboard|🥁 drum|🎬 clapper movie|📷 camera photo|🎨 palette art painting|🚗 car|🚕 taxi|🚌 bus|🚑 ambulance|🚓 police car|🚲 bicycle bike|🛵 scooter|🏍️ motorcycle bike|✈️ airplane flight plane|🚀 rocket|🚁 helicopter|🚢 ship|⛵ sailboat|🚂 train|🏠 house home ghar|🏢 office building|🏥 hospital|🏫 school|🕌 mosque masjid|⛪ church|🛕 temple mandir|🕋 kaaba|🌆 city|🗽 statue liberty|⌚ watch|📱 phone mobile|💻 laptop computer|🖥️ desktop computer|⌨️ keyboard|🖱️ mouse|💾 floppy save|📞 telephone call|📺 tv television|🔋 battery|🔌 plug|💡 bulb idea|🔦 flashlight|📚 books study|📖 book open read|📝 memo note write|✏️ pencil|📌 pin|📎 paperclip|📅 calendar date|💰 money bag paisa|💵 dollar cash|💳 credit card|💎 gem diamond|⚙️ gear settings|🔧 wrench tool|🔨 hammer|🔑 key|🔒 lock|🔓 unlock|🔔 bell notification|🔕 bell off mute|📢 loudspeaker announcement|🏆 trophy winner|🥇 gold medal first|🥈 silver medal second|🥉 bronze medal third|🎁 gift present|🎈 balloon|🎉 party popper celebration congratulations|🎊 confetti|🎀 ribbon bow|🎓 graduation cap|👑 crown king queen|💍 ring wedding|👓 glasses|🕶️ sunglasses|👕 tshirt shirt|👖 jeans|👗 dress|👟 sneakers shoe|👜 handbag|🎒 backpack|🧢 cap hat|✅ check mark yes done|❌ cross no wrong|❎ cross button|❓ question|❗ exclamation important|⚠️ warning|🚫 prohibited banned no|⛔ no entry|🔴 red circle|🟢 green circle|🔵 blue circle|🟡 yellow circle|⚫ black circle|⚪ white circle|➕ plus add|➖ minus|✔️ check|➡️ right arrow|⬅️ left arrow|⬆️ up arrow|⬇️ down arrow|🔄 refresh repeat|🔙 back|🔝 top|🇵🇰 pakistan flag|🇮🇳 india flag|🇺🇸 usa flag america|🇬🇧 uk flag britain|🇸🇦 saudi arabia flag|🇦🇪 uae flag emirates|🏁 chequered flag finish|🚩 red flag|🏳️ white flag|☪️ star crescent islam|🕉️ om|✝️ cross|☮️ peace|♻️ recycle|🆗 ok button|🆕 new|🆒 cool|🔞 adults only|🔊 loud speaker volume|🔇 muted|📍 location pin|🗺️ map|🧭 compass|⏰ alarm clock|⏳ hourglass|🕐 clock time|📦 package box parcel|✉️ envelope mail|📧 email|📥 inbox|📤 outbox|🗑️ trash delete|🔍 search magnifier|🔎 search zoom";
+  var EMI=null,EDB=null,EDBLoading=false;
+  function emoIndex(){
+    if(EMI)return EMI;
+    EMI=EMS.split("|").map(function(x){var i=x.indexOf(" ");return {e:x.slice(0,i),t:x.slice(i+1).toLowerCase()}});
+    return EMI;
+  }
+  function loadEmoDb(){
+    if(EDB||EDBLoading||!window.fetch)return;
+    EDBLoading=true;
+    fetch("https://cdn.jsdelivr.net/npm/emojibase-data@15.3.2/en/compact.json").then(function(r){return r.json()}).then(function(a){
+      EDB=(a||[]).map(function(x){return {e:x.emoji||x.unicode,t:String((x.annotation||x.label||"")+" "+(x.tags||[]).join(" ")).toLowerCase()}}).filter(function(x){return x.e});
+      var q=$("emoQ").value.trim();if(q)emoSearch(q);
+    }).catch(function(){EDBLoading=false});
+  }
+  function emoSearch(q){
+    q=String(q||"").toLowerCase().trim();
+    var g=$("emoGrid");g.innerHTML="";g.className="grid";g.scrollTop=0;
+    var cats=$("emoCats").children;for(var k=0;k<cats.length;k++)cats[k].className="";
+    var words=q.split(/\s+/),seen={},out=[];
+    function add(list){
+      list.forEach(function(it){
+        if(seen[it.e])return;
+        for(var w=0;w<words.length;w++)if(it.t.indexOf(words[w])<0)return;
+        seen[it.e]=1;out.push(it.e);
+      });
+    }
+    add(emoIndex());
+    if(EDB)add(EDB);else loadEmoDb();
+    out=out.slice(0,120);
+    if(!out.length){var n=document.createElement("div");n.className="none";n.textContent=EDB||!EDBLoading?"No emoji found":"Searching…";g.appendChild(n);return}
+    out.forEach(function(e){
+      var b=document.createElement("button");b.type="button";b.textContent=e;
+      b.onclick=function(){insertEmoji(e)};g.appendChild(b);
+    });
+  }
+  $("emoQ").addEventListener("input",function(){
+    var q=this.value.trim();
+    if(q)emoSearch(q);else showEmoCat(typeof emoCat==="number"?emoCat:0);
+  });
+  $("emoQ").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();this.blur()}});
   function openEmo(){
     buildEmo();
+    $("emoQ").value="";
     $("emo").style.display="flex";
     showEmoCat(getRecEmo().length?-1:0);
     $("txt").blur();
@@ -2471,6 +2578,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
 
   // ---- chat open / close ----
   function closeChat(){
+    ggStop();curGrp="";
     cacheFlush();
     $("txt").blur();
     stopTyping();
@@ -2506,7 +2614,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     enterChat(code,{dm:false});
   }
   $("jNo").onclick=function(){$("jd").style.display="none"};
-  $("fPlus").onclick=function(){showSheet([["➕ Create Room",function(){enter(newCode())}],["🔒 Create Private Room",function(){enter(newCode()+newCode().slice(0,3))}],["🔑 Join with room code",function(){$("code").value="";$("jd").style.display="flex";setTimeout(function(){$("code").focus()},50)}],["Cancel"]])};
+  $("fPlus").onclick=function(){showSheet([["👥 New group",function(){gcOpen("new")}],["➕ Create Room",function(){enter(newCode())}],["🔒 Create Private Room",function(){enter(newCode()+newCode().slice(0,3))}],["🔑 Join with room code",function(){$("code").value="";$("jd").style.display="flex";setTimeout(function(){$("code").focus()},50)}],["Cancel"]])};
   $("join").onclick=function(){$("jd").style.display="none";enter($("code").value)};
   $("code").addEventListener("keydown",function(e){if(e.key==="Enter"){$("jd").style.display="none";enter($("code").value)}});
 
@@ -2613,13 +2721,15 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   try{if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register("sw.js").catch(function(){})}catch(e){}
   // chat khulne ke baad: jo msgs door se delete hue wo hatao, aur apne msgs ke tick refresh karo
   function reconcile(myRef,id){
+    // sirf wahi msgs hatao jo fetch shuru hone se PEHLE se the (naya bheja hua msg kabhi na hate)
+    var before={};cacheArr.forEach(function(x){before[x.k]=1});
     try{
       fetch(firebaseConfig.databaseURL+"/rooms/"+encodeURIComponent(id)+"/messages.json?shallow=true")
         .then(function(r){return r.json()}).then(function(o){
           if(ref!==myRef)return;
           if(o&&typeof o==="object"&&o.error)return;
           var live=o||{};
-          cacheArr.slice().forEach(function(x){if(!live[x.k]){removeEl(x.k)}});
+          cacheArr.slice().forEach(function(x){if(before[x.k]&&!live[x.k]&&!pend[x.k]){removeEl(x.k)}});
         }).catch(function(){});
     }catch(e){}
     var mine=Object.keys(info).filter(function(k){var f=info[k];return f.mine&&!(cnt(f.d.seen)>0)}).slice(-30);
@@ -2640,12 +2750,12 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(!configured){err("Firebase is not configured. Add firebaseConfig in the file.");return}
     err("");
     closeChat();
-    isDM=!!o.dm;curOther=o.other||"";curCode=id;
+    isDM=!!o.dm;curOther=o.other||"";curCode=id;curGrp=o.group||"";
     if(isDM){
       var cs=getC();
       
       curClr=parseInt(localStorage.getItem("clr_"+id)||"0",10)||0;
-    }else{addRecent(id);curClr=0}
+    }else{if(!o.group)addRecent(id);curClr=0}
     els={};info={};sentMark={};eating={};pres={};typOthers={};lastDay="";
     oldKey="";oldBusy=false;oldDone=false;oldSpin(false);
     loadHidden(id);
@@ -2653,10 +2763,14 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     fit();
     $("msgs").innerHTML="";
     $("hav").textContent="";
-    $("dgBtn").style.display=isDM?"":"none";
+    $("dgBtn").style.display=isDM?"":"none";$("ggBtn").style.display=curGrp?"":"none";
     $("txt").value="";updSend();
     if(isDM){
       $("who").textContent=o.title||"Guest";
+      $("codeBox").style.display="none";
+    }else if(curGrp){
+      updHdp();
+      $("who").textContent=o.title||"Group";
       $("codeBox").style.display="none";
     }else{
       updHdp();
@@ -2678,6 +2792,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       nkSet(curOther,nickOf(curOther));
     }
     ref=db.ref("rooms/"+id+"/messages");
+    if(curGrp)ggWatch(curGrp);
     var myRef=ref;
     cacheId=id;cacheArr=[];
     function tv(d){return typeof d.t==="number"?d.t:9e15}
@@ -2758,9 +2873,10 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     u.querySelector(".fg").style.strokeDashoffset=String(50.27*(1-Math.max(.06,Math.min(1,p))));
   }
   function pushMsg(o,fm){
+    var gg1=curGrp;
     if(RP){o.rp={k:RP.k,u:RP.u,c:RP.c,n:RP.n,x:RP.x,y:RP.y};clearReply()}
     var r=ref.push(),k=r.key;pend[k]=1;
-    function done(){delete pend[k];setProg(k,null);setTick(k);if(isDM&&curOther)pushNotify(curOther,o)}
+    function done(){delete pend[k];setProg(k,null);setTick(k);if(isDM&&curOther)pushNotify(curOther,o,k);else if(gg1)pushGroup(o,k,gg1)}
     function fail(){delete pend[k];setProg(k,null);if(info[k]){removeEl(k)}sys(fm)}
     function viaSdk(){r.set(o).then(done).catch(fail)}
     // chhote msgs normal tareeke se; bade (photo/video/file) REST upload se taaki asli progress dikhe
@@ -4124,7 +4240,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
 
   // ---- back button: sirf upar wali screen band ho ----
   (function(){
-    var IDS=["chat","selBar","menu","dlg","pv","us","jd","ep","cr","em","pc","fg","ttOv","dgOv","viewer"],stack=[],depth=0,skip=0,pp=false;
+    var IDS=["chat","selBar","menu","dlg","pv","us","jd","ep","cr","em","pc","fg","ttOv","dgOv","gcr","ggOv","viewer"],stack=[],depth=0,skip=0,pp=false;
     function vis(id){var e=$(id);return !!(e&&e.style.display&&e.style.display!=="none")}
     function reconcile(){
       IDS.forEach(function(id){
@@ -4138,8 +4254,6 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     IDS.forEach(function(id){var e=$(id);if(e)mo.observe(e,{attributes:true,attributeFilter:["style"]})});
     function closeTop(){
       depth=Math.max(0,depth-1);
-      var si=stack.indexOf("selBar");
-      if(selMode&&si>=0){stack.splice(si,1);exitSel();return}
       var top=stack.pop();
       if(top==="chat")goHome();else if(top==="selBar")exitSel();else $(top).style.display="none";
     }
@@ -4160,6 +4274,488 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       });
     }
   })();
+
+  // ======== GROUPS + GROUP DRAW & GUESS ========
+  var GRPS={},GW=null,GINFO={},curGrp="",GRW={};
+  function startGroups(){
+    stopGroups();if(!db||!uid)return;
+    GW=db.ref("rooms/_ug/"+uid);
+    GW.on("value",function(s){GRPS=s.val()||{};renderGroups();grpWatchAll()},function(){});
+  }
+  function stopGroups(){
+    if(GW){try{GW.off()}catch(e){}GW=null}
+    Object.keys(GRW).forEach(function(g){try{GRW[g].off()}catch(e){}});GRW={};
+    GRPS={};GINFO={};
+    try{renderGroups()}catch(e){}
+  }
+  function grpInfo(g){
+    if(GINFO[g])return Promise.resolve(GINFO[g]);
+    return db.ref("rooms/_grp/"+g).once("value").then(function(s){var v=s.val();if(v)GINFO[g]=v;return v});
+  }
+  function renderGroups(){
+    var box=$("glist");if(!box)return;box.innerHTML="";
+    var ks=Object.keys(GRPS).sort(function(a,b){return (GRPS[b].t||0)-(GRPS[a].t||0)});
+    if(!ks.length)return;
+    $("empty").style.display="none";
+    var h=document.createElement("h3");h.textContent="Groups";box.appendChild(h);
+    ks.forEach(function(g){
+      var o=GRPS[g]||{};
+      var r=document.createElement("div");r.className="rc";
+      var av=document.createElement("div");av.className="av";initialAv(av,o.name||"Group");
+      var aw=document.createElement("div");aw.className="avw";aw.appendChild(av);
+      var nn=document.createElement("div");nn.className="nn";
+      var nl=document.createElement("div");nl.className="nl";
+      var bn=document.createElement("b");bn.textContent=o.name||"Group";nl.appendChild(bn);
+      var sm=document.createElement("small");sm.style.letterSpacing="0";sm.textContent=o.lm||"👥 Group";
+      nn.appendChild(nl);nn.appendChild(sm);
+      r.appendChild(aw);r.appendChild(nn);
+      r.onclick=function(){openGroup(g)};
+      box.appendChild(r);
+    });
+  }
+  function openGroup(g){
+    var o=GRPS[g];if(!o)return;
+    delete GINFO[g];grpInfo(g).catch(function(){});
+    enterChat("g_"+g,{dm:false,group:g,title:o.name||"Group"});
+  }
+  // group ke naye msgs: app khula ho (kisi bhi screen par) to delivered tick + toast
+  function grpWatchAll(){
+    if(!db||!uid)return;
+    Object.keys(GRW).forEach(function(g){if(!GRPS[g]){try{GRW[g].off()}catch(e){}delete GRW[g]}});
+    Object.keys(GRPS).forEach(function(g){
+      if(GRW[g])return;
+      var q=db.ref("rooms/g_"+g+"/messages").limitToLast(5),ready=false;GRW[g]=q;
+      q.on("child_added",function(sn){
+        var d=sn.val()||{};if(!d||d.uid===uid||d.uid==null)return;
+        if(!(d.delivered&&Object.keys(d.delivered).length))db.ref("rooms/g_"+g+"/messages/"+sn.key+"/delivered/"+uid).set(true).catch(function(){});
+        if(!ready)return;
+        var viewing=curGrp===g&&document.visibilityState==="visible"&&$("chat").style.display!=="none";
+        if(viewing||!ntfOn())return;
+        var gn=(GRPS[g]&&GRPS[g].name)||"Group";
+        try{if(navigator.vibrate)navigator.vibrate(150)}catch(e){}
+        if(document.visibilityState==="visible")toast("💬 "+gn+" · "+String(d.name||"").slice(0,20)+": "+msgPrev(d));
+      },function(){});
+      q.once("value",function(){ready=true},function(){ready=true});
+    });
+  }
+  // ---- group banao / members add ----
+  var gcSel={},gcMode="new",gcGid="";
+  function gcCnt(){$("gcSub").textContent=Object.keys(gcSel).filter(function(k){return gcSel[k]}).length+" selected"}
+  function gcOpen(mode,g){
+    gcMode=mode;gcGid=g||"";gcSel={};
+    $("gcT").textContent=mode==="new"?"👥 New group":"➕ Add members";
+    $("gcName").style.display=mode==="new"?"":"none";$("gcName").value="";
+    $("gcGo").textContent=mode==="new"?"Create group":"Add";
+    $("gcList").innerHTML="";gcCnt();
+    $("gcr").style.display="flex";
+    function fill(have){
+      var c=getC(),box=$("gcList");box.innerHTML="";
+      var ks=Object.keys(c).filter(function(k){return c[k].st==="ok"&&!have[k]});
+      ks.sort(function(a,b){return String(dispName(a,c[a].name)).localeCompare(String(dispName(b,c[b].name)))});
+      if(!ks.length){var e=document.createElement("div");e.className="gcn";e.textContent="No contacts to add";box.appendChild(e)}
+      ks.forEach(function(k){
+        var r=document.createElement("div");r.className="gcr";
+        var av=document.createElement("div");av.className="av";av.style.cssText="width:38px;height:38px;font-size:18px;flex:none";
+        loadDp(c[k]);fillAv(av,c[k]);
+        var nm=document.createElement("b");nm.textContent=dispName(k,c[k].name);
+        var ck=document.createElement("span");ck.className="gck";
+        r.appendChild(av);r.appendChild(nm);r.appendChild(ck);
+        r.onclick=function(){gcSel[k]=!gcSel[k];r.classList.toggle("on",!!gcSel[k]);ck.textContent=gcSel[k]?"✓":"";gcCnt()};
+        box.appendChild(r);
+      });
+    }
+    if(mode==="add")grpInfo(g).then(function(i){fill((i&&i.m)||{})}).catch(function(){fill({})});else fill({});
+    if(mode==="new")setTimeout(function(){try{$("gcName").focus()}catch(e){}},80);
+  }
+  function gcGo(){
+    var ks=Object.keys(gcSel).filter(function(k){return gcSel[k]});
+    if(!db||!uid)return;
+    if(gcMode==="new"){
+      var name=$("gcName").value.trim().slice(0,25);
+      if(!name){toast("Enter a group name");return}
+      if(!ks.length){toast("Select at least 1 member");return}
+      var g=db.ref("rooms/_grp").push().key,m={},t=now(),u={};
+      m[uid]=myName||"Me";ks.forEach(function(k){m[k]=nameOf(k)});
+      u["rooms/_grp/"+g]={name:name,owner:uid,t:t,m:m};
+      Object.keys(m).forEach(function(k){u["rooms/_ug/"+k+"/"+g]={name:name,t:t,lm:"👥 Group created"}});
+      $("gcr").style.display="none";
+      db.ref().update(u).then(function(){
+        GINFO[g]={name:name,owner:uid,t:t,m:m};
+        if(!GRPS[g])GRPS[g]={name:name,t:t,lm:"👥 Group created"};
+        renderGroups();openGroup(g);
+      }).catch(function(){toast("Could not create group")});
+    }else{
+      if(!ks.length){toast("Select at least 1 member");return}
+      var g2=gcGid,t2=now(),u2={};
+      grpInfo(g2).then(function(i){
+        ks.forEach(function(k){u2["rooms/_grp/"+g2+"/m/"+k]=nameOf(k);u2["rooms/_ug/"+k+"/"+g2]={name:(i&&i.name)||"Group",t:t2,lm:"👥 You were added"}});
+        return db.ref().update(u2);
+      }).then(function(){delete GINFO[g2];grpInfo(g2).catch(function(){});toast("Members added")}).catch(function(){toast("Could not add members")});
+      $("gcr").style.display="none";
+    }
+  }
+  function grpLeave(g){
+    goHome();
+    var u={};u["rooms/_ug/"+uid+"/"+g]=null;u["rooms/_grp/"+g+"/m/"+uid]=null;
+    db.ref().update(u).catch(function(){});
+    toast("You left the group");
+  }
+  // group msg ka notification (sab members ko) + list update
+  function pushGroup(o,k,g){
+    if(!g||!db||!uid)return;
+    var pv=msgPrev(o);
+    function go(gi){
+      if(!gi)return;
+      var ms=Object.keys(gi.m||{}),others=ms.filter(function(x){return x!==uid}),u={},t=now();
+      ms.forEach(function(x){
+        u["rooms/_ug/"+x+"/"+g+"/name"]=gi.name||"Group";
+        u["rooms/_ug/"+x+"/"+g+"/t"]=t;
+        u["rooms/_ug/"+x+"/"+g+"/lm"]=(x===uid?"You":(myName||"Someone"))+": "+pv;
+      });
+      db.ref().update(u).catch(function(){});
+      if(!PUSH_URL||!others.length)return;
+      try{fetch(PUSH_URL,{method:"POST",mode:"no-cors",keepalive:true,headers:{"Content-Type":"text/plain"},
+        body:JSON.stringify({key:PUSH_KEY,grp:g,gn:gi.name||"Group",to:others,k:uid,from:myName||(me&&me.name)||"Chatly",un:(me&&me.un)||"",type:"text",text:String(pv).slice(0,120),m:k,room:"g_"+g})}).catch(function(){})}catch(e){}
+    }
+    if(GINFO[g])go(GINFO[g]);else grpInfo(g).then(go).catch(function(){});
+  }
+
+  // ---- group Draw & Guess (max 6) ----
+  var GG=null,ggRefV=null,ggW=null,ggTick=null,ggGid="",ggTurn=-1,ggStR=null,ggStW=null,ggFdR=null,ggFdW=null,ggInvFor="",ggAdvT=0;
+  var ggCol="#111111",ggSz=8,ggPts=[],ggSentN=0,ggDown=false,ggFT=null,ggToolFor="";
+  var GGCOL=["#111111","#e53935","#fb8c00","#fdd835","#43a047","#1e88e5","#8e24aa","#ffffff"];
+  var ggCv=$("ggCv"),ggCx=ggCv.getContext("2d");
+  var GG_MAX=6;
+  function ggNorm(s){return String(s||"").toLowerCase().replace(/[^a-z0-9\u0600-\u06ff ]/g,"").replace(/\s+/g," ").trim()}
+  function ggMask(w,fr){
+    var a=Array.from(String(w||"")),rev={};
+    if(fr>0.5&&a.length>2)rev[0]=1;
+    if(fr>0.75&&a.length>4)rev[Math.floor(a.length/2)]=1;
+    return a.map(function(ch,i){return ch===" "?"   ":(rev[i]?ch.toUpperCase():"_")}).join(" ");
+  }
+  function ggOrder(g){var o=(g&&g.o)||[];if(!Array.isArray(o))o=Object.keys(o).sort(function(a,b){return a-b}).map(function(k){return o[k]});return o}
+  function ggPl(g){return (g&&g.p)||{}}
+  function ggCount(g){return Object.keys(ggPl(g)).length}
+  // ---- pure state changes (transactions) ----
+  function txJoin(c,u,nm){
+    if(!c||(c.st!=="lobby"&&c.st!=="play"))return;
+    c.p=c.p||{};if(c.p[u])return c;
+    if(Object.keys(c.p).length>=GG_MAX)return;
+    c.p[u]={n:nm,s:0};return c;
+  }
+  function txLeave(c,u){
+    if(!c)return;
+    if(!c.p||!c.p[u])return c;
+    delete c.p[u];
+    var ids=Object.keys(c.p);
+    if(!ids.length)return null;
+    if(c.host===u){c.host=ids[0];c.hn=c.p[ids[0]].n}
+    if(c.st==="play"&&ids.length<2){c.st="end";c.te=now()}
+    return c;
+  }
+  function txBegin(c,u){
+    if(!c||c.st!=="lobby"||c.host!==u)return;
+    var ids=Object.keys(c.p||{});if(ids.length<2)return;
+    for(var i=ids.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=ids[i];ids[i]=ids[j];ids[j]=t}
+    var R=ids.length<=3?2:1;
+    c.st="play";c.o=ids;c.tn=0;c.tt=ids.length*R;c.d=ids[0];c.w=pickWord("","mix");c.t0=now();c.du=70;
+    delete c.sv;delete c.ls;
+    ids.forEach(function(k){c.p[k].s=0});
+    return c;
+  }
+  function txAdvance(c,tn){
+    if(!c||c.st!=="play"||c.tn!==tn)return;
+    var ord=ggOrder(c),p=c.p||{},next=c.tn+1;
+    while(next<c.tt&&!p[ord[next%ord.length]])next++;
+    if(next>=c.tt||Object.keys(p).length<2){c.st="end";c.te=now();return c}
+    c.tn=next;c.d=ord[next%ord.length];c.w=pickWord(c.w,"mix");c.t0=now();
+    delete c.sv;delete c.ls;
+    return c;
+  }
+  function txSolve(c,u,tn){
+    if(!c||c.st!=="play"||c.tn!==tn||c.d===u||!c.p||!c.p[u])return;
+    c.sv=c.sv||{};if(c.sv[u])return;
+    var rank=Object.keys(c.sv).length,pts=Math.max(30,100-rank*20);
+    c.sv[u]=pts;c.ls=now();
+    c.p[u].s=(c.p[u].s||0)+pts;
+    if(c.p[c.d])c.p[c.d].s=(c.p[c.d].s||0)+20;
+    return c;
+  }
+  function txAgain(c,u){
+    if(!c||c.st!=="end"||c.host!==u)return;
+    c.st="lobby";c.id=now();
+    ["o","tn","tt","d","w","t0","sv","ls","te","du"].forEach(function(k){delete c[k]});
+    Object.keys(c.p||{}).forEach(function(k){c.p[k].s=0});
+    return c;
+  }
+  function ggFresh(g){
+    if(!g)return false;
+    if(g.st==="lobby")return now()-(g.id||0)<20*60*1000;
+    if(g.st==="play")return now()-(g.t0||g.id||0)<4*60*1000;
+    return false;
+  }
+  // ---- firebase wiring ----
+  function ggRef(){return db.ref("rooms/g_"+ggGid+"/game")}
+  function ggOpen(){return $("ggOv").style.display==="flex"}
+  function ggWatch(gid){
+    ggStop();ggGid=gid;if(!db)return;
+    ggRefV=ggRef();
+    ggW=ggRefV.on("value",function(s){var old=GG;GG=s.val();ggOnState(old,GG)},function(){});
+    ggTick=setInterval(ggTickFn,1000);
+  }
+  function ggStopTurn(){
+    if(ggStR&&ggStW){try{ggStR.off("child_added",ggStW)}catch(e){}}
+    if(ggFdR&&ggFdW){try{ggFdR.off("child_added",ggFdW)}catch(e){}}
+    ggStR=ggStW=ggFdR=ggFdW=null;ggTurn=-1;
+  }
+  function ggStop(){
+    if(ggRefV&&ggW){try{ggRefV.off("value",ggW)}catch(e){}}
+    ggRefV=null;ggW=null;GG=null;ggGid="";ggStopTurn();
+    if(ggTick){clearInterval(ggTick);ggTick=null}
+    if(ggFT){clearInterval(ggFT);ggFT=null}
+    ggDown=false;ggPts=[];ggSentN=0;ggInvFor="";ggToolFor="";
+    try{$("ggOv").style.display="none";$("ggBanner").style.display="none";$("gPop").style.display="none"}catch(e){}
+  }
+  function ggOnState(old,g){
+    var live=ggFresh(g);
+    if(live&&!ggPl(g)[uid]&&ggInvFor!==String(g.id)&&!ggOpen()&&document.visibilityState==="visible"&&$("chat").style.display!=="none"&&ggCount(g)<GG_MAX&&g.host!==uid){
+      ggInvFor=String(g.id);ggInvite(g);
+    }
+    if(g&&g.st==="play"&&live){
+      if(ggTurn!==g.tn){
+        var oldw=(old&&old.st==="play"&&old.tn!==g.tn&&old.d!==uid)?old.w:"";
+        ggStartTurn(g);
+        if(oldw)ggFeedAdd({s:1,x:"The word was: "+oldw});
+      }
+    }else if(ggTurn!==-1)ggStopTurn();
+    ggRender();
+  }
+  function ggClear(){ggCx.fillStyle="#fff";ggCx.fillRect(0,0,ggCv.width,ggCv.height)}
+  function ggLine(p,col,w){
+    if(!p||p.length<2)return;
+    var S=ggCv.width/1000;
+    ggCx.strokeStyle=col||"#111";ggCx.lineWidth=(w||8)*ggCv.width/600;ggCx.lineCap="round";ggCx.lineJoin="round";
+    ggCx.beginPath();ggCx.moveTo(p[0]*S,p[1]*S);
+    if(p.length<4)ggCx.lineTo(p[0]*S+.1,p[1]*S);
+    for(var i=2;i+1<p.length;i+=2)ggCx.lineTo(p[i]*S,p[i+1]*S);
+    ggCx.stroke();
+  }
+  function ggStartTurn(g){
+    ggStopTurn();ggTurn=g.tn;ggClear();
+    $("ggFeed").innerHTML="";ggToolFor="";
+    var base="rooms/g_"+ggGid+"/";
+    ggStR=db.ref(base+"gs/"+g.tn);
+    ggStW=ggStR.on("child_added",function(s){
+      var d=s.val()||{};if(d.u===uid)return;
+      if(d.x){ggClear();return}
+      ggLine(d.p,d.c,d.w);
+    });
+    ggFdR=db.ref(base+"gf/"+g.tn).limitToLast(8);
+    ggFdW=ggFdR.on("child_added",function(s){ggFeedAdd(s.val()||{})});
+  }
+  function ggFeedAdd(d){
+    var f=$("ggFeed"),r=document.createElement("div");
+    if(d.s){r.className="gs";r.textContent="ℹ️ "+d.x}
+    else if(d.ok){r.className="ok";r.textContent="✅ "+(d.n||"Someone")+" guessed it! +"+(d.pts||0)}
+    else r.textContent=(d.n||"?")+": "+(d.x||"");
+    f.appendChild(r);
+    while(f.children.length>6)f.removeChild(f.firstChild);
+  }
+  // ---- drawing (sirf drawer) ----
+  function ggCanDraw(){return !!(GG&&GG.st==="play"&&GG.d===uid&&ggOpen())}
+  function ggPt(e){
+    var r=ggCv.getBoundingClientRect();
+    return [Math.max(0,Math.min(1000,Math.round((e.clientX-r.left)/r.width*1000))),Math.max(0,Math.min(1000,Math.round((e.clientY-r.top)/r.height*1000)))];
+  }
+  function ggSend(){
+    var n=ggPts.length;
+    if(n>ggSentN&&GG&&GG.st==="play"&&GG.d===uid){
+      var chunk=ggSentN>=2?ggPts.slice(ggSentN-2):ggPts.slice();
+      db.ref("rooms/g_"+ggGid+"/gs/"+GG.tn).push({u:uid,c:ggCol,w:ggSz,p:chunk}).catch(function(){});
+      ggSentN=n;
+    }
+    if(!ggDown){if(ggFT){clearInterval(ggFT);ggFT=null}ggPts=[];ggSentN=0}
+  }
+  ggCv.addEventListener("pointerdown",function(e){
+    if(!ggCanDraw())return;
+    e.preventDefault();try{ggCv.setPointerCapture(e.pointerId)}catch(x){}
+    ggDown=true;var p=ggPt(e);ggPts=[p[0],p[1]];ggSentN=0;ggLine(ggPts,ggCol,ggSz);
+    if(!ggFT)ggFT=setInterval(ggSend,90);
+  });
+  ggCv.addEventListener("pointermove",function(e){
+    if(!ggDown)return;e.preventDefault();
+    var p=ggPt(e),n=ggPts.length;
+    if(Math.abs(p[0]-ggPts[n-2])+Math.abs(p[1]-ggPts[n-1])<3)return;
+    ggLine([ggPts[n-2],ggPts[n-1],p[0],p[1]],ggCol,ggSz);
+    ggPts.push(p[0],p[1]);
+  });
+  function ggUp(){if(!ggDown)return;ggDown=false;ggSend()}
+  ggCv.addEventListener("pointerup",ggUp);ggCv.addEventListener("pointercancel",ggUp);
+  function ggTools(){
+    var t=$("ggTools");t.innerHTML="";
+    GGCOL.forEach(function(c){
+      var i=document.createElement("i");i.style.background=c;if(c===ggCol)i.className="on";
+      if(c==="#ffffff")i.textContent="⌫";
+      i.onclick=function(){ggCol=c;ggTools()};t.appendChild(i);
+    });
+    [["S",4],["M",9],["L",18]].forEach(function(s){
+      var i=document.createElement("i");i.className="sz"+(ggSz===s[1]?" on":"");i.textContent=s[0];
+      i.onclick=function(){ggSz=s[1];ggTools()};t.appendChild(i);
+    });
+    var cl=document.createElement("i");cl.className="sz";cl.textContent="🗑";
+    cl.onclick=function(){
+      if(!ggCanDraw())return;
+      ggClear();db.ref("rooms/g_"+ggGid+"/gs/"+GG.tn).push({u:uid,x:1}).catch(function(){});
+    };
+    t.appendChild(cl);
+  }
+  // ---- actions ----
+  function ggCreate(){
+    if(!db||!ggGid)return;
+    var g=GG;
+    if(g&&ggFresh(g)){ggShow();return}
+    var p={};p[uid]={n:myName||"Me",s:0};
+    db.ref("rooms/g_"+ggGid+"/gs").remove().catch(function(){});
+    db.ref("rooms/g_"+ggGid+"/gf").remove().catch(function(){});
+    ggRef().set({id:now(),st:"lobby",host:uid,hn:myName||"Me",p:p}).then(function(){
+      ggShow();
+      var sv=RP;RP=null;
+      try{pushMsg({cid:cid,uid:uid,name:myName,type:"sys",lv:"i",text:"🎨 "+(myName||"Someone")+" started Draw & Guess — tap the banner on top to join!",t:firebase.database.ServerValue.TIMESTAMP},"Could not announce the game")}finally{RP=sv}
+    }).catch(function(){toast("Could not start the game")});
+  }
+  function ggJoin(openAfter){
+    if(!GG)return;
+    ggRef().transaction(function(c){return txJoin(c,uid,myName||"Me")},function(e,ok,sn){
+      if(e)return;
+      var v=sn&&sn.val();
+      if(v&&ggPl(v)[uid]){if(openAfter)ggShow()}
+      else toast("Game is full (max "+GG_MAX+" players)");
+    },false);
+  }
+  function ggBegin(){
+    if(!GG||GG.host!==uid||ggCount(GG)<2)return;
+    Promise.all([
+      db.ref("rooms/g_"+ggGid+"/gs").remove().catch(function(){}),
+      db.ref("rooms/g_"+ggGid+"/gf").remove().catch(function(){})
+    ]).then(function(){ggRef().transaction(function(c){return txBegin(c,uid)},null,false)});
+  }
+  function ggAgain(){ggRef().transaction(function(c){return txAgain(c,uid)},null,false)}
+  function ggLeave(){
+    ggRef().transaction(function(c){return txLeave(c,uid)},null,false);
+    $("ggOv").style.display="none";
+  }
+  function ggAdvance(tn){ggAdvT=now();ggRef().transaction(function(c){return txAdvance(c,tn)},null,false)}
+  function ggSubmit(){
+    var inp=$("ggIn"),t=inp.value.trim();inp.value="";
+    var g=GG;
+    if(!t||!g||g.st!=="play"||g.d===uid||!ggPl(g)[uid]||(g.sv&&g.sv[uid]))return;
+    var tn=g.tn;
+    if(ggNorm(t)===ggNorm(g.w)){
+      ggRef().transaction(function(c){return txSolve(c,uid,tn)},function(e,ok,sn){
+        if(e||!ok)return;
+        var v=sn.val()||{};
+        db.ref("rooms/g_"+ggGid+"/gf/"+tn).push({u:uid,n:myName,ok:1,pts:(v.sv||{})[uid]||0}).catch(function(){});
+      },false);
+    }else{
+      db.ref("rooms/g_"+ggGid+"/gf/"+tn).push({u:uid,n:myName,x:t.slice(0,30)}).catch(function(){});
+    }
+  }
+  function ggShow(){$("ggOv").style.display="flex";ggRender()}
+  function ggInvite(g){
+    var T=(g.hn||"Someone")+" started Draw & Guess";
+    gamePop("🎨",T,"Join the drawing game? ("+ggCount(g)+"/"+GG_MAX+" players)");
+    var a=$("gPopAct");a.innerHTML="";a.style.display="block";$("gPopOk").style.display="none";
+    function done(){$("gPop").style.display="none";a.style.display="none";$("gPopOk").style.display=""}
+    a.appendChild(ttBtn("Join","",function(){done();ggJoin(true)}));
+    a.appendChild(ttBtn("Not now","alt",done));
+  }
+  // ---- UI ----
+  function ggRender(){
+    var g=GG,b=$("ggBanner"),live=ggFresh(g);
+    if(curGrp&&live){
+      var n=ggCount(g),inG=!!ggPl(g)[uid];
+      b.innerHTML="";b.style.display="flex";
+      var sp=document.createElement("span");
+      sp.textContent="🎨 Draw & Guess · "+(g.st==="lobby"?"Waiting for players":"Game in progress")+" · "+n+"/"+GG_MAX;
+      var bt=document.createElement("button");bt.type="button";
+      bt.textContent=inG?"Open":(n<GG_MAX?"Join":"Watch");
+      bt.onclick=function(){if(inG||n>=GG_MAX)ggShow();else ggJoin(true)};
+      b.appendChild(sp);b.appendChild(bt);
+    }else b.style.display="none";
+    if(!ggOpen())return;
+    if(!g||(!live&&g.st!=="end")){$("ggOv").style.display="none";return}
+    var pl=ggPl(g),inG2=!!pl[uid],play=g.st==="play",host=g.host===uid;
+    $("ggPlay").style.display=play?"block":"none";
+    $("ggWord").style.display=play?"":"none";$("ggS").style.display=play?"":"none";
+    var body=$("ggBody"),act=$("ggAct");body.innerHTML="";act.innerHTML="";
+    if(g.st==="lobby"){
+      $("ggInfo").textContent="Players "+ggCount(g)+"/"+GG_MAX;
+      var tp=document.createElement("p");tp.style.cssText="margin:4px 0 8px;font-size:14px";
+      tp.textContent=host?(ggCount(g)<2?"Waiting for at least 1 more player…":"Everyone ready? Start the game!"):"Waiting for "+(g.hn||"host")+" to start…";
+      body.appendChild(tp);
+      if(host&&ggCount(g)>=2)act.appendChild(ttBtn("▶ Start game","",ggBegin));
+      if(!inG2&&ggCount(g)<GG_MAX)act.appendChild(ttBtn("Join game","",function(){ggJoin(false)}));
+    }else if(g.st==="end"){
+      $("ggInfo").textContent="🏁 Game over";
+      var te=document.createElement("p");te.style.cssText="margin:4px 0 8px;font-size:14px";
+      te.textContent=host?"Play another round?":"Waiting for "+(g.hn||"host")+"…";body.appendChild(te);
+      if(host)act.appendChild(ttBtn("🔁 Play again","",ggAgain));
+    }else{
+      // play
+      var drawer=g.d===uid,solved=!!(g.sv&&g.sv[uid]);
+      $("ggGuess").style.display=(inG2&&!drawer&&!solved)?"flex":"none";
+      $("ggTools").style.display=drawer?"flex":"none";
+      $("ggCv").style.cursor=drawer?"crosshair":"default";
+      if(drawer){var key=g.id+"_"+g.tn;if(ggToolFor!==key){ggToolFor=key;ggTools()}}
+      if(!inG2&&ggCount(g)<GG_MAX)act.appendChild(ttBtn("Join game","",function(){ggJoin(false)}));
+      ggTickUi();
+    }
+    if(inG2)act.appendChild(ttBtn("🚪 Leave game","alt",ggLeave));
+    ggLb();
+  }
+  function ggLb(){
+    var g=GG,box=$("ggLb");box.innerHTML="";if(!g)return;
+    var pl=ggPl(g),ids=Object.keys(pl).sort(function(a,b){return (pl[b].s||0)-(pl[a].s||0)});
+    var med=["🥇","🥈","🥉"];
+    ids.forEach(function(k,i){
+      var r=document.createElement("div");r.className="ggp"+(k===uid?" me":"");
+      var rk=document.createElement("span");rk.textContent=(g.st==="end"&&i<3)?med[i]:String(i+1);rk.style.cssText="width:24px;flex:none";
+      var nm=document.createElement("b");nm.textContent=pl[k].n||"Player";
+      var mk=document.createElement("span");mk.style.flex="none";
+      mk.textContent=(g.st==="play"&&g.d===k)?"✏️":((g.st==="play"&&g.sv&&g.sv[k])?"✅":"");
+      var sc=document.createElement("span");sc.className="sc";sc.textContent=(pl[k].s||0);
+      r.appendChild(rk);r.appendChild(nm);r.appendChild(mk);r.appendChild(sc);box.appendChild(r);
+    });
+  }
+  function ggTickUi(){
+    var g=GG;if(!g||g.st!=="play")return;
+    var du=g.du||70,el=Math.max(0,(now()-(g.t0||now()))/1000),left=Math.max(0,Math.ceil(du-el));
+    var pl=ggPl(g),drawer=g.d===uid,solved=!!(g.sv&&g.sv[uid]);
+    $("ggInfo").textContent="Turn "+((g.tn||0)+1)+"/"+g.tt+" · ⏱ "+left+"s";
+    var w=String(g.w||"");
+    $("ggWord").textContent=drawer?("✏️ "+w.toUpperCase()):(solved?("✅ "+w.toUpperCase()):ggMask(w,el/du));
+    $("ggS").textContent=drawer?"Draw this word — others are guessing":((pl[g.d]&&pl[g.d].n)||"Someone")+" is drawing";
+  }
+  function ggTickFn(){
+    var g=GG;if(!g||g.st!=="play"){return}
+    if(!ggFresh(g))return;
+    var du=g.du||70,el=(now()-(g.t0||now()))/1000,pl=ggPl(g);
+    var prio=(uid===g.d||uid===g.host),delay=prio?0:5;
+    var need=Math.max(0,Object.keys(pl).length-1),got=Object.keys(g.sv||{}).length;
+    var allDone=need>0&&got>=need&&now()-(g.ls||0)>2000+delay*1000;
+    var gone=!pl[g.d]&&el>3+delay;
+    if((el>=du+delay||allDone||gone)&&now()-ggAdvT>2500&&pl[uid])ggAdvance(g.tn);
+    if(ggOpen())ggTickUi();
+  }
+  $("ggX").onclick=function(){$("ggOv").style.display="none"};
+  $("ggGo").onclick=ggSubmit;
+  $("ggIn").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();ggSubmit()}});
+  $("ggBtn").onclick=function(){
+    if(!curGrp)return;
+    if(GG&&ggFresh(GG)){var inG=!!ggPl(GG)[uid];if(inG||ggCount(GG)>=GG_MAX)ggShow();else ggJoin(true)}
+    else ggCreate();
+  };
+  $("gcGo").onclick=gcGo;$("gcX").onclick=function(){$("gcr").style.display="none"};
 
   // ---- invites: chat band ho tab bhi popup ----
   var INVW={};
@@ -4218,6 +4814,8 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
 <div id="stg" class="ov"><div class="box glass"><h3>⚙ Chatly Settings</h3>
 <div class="srw"><span>🔔 Notifications</span><div class="sw" id="swNtf"></div></div>
 <div id="ntfH" style="display:none;font-size:12px;color:var(--sub);margin:-6px 0 12px"></div>
+<div class="srw" id="keepRow" style="display:none"><span>🔋 Always running</span><div class="sw" id="swKeep"></div></div>
+<div id="keepH" style="display:none;font-size:12px;color:var(--sub);margin:-6px 0 12px">App background mein bhi chalti rahe (ek chhoti silent notification dikhegi). Msgs foran aate hain aur ✓✓ lagta hai.</div>
 <div class="srw" style="margin-bottom:8px"><span>🎭 Style</span></div>
 <div class="thm" id="sty"><button type="button" data-s="glass">🔮 Glass</button><button type="button" data-s="clean">▫️ Clean</button></div>
 <div class="srw" style="margin-bottom:8px"><span>🌗 Mode</span></div>
@@ -4277,6 +4875,11 @@ function nu(){nt.classList.toggle('on',nv()===1);var m='';if(nv()===1){if(!('Not
 nt.onclick=function(){var v=nv()===1?0:1;try{localStorage.setItem('ntf',JSON.stringify(v))}catch(e){}
 if(v&&'Notification' in window&&Notification.permission==='default'){try{var p=Notification.requestPermission(function(){nu();if(window.__pushInit)window.__pushInit()});if(p&&p.then)p.then(function(){nu();if(window.__pushInit)window.__pushInit()})}catch(e){}}
 if(v){if(window.__pushInit)window.__pushInit()}else{if(window.__pushOff)window.__pushOff()}nu()};
+var kp=null;try{if(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())kp=Capacitor.Plugins&&Capacitor.Plugins.ScreenGuard}catch(e){}
+var kr=document.getElementById('keepRow'),ks=document.getElementById('swKeep'),kh=document.getElementById('keepH');
+function kv(){try{return JSON.parse(localStorage.getItem('keepAlive')||'1')}catch(e){return 1}}
+if(kp&&kr){kr.style.display='';kh.style.display='';ks.classList.toggle('on',kv()===1);
+ks.onclick=function(){var v=kv()===1?0:1;try{localStorage.setItem('keepAlive',JSON.stringify(v))}catch(e){}ks.classList.toggle('on',v===1);try{kp.keepAlive({on:v===1,ask:v===1})}catch(e){}}}
 document.querySelector('.top h1').addEventListener('click',nu);nu();
 function op(){ov.style.display='flex'}
 document.querySelector('.top h1').addEventListener('click',op);
