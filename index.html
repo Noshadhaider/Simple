@@ -24,6 +24,7 @@ body:after{width:300px;height:300px;background:#7c3aed;opacity:.4;bottom:-80px;r
 .glass{background:var(--glass);border:1px solid var(--bd);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%)}
 
 /* ===== iOS emoji images (Android/Windows par) ===== */
+.m a.lk{color:#5aaeff;text-decoration:underline;word-break:break-all;-webkit-touch-callout:default;-webkit-user-select:text;user-select:text}
 img.emo{display:inline-block;width:1.22em;height:1.22em;vertical-align:-.26em;margin:0 .02em;pointer-events:none;-webkit-user-drag:none}
 
 /* ===== HOME (pehle jaisa) ===== */
@@ -2167,11 +2168,34 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
 
   // ---- message menu ----
   // ---- message edit (WhatsApp jaisa) ----
+  // ---- message text me links clickable ----
+  var URL_RE=/((?:https?:\/\/|www\.)[^\s<>"']+|\b[a-z0-9][a-z0-9-]*(?:\.[a-z0-9-]+)*\.(?:com|net|org|io|pk|in|co|me|app|dev|xyz|info|tv|ly|link|gl|be|ai|edu|gov)\b(?:\/[^\s<>"']*)?)/gi;
+  function linkTxt(el,txt){
+    el.textContent="";
+    URL_RE.lastIndex=0;
+    var last=0,m,any=false;
+    while((m=URL_RE.exec(txt))){
+      var u=m[0],tail="";
+      var mt=/[.,!?;:)\]}'"]+$/.exec(u);
+      if(mt){tail=mt[0];u=u.slice(0,u.length-tail.length)}
+      if(!u)continue;
+      if(m.index>0&&/[@\w]/.test(txt.charAt(m.index-1))&&!/^https?:/i.test(u))continue;
+      if(m.index>last)el.appendChild(document.createTextNode(txt.slice(last,m.index)));
+      var a=document.createElement("a");a.className="lk";a.textContent=u;
+      a.href=/^https?:\/\//i.test(u)?u:"https://"+u;
+      a.target="_blank";a.rel="noopener noreferrer";
+      a.addEventListener("click",function(e){e.stopPropagation()});
+      el.appendChild(a);any=true;
+      last=m.index+u.length;URL_RE.lastIndex=last;
+    }
+    if(last<txt.length)el.appendChild(document.createTextNode(txt.slice(last)));
+    if(!any&&!el.firstChild)el.textContent=txt;
+  }
   var EDK=null,EDIT_MS=15*60*1000;
   function refreshText(key){
     var f=info[key];if(!f||!f.tx||!f.d)return;
     var txt=String(f.d.text||"").slice(0,1000);
-    if(f.tx.textContent!==txt)f.tx.textContent=txt;
+    if(f.tx.textContent!==txt)linkTxt(f.tx,txt);
     var el=els[key];if(el)el.classList.toggle("big",onlyEmoji(txt));
     if(f.d.ed&&f.tmEl&&!f.tmEl.querySelector(".edl")){
       var e=document.createElement("span");e.className="edl";e.textContent="edited";f.tmEl.insertBefore(e,f.tmEl.firstChild);
@@ -2652,7 +2676,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       el.appendChild(fb);
     }else{
       var txt=String(d.text||"").slice(0,1000);
-      var t=document.createElement("div");t.textContent=txt;el.appendChild(t);txEl=t;
+      var t=document.createElement("div");linkTxt(t,txt);el.appendChild(t);txEl=t;
       if(onlyEmoji(txt))el.classList.add("big");
     }
     if((d.type==="image"||d.type==="video")&&d.caption){
