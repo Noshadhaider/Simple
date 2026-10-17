@@ -575,7 +575,7 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
 #attSheet .as-grid button{display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:0;color:var(--text);font-size:14px;padding:0;margin:0}
 #attSheet .as-grid span{width:84px;max-width:100%;height:44px;border-radius:22px;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800}
 #camScr{position:fixed;inset:0;z-index:99995;display:none;background:#000;color:#fff;flex-direction:column}
-#camV{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+#camV{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
 #camScr .cb{position:relative;width:48px;height:48px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:#fff;font-size:21px;display:flex;align-items:center;justify-content:center;padding:0;margin:0}
 #camTop{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 0}
 #camTm{display:none;position:absolute;top:calc(20px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:#e53935;border-radius:14px;padding:3px 12px;font-weight:700;font-size:14px}
@@ -738,7 +738,7 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
   <div id="eErr" style="color:#ff8a8a;font-size:13px;min-height:18px;margin:-4px 0 6px"></div>
   <div class="db"><button class="alt" id="eNo">Cancel</button><button id="eSave">Save</button></div>
 </div></div>
-<div id="cr" class="ov"><div class="box glass" style="text-align:center">
+<div id="cr" class="ov" style="z-index:95"><div class="box glass" style="text-align:center">
   <h3>Adjust photo</h3>
   <p style="margin-bottom:10px">Drag to reposition. Pinch or use the slider to zoom.</p>
   <div id="crV" style="width:260px;height:260px;margin:0 auto 14px;position:relative;overflow:hidden;border-radius:50%;touch-action:none;background:#000;border:2px solid var(--acc)"><img id="crI" alt="" draggable="false" style="position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;-webkit-user-select:none;user-select:none"></div>
@@ -1207,6 +1207,14 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(presRefMe){try{presRefMe.set(TSV())}catch(e){}presRefMe=null}
   }
   function presHook(){if(presCb&&db){db.ref(".info/connected").off("value",presCb);db.ref(".info/connected").on("value",presCb)}}
+  function lastSeen(k){
+    var v=ONL[k];if(v===1||typeof v!=="number"||v<2)return "";
+    var d=new Date(v),n=new Date(),hm=d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+    var df=Math.floor((new Date(n.getFullYear(),n.getMonth(),n.getDate())-new Date(d.getFullYear(),d.getMonth(),d.getDate()))/864e5);
+    if(df<=0){var m=Math.floor((n-d)/6e4);if(m<1)return "last seen just now";if(m<60)return "last seen "+m+" min ago";return "last seen today at "+hm}
+    if(df===1)return "last seen yesterday at "+hm;
+    return "last seen "+d.toLocaleDateString([],{day:"numeric",month:"short"})+" at "+hm;
+  }
   function updDots(){
     var rs=document.querySelectorAll("#clist .rc[data-k]");
     for(var i=0;i<rs.length;i++)rs[i].classList.toggle("on",ONL[rs[i].getAttribute("data-k")]===1);
@@ -1218,7 +1226,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       if(c[k].st!=="ok"||PW[k])return;
       var r=db.ref("rooms/_on/"+k);PW[k]=r;
       r.on("value",function(s){
-        ONL[k]=s.val();updDots();
+        ONL[k]=s.val();updDots();schedRender();
         if(isDM&&curOther===k&&typeof updStatus==="function")updStatus();
       },function(){});
     });
@@ -1391,16 +1399,18 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     var box=$("clist");box.innerHTML="";
     skWatchAll();invWatchAll();nkWatchAll();presWatchAll();msgWatchAll();
     var c=getC(),b=getB();
-    var ks=Object.keys(c).filter(function(k){
+    var ks=HF==="groups"?[]:Object.keys(c).filter(function(k){
       var o=c[k];if(o.st!=="ok")return true;
       var hc=lsGet("hc_"+k,null);return hc===null||(o.t||0)>hc;
     });
     var la=lsGet("la_"+uid,{});
     function ak(k){return Math.max(typeof c[k].t==="number"?c[k].t:0,la[k]||0)}
-    ks.sort(function(x,y){return ak(y)-ak(x)});
-    $("empty").style.display=(ks.length||getRecent().length||Object.keys(GRPS).length||HF==="groups")?"none":"block";
-    if(!ks.length)return;
-    var h=document.createElement("h3");h.textContent="Chats";box.appendChild(h);
+    // chats + groups ek hi list me, latest activity upar
+    var items=[];
+    if(HF!=="chats"){
+      Object.keys(GRPS).forEach(function(g){items.push({t:(GRPS[g]&&GRPS[g].t)||0,el:grpRow(g)})});
+    }
+    $("empty").style.display=(ks.length||items.length||getRecent().length||HF==="groups")?"none":"block";
     ks.forEach(function(k){
       var o=c[k];loadDp(o);
       var r=document.createElement("div");r.className="rc";
@@ -1409,7 +1419,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       var bn=document.createElement("b");bn.textContent=dispName(k,o.name);
       var sm=document.createElement("small");sm.style.letterSpacing="0";
       var sk=o.st==="ok"?skInfo(SKM[k],k):{n:0,risk:false};
-      sm.textContent=o.st==="req"?"📩 Request received":o.st==="sent"?"⏳ Awaiting acceptance":(b[k]?"🚫 Blocked":(sk.risk?"⌛ Streak at risk":(NKM[k]?"✏️ Calls you \""+NKM[k]+"\"":"")));
+      sm.textContent=o.st==="req"?"📩 Request received":o.st==="sent"?"⏳ Awaiting acceptance":(b[k]?"🚫 Blocked":(sk.risk?"⌛ Streak at risk":(NKM[k]?"✏️ Calls you \""+NKM[k]+"\"":(o.st==="ok"?(ONL[k]===1?"🟢 Online":lastSeen(k)):""))));
       var nl=document.createElement("div");nl.className="nl";nl.appendChild(bn);
       var stxt=(sk.n>0?"🔥"+sk.n:"")+(sk.risk?"⌛":"");
       var sp=null;
@@ -1433,8 +1443,11 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
         r.appendChild(m);
       }
       r.onclick=function(){openDM(k)};
-      box.appendChild(r);
+      items.push({t:ak(k),el:r});
     });
+    items.sort(function(x,y){return y.t-x.t});
+    items.forEach(function(it){box.appendChild(it.el)});
+    if(!items.length&&HF==="groups")box.innerHTML='<div class="gcn">No groups yet.<br>Tap ＋ then “New group”.</div>';
   }
   function openDM(k){
     var c=getC()[k];if(!c)return;
@@ -2434,7 +2447,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     }
     st.className="";
     var ids=Object.keys(pres).filter(function(k){return k!==cid});
-    if(isDM)st.textContent=ids.length?"In chat":(ONL[curOther]===1?"Online":"Offline");
+    if(isDM)st.textContent=ids.length?"In chat":(ONL[curOther]===1?"Online":(lastSeen(curOther)||"Offline"));
     else{
       var p=ids.length?(pres[ids[0]]||{}):null;
       st.textContent=p?String(p.name||"Guest").slice(0,20)+(ids.length>1?" +"+(ids.length-1):"")+" is in chat":"Room";
@@ -3628,6 +3641,13 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       cam.st=st;var v=$("camV");v.srcObject=st;v.style.transform=cam.face==="user"?"scaleX(-1)":"";
       try{v.play()}catch(x){}
       var tr=st.getVideoTracks()[0],cp=tr&&tr.getCapabilities?tr.getCapabilities():{};
+      // agar device ne landscape stream diya par screen portrait hai, to portrait maango (WhatsApp jaisa full view)
+      v.onloadedmetadata=function(){
+        var sp=window.innerHeight>=window.innerWidth;
+        if(tr&&tr.applyConstraints&&v.videoWidth&&((v.videoWidth>v.videoHeight)===sp)){
+          tr.applyConstraints({aspectRatio:{ideal:sp?9/16:16/9}}).catch(function(){});
+        }
+      };
       $("camFl").style.display=cp.torch?"flex":"none";
     }).catch(function(){camClose();toast("Camera permission denied")});
   }
@@ -3650,8 +3670,13 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(!cam.st)return;
     if(cam.mode==="photo"){
       var v=$("camV");if(!v.videoWidth)return;
-      var c=document.createElement("canvas");c.width=v.videoWidth;c.height=v.videoHeight;
-      c.getContext("2d").drawImage(v,0,0);
+      // jo screen par dikh raha hai (cover) wahi photo me aaye
+      var vw=v.videoWidth,vh=v.videoHeight,dw=v.clientWidth||vw,dh=v.clientHeight||vh;
+      var k=Math.max(dw/vw,dh/vh),sw=Math.min(vw,dw/k),sh=Math.min(vh,dh/k),sx=(vw-sw)/2,sy=(vh-sh)/2;
+      var c=document.createElement("canvas");c.width=Math.round(sw);c.height=Math.round(sh);
+      var cx=c.getContext("2d");
+      if(cam.face==="user"){cx.translate(c.width,0);cx.scale(-1,1)}
+      cx.drawImage(v,sx,sy,sw,sh,0,0,c.width,c.height);
       c.toBlob(function(b){
         if(!b)return;camClose();
         imgToData(b).then(function(d){openMediaComposer("image",d,b)}).catch(function(){sys("Could not open photo")});
@@ -4344,16 +4369,12 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     return db.ref("rooms/_grp/"+g).once("value").then(function(s){var v=s.val();if(v)GINFO[g]=v;return v});
   }
   function renderGroups(){
-    var box=$("glist");if(!box)return;box.innerHTML="";
-    var ks=Object.keys(GRPS).sort(function(a,b){return (GRPS[b].t||0)-(GRPS[a].t||0)});
+    var box=$("glist");if(box)box.innerHTML="";
     if(curGrp&&GRPS[curGrp]){setTxt($("who"),GRPS[curGrp].name||"Group");updHdp()}
-    if(!ks.length){
-      if(HF==="groups"){$("empty").style.display="none";box.innerHTML='<div class="gcn">No groups yet.<br>Tap ＋ then “New group”.</div>'}
-      return;
-    }
-    $("empty").style.display="none";
-    var h=document.createElement("h3");h.textContent="Groups";box.appendChild(h);
-    ks.forEach(function(g){
+    // groups ab chats ke saath ek hi list me dikhte hain
+    renderContacts();
+  }
+  function grpRow(g){
       var o=GRPS[g]||{};
       var r=document.createElement("div");r.className="rc";
       var av=document.createElement("div");av.className="av";dpEl(av,o.dp,o.name||"Group");
@@ -4365,8 +4386,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       nn.appendChild(nl);nn.appendChild(sm);
       r.appendChild(aw);r.appendChild(nn);
       r.onclick=function(){openGroup(g)};
-      box.appendChild(r);
-    });
+      return r;
   }
   function openGroup(g){
     var o=GRPS[g];if(!o)return;
@@ -4642,8 +4662,8 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   var HF=lsGet("hfil","all");
   if(HF!=="chats"&&HF!=="groups")HF="all";
   function applyFil(){
-    $("glist").style.display=HF==="chats"?"none":"";
-    $("clist").style.display=HF==="groups"?"none":"";
+    $("glist").style.display="none";
+    $("clist").style.display="";
     $("recent").style.display=HF==="groups"?"none":"";
     Array.prototype.forEach.call($("hfil").children,function(b){b.classList.toggle("on",b.getAttribute("data-f")===HF)});
   }
