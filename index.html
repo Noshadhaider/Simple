@@ -1870,7 +1870,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     squareDp(f).then(function(d){if(!d)return;tmpDp=d.t;tmpDpF=d.f;var i=document.createElement("img");i.src=d.t;$("aDp").innerHTML="";$("aDp").appendChild(i)}).catch(function(){aerr("Could not open photo")});
   };
   function enterApp(){
-    busy(false);setTimeout(gChk,1500);setTimeout(lkSync,2500);
+    busy(false);setTimeout(gChk,1500);setTimeout(lkSync,2500);setTimeout(adminHooks,1200);
     saveAcc();
     try{var d0=lsGet("dpc",{});Object.keys(d0).forEach(function(k){if(!(k in dpCache))dpCache[k]=d0[k]})}catch(e){}
     var c0=lsGet("conc_"+uid,null);if(c0&&!Object.keys(CON).length)CON=c0;
@@ -2856,6 +2856,28 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   window.addEventListener("focus",markAllSeen);
   setInterval(function(){try{if($("chat").style.display!=="none")markAllSeen()}catch(e){}},2500);
 
+  // ---- admin panel hooks: ban + announcement ----
+  var admOn="";
+  function adminHooks(){
+    if(admOn===uid||!db||!uid)return;admOn=uid;
+    try{
+      db.ref("rooms/_ban/"+uid).on("value",function(sn){
+        if(sn.val()!==1||$("banOv"))return;
+        lsSet("me",null);
+        var o=document.createElement("div");o.id="banOv";
+        o.style.cssText="position:fixed;inset:0;z-index:99999;background:#070d1a;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;font-family:system-ui,sans-serif";
+        o.innerHTML='<div style="font-size:54px">🚫</div><h2 style="margin:10px 0 6px">Account suspended</h2><p style="opacity:.75;max-width:300px">Admin ne aapka account suspend kar diya hai.</p>';
+        var b=document.createElement("button");b.textContent="OK";b.style.cssText="margin-top:18px;padding:12px 28px;border:0;border-radius:14px;background:#4d8dff;color:#fff;font-size:16px";
+        b.onclick=function(){location.reload()};o.appendChild(b);document.body.appendChild(o);
+      });
+      db.ref("rooms/_ann").on("value",function(sn){
+        var v=sn.val();if(!v||!v.id||!v.text)return;
+        if(lsGet("annSeen",null)===v.id)return;
+        lsSet("annSeen",v.id);
+        confirmBox("📢 Announcement",String(v.text).slice(0,500),"OK",function(){});
+      });
+    }catch(e){}
+  }
   // ---- Dudu Bubu "Baooo" when contact comes online ----
   var GCH={},myG=null,booK="",booOn=false,booLast=0,booTm=null;
   function gGet(){var g=lsGet("mg_"+(me&&me.un),null);return g==="m"||g==="f"?g:null}

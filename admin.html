@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Chatly Admin</title>
+<style>
+:root{--bg:#070d1a;--card:#101a30;--card2:#16233f;--bd:rgba(255,255,255,.09);--tx:#e8eefc;--sub:#8fa0c6;--acc:#4d8dff;--ok:#2fd27a;--bad:#ff5a6a;--warn:#ffb84d;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:15px}
+button,input,textarea{font:inherit;color:inherit}
+#login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg);z-index:50}
+.lbox{width:100%;max-width:340px;background:var(--card);border:1px solid var(--bd);border-radius:22px;padding:24px;text-align:center}
+.lbox h1{margin:0 0 4px;font-size:22px}.lbox p{margin:0 0 16px;color:var(--sub);font-size:13px}
+input.t,textarea.t{width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--bd);background:var(--card2);outline:0}
+input.t:focus,textarea.t:focus{border-color:var(--acc)}
+.btn{border:0;border-radius:14px;padding:12px 16px;background:var(--acc);color:#fff;font-weight:600;cursor:pointer}
+.btn.alt{background:var(--card2);border:1px solid var(--bd)}
+.btn.bad{background:var(--bad)}.btn.ok{background:var(--ok);color:#05230f}
+.btn.sm{padding:8px 12px;border-radius:11px;font-size:13px}
+.btn:disabled{opacity:.5}
+#err{color:var(--bad);font-size:13px;min-height:18px;margin:8px 0}
+#app{display:none;height:100%;flex-direction:column;max-width:760px;margin:0 auto}
+header{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 10px}
+header h2{margin:0;font-size:18px;flex:1}
+header .st{font-size:12px;color:var(--sub)}
+main{flex:1;overflow-y:auto;padding:4px 12px 90px;-webkit-overflow-scrolling:touch}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;background:rgba(10,16,32,.96);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
+nav div{display:flex;width:100%;max-width:760px}
+nav button{flex:1;background:none;border:0;padding:9px 2px 8px;color:var(--sub);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button b{font-size:19px;font-weight:400}
+nav button.on{color:var(--acc)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:6px 0 14px}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:14px}
+.stat b{display:block;font-size:26px;line-height:1.1}.stat span{color:var(--sub);font-size:12px}
+.stat.g b{color:var(--ok)}.stat.w b{color:var(--warn)}.stat.r b{color:var(--bad)}
+h3{margin:16px 2px 8px;font-size:14px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.list{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:11px 12px;cursor:pointer}
+.row:active{background:var(--card2)}
+.row .mid{flex:1;min-width:0}
+.row .mid b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .mid small{display:block;color:var(--sub);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.av{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;flex:none;position:relative;background-size:cover;background-position:center}
+.av i{position:absolute;right:0;bottom:0;width:11px;height:11px;border-radius:50%;background:var(--ok);border:2px solid var(--card)}
+.chip{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;background:var(--card2);border:1px solid var(--bd);color:var(--sub);margin:2px 4px 0 0}
+.chip.ok{color:var(--ok);border-color:rgba(47,210,122,.4)}.chip.bad{color:var(--bad);border-color:rgba(255,90,106,.4)}.chip.warn{color:var(--warn);border-color:rgba(255,184,77,.4)}
+.tools{display:flex;gap:8px;margin:6px 0 10px;overflow-x:auto;padding-bottom:2px}
+.tools .btn{white-space:nowrap}
+.seg{display:flex;gap:6px;margin:6px 0 10px;overflow-x:auto}
+.seg button{border:1px solid var(--bd);background:var(--card);border-radius:99px;padding:7px 14px;color:var(--sub);white-space:nowrap}
+.seg button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.num{font-weight:700}
+.feed{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:6px 12px;max-height:240px;overflow:auto}
+.feed div{padding:7px 0;border-bottom:1px solid var(--bd);font-size:13px;display:flex;justify-content:space-between;gap:8px}
+.feed div:last-child{border:0}.feed span{color:var(--sub);white-space:nowrap}
+.empty{color:var(--sub);text-align:center;padding:28px 10px;font-size:14px}
+.bar{height:7px;border-radius:5px;background:var(--card2);overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:var(--acc)}
+#sheetBg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:40}
+#sheet{position:fixed;left:0;right:0;bottom:0;max-height:88%;overflow-y:auto;background:var(--bg);border-top-left-radius:24px;border-top-right-radius:24px;border:1px solid var(--bd);padding:16px 14px calc(env(safe-area-inset-bottom,0px) + 18px);z-index:41;display:none;max-width:760px;margin:0 auto}
+#sheet .grip{width:42px;height:5px;border-radius:3px;background:var(--bd);margin:0 auto 12px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd);font-size:14px}
+.kv span:first-child{color:var(--sub)}.kv span:last-child{text-align:right;word-break:break-all}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.sub{color:var(--sub);font-size:12px}
+.progress{font-size:12px;color:var(--sub);padding:2px 4px}
+#toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:#222c45;border:1px solid var(--bd);border-radius:14px;padding:10px 16px;z-index:60;display:none;max-width:90%}
+</style>
+</head>
+<body>
+
+<div id="login"><div class="lbox">
+  <h1>🛡️ Chatly Admin</h1><p>Control panel · sirf admin ke liye</p>
+  <input class="t" id="pw" type="password" placeholder="Admin password" autocomplete="current-password">
+  <div id="err"></div>
+  <button class="btn" id="go" style="width:100%">Login</button>
+</div></div>
+
+<div id="app">
+  <header><h2 id="ttl">Dashboard</h2><span class="st" id="stat"></span><button class="btn alt sm" id="refresh">⟳</button></header>
+  <main id="main"></main>
+  <nav><div>
+    <button data-t="dash" class="on"><b>📊</b>Dashboard</button>
+    <button data-t="users"><b>👥</b>Users</button>
+    <button data-t="chats"><b>💬</b>Chats</button>
+    <button data-t="groups"><b>👪</b>Groups</button>
+    <button data-t="tools"><b>⚙️</b>Tools</button>
+  </div></nav>
+</div>
+
+<div id="sheetBg"></div><div id="sheet"></div><div id="toast"></div>
+
+<script>
+// ================= CONFIG =================
+var DB = "https://mychat-f22a1-default-rtdb.firebaseio.com";   // index.html wali databaseURL
+// Admin password ka SHA-256. Default password: Chatly@Admin2026  (Tools > "Change admin password" se naya hash banao aur yahan paste karo)
+var ADMIN_HASH = "298933926cd4a6aa0e57091317e573ffdcec2ac8c15216e716b45430c91b71dd";
+// ==========================================
+
+var $ = function(i){return document.getElementById(i)};
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function sha(t){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(t)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return ("0"+x.toString(16)).slice(-2)}).join("")})}
+function toast(t){var e=$("toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(function(){e.style.display="none"},2600)}
+
+// ---------- login ----------
+var fails=0,lockUntil=0;
+function tryLogin(){
+  if(Date.now()<lockUntil){$("err").textContent="Thori der baad try karo";return}
+  if(!window.crypto||!crypto.subtle){$("err").textContent="Ye page https par kholo";return}
+  sha($("pw").value).then(function(h){
+    if(h===ADMIN_HASH){sessionStorage.setItem("adm","1");start()}
+    else{fails++;$("err").textContent="Galat password";$("pw").value="";if(fails>=5){lockUntil=Date.now()+30000;fails=0}}
+  });
+}
+$("go").onclick=tryLogin;
+$("pw").addEventListener("keydown",function(e){if(e.key==="Enter")tryLogin()});
+
+// ---------- REST helpers ----------
+function api(path,q){return fetch(DB+"/"+path+".json"+(q?"?"+q:"")).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+function upd(o){return fetch(DB+"/.json",{method:"PATCH",body:JSON.stringify(o)}).then(function(r){if(!r.ok)throw new Error(r.status)})}
+function pool(items,n,fn){var i=0;return Promise.all(Array.from({length:Math.min(n,items.length)||1},function(){return (function loop(){if(i>=items.length)return Promise.resolve();var k=items[i++];return Promise.resolve().then(function(){return fn(k)}).catch(function(){}).then(loop)})()}))}
+function ago(t){
+  if(!t||typeof t!=="number")return "—";
+  var s=Math.floor((Date.now()-t)/1000);if(s<0)s=0;
+  if(s<60)return "just now";var m=Math.floor(s/60);if(m<60)return m+"m ago";
+  var h=Math.floor(m/60);if(h<24)return h+"h ago";var d=Math.floor(h/24);if(d<30)return d+"d ago";
+  return new Date(t).toLocaleDateString()
+}
+function fdate(t){return t?new Date(t).toLocaleString([], {day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}):"—"}
+var COLS=["#4d8dff","#a855f7","#ec4899","#f97316","#14b8a6","#84cc16","#eab308","#ef4444"];
+function colr(s){var h=0;s=String(s||"");for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return COLS[h%COLS.length]}
+
+// ---------- state ----------
+var S={users:{},byUn:{},on:{},con:{},tok:{},ban:{},groups:{},chats:{},gstat:{},feed:[],prevOn:null,loaded:false,statDone:false,statTotal:0,statN:0,dp:{}};
+var TAB="dash",SEG="chats",UF="all",Q="";
+
+function uname(u){var x=S.users[u];return x?x.name:"Deleted user"}
+function uun(u){var x=S.users[u];return x?"@"+x.un:""}
+function isOn(u){return S.on[u]===1}
+function lastSeen(u){var v=S.on[u];return v===1?"Online":(typeof v==="number"&&v>1?"last seen "+ago(v):"never seen")}
+function avatar(u,size){
+  var x=S.users[u],n=(x&&x.name)||"?",dp=S.dp[u];
+  var st="background-color:"+colr(u)+(size?";width:"+size+"px;height:"+size+"px;font-size:"+Math.round(size/2.3)+"px":"");
+  if(dp&&/^data:image|^https?:/.test(dp))st+=";background-image:url('"+dp.replace(/'/g,"%27")+"')";
+  return '<div class="av" style="'+st+'">'+(dp?"":esc(n.trim().charAt(0).toUpperCase()||"?"))+(isOn(u)?"<i></i>":"")+"</div>";
+}
+
+// ---------- load ----------
+function setStat(t){$("stat").textContent=t||""}
+function loadAll(){
+  setStat("loading…");S.loaded=false;S.statDone=false;S.chats={};S.gstat={};
+  var keysR,uns=[];
+  return api("rooms","shallow=true").then(function(k){keysR=Object.keys(k||{});
+    return api("rooms/_n","shallow=true")
+  }).then(function(n){
+    uns=Object.keys(n||{});S.users={};S.byUn={};
+    return pool(uns,10,function(un){
+      var q=encodeURIComponent(un);
+      return Promise.all([api("rooms/_n/"+q+"/uid"),api("rooms/_n/"+q+"/name")]).then(function(r){
+        if(!r[0])return;S.users[r[0]]={uid:r[0],un:un,name:r[1]||un};S.byUn[un]=r[0];
+      })
+    });
+  }).then(function(){
+    return Promise.all([api("rooms/_on"),api("rooms/_con"),api("rooms/_tok"),api("rooms/_ban"),api("rooms/_grp","shallow=true")]);
+  }).then(function(r){
+    S.on=r[0]||{};S.con=r[1]||{};S.tok=r[2]||{};S.ban=r[3]||{};
+    var gids=Object.keys(r[4]||{});S.groups={};
+    return pool(gids,8,function(g){
+      return Promise.all([api("rooms/_grp/"+g+"/name"),api("rooms/_grp/"+g+"/m"),api("rooms/_grp/"+g+"/a")]).then(function(x){
+        S.groups[g]={id:g,name:x[0]||"Group",m:x[1]||{},a:x[2]||{}};
+      })
+    }).then(function(){return keysR});
+  }).then(function(keys){
+    S.loaded=true;S.prevOn=JSON.stringify(S.on);setStat("updated "+new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}));
+    render();loadStats(keys);loadDps();
+  }).catch(function(e){setStat("error");toast("Load failed: "+e.message+" (Firebase rules / network check karo)")});
+}
+function loadDps(){
+  var us=Object.keys(S.users).filter(function(u){return !(u in S.dp)});
+  var lim=us.slice(0,300);
+  pool(lim,6,function(u){return api("rooms/_n/"+encodeURIComponent(S.users[u].un)+"/dp").then(function(d){S.dp[u]=(typeof d==="string"&&d.length<60000)?d:"";})}).then(function(){if(TAB==="users"||TAB==="dash")render()});
+}
+function loadStats(keys){
+  var dms=keys.filter(function(k){return k.indexOf("dm_")===0}),gs=keys.filter(function(k){return k.indexOf("g_")===0});
+  S.statTotal=dms.length+gs.length;S.statN=0;var tm=null;
+  function tick(){S.statN++;clearTimeout(tm);tm=setTimeout(function(){if(TAB!=="tools")render()},400);setStat(S.statN<S.statTotal?"activity "+S.statN+"/"+S.statTotal:"updated "+new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}))}
+  function one(room,store,key,extra){
+    return api("rooms/"+room+"/messages","shallow=true").then(function(m){
+      var ks=Object.keys(m||{}).sort(),n=ks.length,rec=Object.assign({n:n,last:0},extra||{});
+      store[key]=rec;
+      if(!n)return;
+      return api("rooms/"+room+"/messages/"+ks[n-1]+"/t").then(function(t){rec.last=typeof t==="number"?t:0}).catch(function(){});
+    }).then(tick,tick);
+  }
+  var jobs=dms.map(function(r){return {r:r,dm:1}}).concat(gs.map(function(r){return {r:r}}));
+  pool(jobs,8,function(j){
+    if(j.dm){var p=j.r.split("_");return one(j.r,S.chats,j.r,{a:p[1],b:p[2]})}
+    return one(j.r,S.gstat,j.r.slice(2));
+  }).then(function(){S.statDone=true;render()});
+}
+
+// ---------- derived ----------
+function groupsOf(u){return Object.keys(S.groups).filter(function(g){return S.groups[g].m&&S.groups[g].m[u]})}
+function consOf(u){var c=S.con[u]||{};return Object.keys(c)}
+function devices(u){return S.tok[u]?Object.keys(S.tok[u]).length:0}
+function chatList(){return Object.keys(S.chats).map(function(k){return Object.assign({room:k},S.chats[k])})}
+function totalMsgs(){var n=0;Object.keys(S.chats).forEach(function(k){n+=S.chats[k].n});Object.keys(S.gstat).forEach(function(k){n+=S.gstat[k].n});return n}
+function pendingReqs(){
+  var out=[];Object.keys(S.con).forEach(function(a){Object.keys(S.con[a]||{}).forEach(function(b){var c=S.con[a][b];if(c&&c.st==="sent")out.push({from:a,to:b,t:c.t})})});
+  return out;
+}
+
+// ---------- render ----------
+function render(){
+  if(!S.loaded){$("main").innerHTML='<div class="empty">Loading…</div>';return}
+  ({dash:rDash,users:rUsers,chats:rChats,groups:rGroups,tools:rTools})[TAB]();
+}
+function setTab(t){
+  TAB=t;Q="";[].forEach.call(document.querySelectorAll("nav button"),function(b){b.classList.toggle("on",b.getAttribute("data-t")===t)});
+  $("ttl").textContent={dash:"Dashboard",users:"Users",chats:"Chats & Activity",groups:"Groups",tools:"Tools"}[t];
+  $("main").scrollTop=0;render();
+}
+[].forEach.call(document.querySelectorAll("nav button"),function(b){b.onclick=function(){setTab(b.getAttribute("data-t"))}});
+$("refresh").onclick=function(){loadAll()};
+
+function rDash(){
+  var us=Object.keys(S.users),on=us.filter(isOn).length,banned=us.filter(function(u){return S.ban[u]}).length;
+  var dev=us.filter(function(u){return devices(u)>0}).length;
+  var cl=chatList().filter(function(c){return c.n>0}).sort(function(a,b){return b.n-a.n}).slice(0,5);
+  var conn=us.map(function(u){return {u:u,n:consOf(u).filter(function(k){return (S.con[u][k]||{}).st==="ok"}).length}}).sort(function(a,b){return b.n-a.n}).slice(0,5);
+  var recent=us.filter(function(u){return typeof S.on[u]==="number"&&S.on[u]>1}).sort(function(a,b){return S.on[b]-S.on[a]}).slice(0,6);
+  var h='<div class="grid">'+
+   '<div class="stat"><b>'+us.length+'</b><span>Total users</span></div>'+
+   '<div class="stat g"><b>'+on+'</b><span>Online now</span></div>'+
+   '<div class="stat"><b>'+Object.keys(S.chats).length+'</b><span>Chats (DM)</span></div>'+
+   '<div class="stat"><b>'+Object.keys(S.groups).length+'</b><span>Groups</span></div>'+
+   '<div class="stat"><b>'+(S.statDone?totalMsgs():totalMsgs()+"…")+'</b><span>Total messages</span></div>'+
+   '<div class="stat w"><b>'+pendingReqs().length+'</b><span>Pending requests</span></div>'+
+   '<div class="stat"><b>'+dev+'</b><span>Notifications on</span></div>'+
+   '<div class="stat r"><b>'+banned+'</b><span>Banned</span></div></div>';
+  h+='<h3>🔴 Live activity</h3><div class="feed" id="feed">'+feedHtml()+'</div>';
+  h+='<h3>🏆 Most active chats</h3><div class="list">'+(cl.length?cl.map(chatRow).join(""):'<div class="empty">'+(S.statDone?"No chats yet":"Calculating…")+'</div>')+'</div>';
+  h+='<h3>🔗 Most connected users</h3><div class="list">'+conn.map(function(x){return userRow(x.u,x.n+" contacts")}).join("")+'</div>';
+  h+='<h3>🕒 Recently active</h3><div class="list">'+(recent.length?recent.map(function(u){return userRow(u,lastSeen(u))}).join(""):'<div class="empty">—</div>')+'</div>';
+  $("main").innerHTML=h;
+}
+function feedHtml(){
+  if(!S.feed.length)return '<div class="sub" style="padding:10px 0">Online/offline changes yahan live dikhenge…</div>';
+  return S.feed.slice(0,40).map(function(f){return '<div><div>'+f.icon+' <b>'+esc(f.name)+'</b> '+f.txt+'</div><span>'+new Date(f.t).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"})+'</span></div>'}).join("");
+}
+
+function userRow(u,sub){
+  var x=S.users[u];if(!x)return "";
+  var ch="";if(S.ban[u])ch+='<span class="chip bad">banned</span>';
+  return '<div class="row" data-a="user" data-id="'+u+'">'+avatar(u)+'<div class="mid"><b>'+esc(x.name)+'</b><small>@'+esc(x.un)+' · '+esc(sub||lastSeen(u))+'</small></div>'+ch+'</div>';
+}
+function rUsers(){
+  var us=Object.keys(S.users),q=Q.toLowerCase();
+  var fl={all:function(){return true},online:isOn,banned:function(u){return !!S.ban[u]},nonotif:function(u){return devices(u)===0}}[UF];
+  var list=us.filter(function(u){var x=S.users[u];return fl(u)&&(!q||x.name.toLowerCase().indexOf(q)>=0||x.un.toLowerCase().indexOf(q)>=0||u.toLowerCase().indexOf(q)>=0)})
+    .sort(function(a,b){return (isOn(b)-isOn(a))||((S.on[b]>1?S.on[b]:0)-(S.on[a]>1?S.on[a]:0))||uname(a).localeCompare(uname(b))});
+  var h='<input class="t" id="q" placeholder="🔍 Search name / username / id" value="'+esc(Q)+'">'+
+   '<div class="seg">'+[["all","All"],["online","Online"],["banned","Banned"],["nonotif","No notifications"]].map(function(x){return '<button data-uf="'+x[0]+'" class="'+(UF===x[0]?"on":"")+'">'+x[1]+'</button>'}).join("")+'</div>'+
+   '<div class="progress">'+list.length+' users</div><div class="list">'+
+   (list.length?list.slice(0,300).map(function(u){
+      var sub=lastSeen(u)+" · "+consOf(u).filter(function(k){return (S.con[u][k]||{}).st==="ok"}).length+" contacts · "+groupsOf(u).length+" groups";
+      return userRow(u,sub)}).join(""):'<div class="empty">Koi user nahi mila</div>')+'</div>';
+  $("main").innerHTML=h;
+  var qi=$("q");qi.oninput=function(){Q=qi.value;var p=qi.selectionStart;rUsers();var n=$("q");n.focus();try{n.setSelectionRange(p,p)}catch(e){}};
+  [].forEach.call($("main").querySelectorAll("[data-uf]"),function(b){b.onclick=function(){UF=b.getAttribute("data-uf");rUsers()}});
+}
+function chatRow(c){
+  return '<div class="row" data-a="chat" data-id="'+esc(c.room)+'">'+avatar(c.a)+'<div class="mid"><b>'+esc(uname(c.a))+' ↔ '+esc(uname(c.b))+'</b><small>'+c.n+' messages · last '+ago(c.last)+'</small></div></div>';
+}
+function rChats(){
+  var q=Q.toLowerCase();
+  var h='<div class="seg"><button data-s="chats" class="'+(SEG==="chats"?"on":"")+'">Chats</button><button data-s="reqs" class="'+(SEG==="reqs"?"on":"")+'">Requests ('+pendingReqs().length+')</button></div>';
+  if(SEG==="chats"){
+    var l=chatList().filter(function(c){return !q||(uname(c.a)+" "+uname(c.b)+" "+uun(c.a)+" "+uun(c.b)).toLowerCase().indexOf(q)>=0}).sort(function(a,b){return (b.last||0)-(a.last||0)});
+    h+='<input class="t" id="q" placeholder="🔍 Search by name" value="'+esc(Q)+'" style="margin-bottom:10px">'+(S.statDone?"":'<div class="progress">Activity load ho rahi hai… '+S.statN+'/'+S.statTotal+'</div>')+'<div class="list">'+(l.length?l.slice(0,300).map(chatRow).join(""):'<div class="empty">No chats</div>')+'</div>';
+  }else{
+    var r=pendingReqs().sort(function(a,b){return (b.t||0)-(a.t||0)});
+    h+='<div class="list">'+(r.length?r.map(function(x){return '<div class="row" data-a="user" data-id="'+x.from+'">'+avatar(x.from)+'<div class="mid"><b>'+esc(uname(x.from))+' → '+esc(uname(x.to))+'</b><small>request pending · '+ago(x.t)+'</small></div></div>'}).join(""):'<div class="empty">Koi pending request nahi</div>')+'</div>';
+  }
+  $("main").innerHTML=h;
+  var qi=$("q");if(qi)qi.oninput=function(){Q=qi.value;var p=qi.selectionStart;rChats();var n=$("q");n.focus();try{n.setSelectionRange(p,p)}catch(e){}};
+  [].forEach.call($("main").querySelectorAll("[data-s]"),function(b){b.onclick=function(){SEG=b.getAttribute("data-s");rChats()}});
+}
+function rGroups(){
+  var l=Object.keys(S.groups).map(function(g){return S.groups[g]}).sort(function(a,b){return ((S.gstat[b.id]||{}).last||0)-((S.gstat[a.id]||{}).last||0)});
+  var h='<div class="list">'+(l.length?l.map(function(g){
+    var st=S.gstat[g.id]||{n:0,last:0};
+    return '<div class="row" data-a="group" data-id="'+g.id+'"><div class="av" style="background:'+colr(g.id)+'">👪</div><div class="mid"><b>'+esc(g.name)+'</b><small>'+Object.keys(g.m).length+' members · '+Object.keys(g.a).length+' admins · '+st.n+' msgs · '+ago(st.last)+'</small></div></div>';
+  }).join(""):'<div class="empty">No groups</div>')+'</div>';
+  $("main").innerHTML=h;
+}
+function rTools(){
+  var banned=Object.keys(S.ban).filter(function(u){return S.ban[u]});
+  $("main").innerHTML=
+   '<h3>📢 Announcement (sab users ko)</h3><textarea class="t" id="ann" rows="3" placeholder="Message likho… users ko app me popup aayega"></textarea>'+
+   '<div class="acts"><button class="btn" id="annSend">Send</button><button class="btn alt" id="annClr">Clear current</button></div>'+
+   '<h3>🚫 Banned users ('+banned.length+')</h3><div class="list">'+(banned.length?banned.map(function(u){return userRow(u,"banned")}).join(""):'<div class="empty">Koi banned nahi</div>')+'</div>'+
+   '<h3>📤 Export</h3><div class="acts"><button class="btn alt" id="csv">Users CSV download</button></div>'+
+   '<h3>🔑 Change admin password</h3><input class="t" id="npw" type="text" placeholder="Naya admin password"><div class="acts"><button class="btn alt" id="mk">Hash banao</button></div><div class="sub" id="hout" style="word-break:break-all"></div>'+
+   '<div class="sub" style="margin-top:6px">Hash ko is file me <code>ADMIN_HASH</code> me paste karo aur file dobara upload karo.</div>'+
+   '<h3>ℹ️ Note</h3><div class="sub">Privacy: panel me chat ke message text nahi dikhte, sirf kaun kis se connected hai, kitne messages hain aur last activity. Is page ka link sirf apne paas rakho.</div>';
+  $("annSend").onclick=function(){
+    var t=$("ann").value.trim();if(!t)return toast("Message likho");
+    if(!confirm("Ye sab users ko dikhega. Send karein?"))return;
+    upd({"rooms/_ann":{id:Date.now(),text:t.slice(0,500),t:Date.now()}}).then(function(){toast("Announcement bhej di");$("ann").value=""}).catch(function(){toast("Failed")});
+  };
+  $("annClr").onclick=function(){upd({"rooms/_ann":null}).then(function(){toast("Announcement hata di")}).catch(function(){toast("Failed")})};
+  $("csv").onclick=exportCsv;
+  $("mk").onclick=function(){var v=$("npw").value;if(v.length<8)return toast("Kam az kam 8 characters");sha(v).then(function(h){$("hout").textContent=h})};
+}
+function exportCsv(){
+  var rows=[["name","username","uid","status","contacts","groups","notification_devices","banned"]];
+  Object.keys(S.users).forEach(function(u){var x=S.users[u];rows.push([x.name,x.un,u,lastSeen(u),consOf(u).filter(function(k){return (S.con[u][k]||{}).st==="ok"}).length,groupsOf(u).length,devices(u),S.ban[u]?"yes":"no"])});
+  var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"'}).join(",")}).join("\n");
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="chatly-users.csv";document.body.appendChild(a);a.click();a.remove();
+}
+
+// ---------- sheets ----------
+function openSheet(h){$("sheet").innerHTML='<div class="grip"></div>'+h;$("sheet").style.display="block";$("sheetBg").style.display="block";$("sheet").scrollTop=0}
+function closeSheet(){$("sheet").style.display="none";$("sheetBg").style.display="none"}
+$("sheetBg").onclick=closeSheet;
+
+function userSheet(u){
+  var x=S.users[u];if(!x)return;
+  var cons=consOf(u).map(function(k){return {k:k,c:S.con[u][k]}}).sort(function(a,b){return (a.c.st==="ok"?0:1)-(b.c.st==="ok"?0:1)});
+  var chats=chatList().filter(function(c){return c.a===u||c.b===u}).sort(function(a,b){return (b.last||0)-(a.last||0)});
+  var gs=groupsOf(u);
+  var ban=!!S.ban[u];
+  var h='<div style="display:flex;gap:12px;align-items:center">'+avatar(u,56)+'<div><b style="font-size:17px">'+esc(x.name)+'</b><div class="sub">@'+esc(x.un)+'</div>'+(ban?'<span class="chip bad">banned</span>':'')+'</div></div>'+
+   '<div style="margin-top:10px"><div class="kv"><span>Status</span><span>'+esc(lastSeen(u))+'</span></div>'+
+   '<div class="kv"><span>User ID</span><span>'+esc(u)+'</span></div>'+
+   '<div class="kv"><span>Notification devices</span><span>'+devices(u)+'</span></div>'+
+   '<div class="kv"><span>Contacts</span><span>'+cons.filter(function(c){return c.c.st==="ok"}).length+' accepted · '+cons.filter(function(c){return c.c.st!=="ok"}).length+' pending</span></div>'+
+   '<div class="kv"><span>Groups</span><span>'+gs.length+'</span></div></div>'+
+   '<div class="acts"><button class="btn '+(ban?"ok":"bad")+' sm" data-do="ban" data-id="'+u+'">'+(ban?"✅ Unban":"🚫 Ban user")+'</button><button class="btn alt sm" data-do="pw" data-id="'+u+'">🔑 Reset password</button><button class="btn bad sm" data-do="del" data-id="'+u+'">🗑 Delete account</button></div>';
+  h+='<h3>Contacts / kis ke sath add hai</h3><div class="list">'+(cons.length?cons.map(function(o){
+    var st=o.c&&o.c.st,lab=st==="ok"?'<span class="chip ok">connected</span>':st==="sent"?'<span class="chip warn">request sent</span>':'<span class="chip warn">request received</span>';
+    var nm=S.users[o.k]?S.users[o.k].name:(o.c&&o.c.name)||"Deleted user";
+    return '<div class="row" '+(S.users[o.k]?'data-a="user" data-id="'+o.k+'"':'')+'>'+avatar(o.k)+'<div class="mid"><b>'+esc(nm)+'</b><small>@'+esc((o.c&&o.c.un)||"")+' · since '+fdate(o.c&&o.c.t)+'</small></div>'+lab+'</div>'}).join(""):'<div class="empty">No contacts</div>')+'</div>';
+  h+='<h3>Chat activity</h3><div class="list">'+(chats.length?chats.map(function(c){var o=c.a===u?c.b:c.a;return '<div class="row" data-a="chat" data-id="'+esc(c.room)+'">'+avatar(o)+'<div class="mid"><b>with '+esc(uname(o))+'</b><small>'+c.n+' messages · last '+ago(c.last)+'</small></div></div>'}).join(""):'<div class="empty">'+(S.statDone?"No chats":"Loading…")+'</div>')+'</div>';
+  h+='<h3>Groups</h3><div class="list">'+(gs.length?gs.map(function(g){var G=S.groups[g];return '<div class="row" data-a="group" data-id="'+g+'"><div class="av" style="background:'+colr(g)+'">👪</div><div class="mid"><b>'+esc(G.name)+'</b><small>'+(G.a[u]?"admin · ":"")+Object.keys(G.m).length+' members</small></div></div>'}).join(""):'<div class="empty">No groups</div>')+'</div>';
+  openSheet(h);
+}
+function chatSheet(room){
+  var c=S.chats[room];if(!c)return;
+  var h='<b style="font-size:17px">Chat</b><div class="list" style="margin-top:10px">'+userRow(c.a,"")+userRow(c.b,"")+'</div>'+
+   '<div class="kv"><span>Messages</span><span>'+c.n+'</span></div><div class="kv"><span>Last activity</span><span>'+fdate(c.last)+' ('+ago(c.last)+')</span></div>'+
+   '<div class="kv"><span>Room</span><span>'+esc(room)+'</span></div>'+
+   '<div class="acts"><button class="btn bad sm" data-do="clrchat" data-id="'+esc(room)+'">🧹 Delete chat history</button></div>';
+  openSheet(h);
+}
+function groupSheet(g){
+  var G=S.groups[g];if(!G)return;var st=S.gstat[g]||{n:0,last:0};
+  var mem=Object.keys(G.m);
+  var h='<b style="font-size:17px">'+esc(G.name)+'</b><div class="kv"><span>Members</span><span>'+mem.length+'</span></div><div class="kv"><span>Admins</span><span>'+Object.keys(G.a).length+'</span></div><div class="kv"><span>Messages</span><span>'+st.n+'</span></div><div class="kv"><span>Last activity</span><span>'+ago(st.last)+'</span></div>'+
+   '<h3>Members</h3><div class="list">'+mem.map(function(u){
+     return '<div class="row" '+(S.users[u]?'data-a="user" data-id="'+u+'"':'')+'>'+avatar(u)+'<div class="mid"><b>'+esc(S.users[u]?S.users[u].name:G.m[u]||"Deleted user")+'</b><small>'+(G.a[u]?"admin":"member")+' · '+esc(lastSeen(u))+'</small></div><button class="btn alt sm" data-do="rmmem" data-id="'+g+'" data-u="'+u+'">Remove</button></div>'}).join("")+'</div>'+
+   '<div class="acts"><button class="btn bad sm" data-do="delgrp" data-id="'+g+'">🗑 Delete group</button></div>';
+  openSheet(h);
+}
+
+// ---------- actions ----------
+document.addEventListener("click",function(e){
+  var el=e.target.closest("[data-a],[data-do]");if(!el)return;
+  var a=el.getAttribute("data-a"),d=el.getAttribute("data-do"),id=el.getAttribute("data-id");
+  if(a){e.stopPropagation();if(a==="user")userSheet(id);else if(a==="chat")chatSheet(id);else if(a==="group")groupSheet(id);return}
+  e.stopPropagation();
+  if(d==="ban"){
+    var on=!S.ban[id];
+    if(on&&!confirm("Is user ko ban karein? Wo app use nahi kar payega."))return;
+    upd(one("rooms/_ban/"+id,on?1:null)).then(function(){if(on)S.ban[id]=1;else delete S.ban[id];toast(on?"User banned":"User unbanned");userSheet(id);render()}).catch(function(){toast("Failed")});
+  }else if(d==="pw"){
+    var np=prompt("Naya password (kam az kam 4 characters):");if(!np||np.length<4)return;
+    sha(S.users[id].un+":"+np).then(function(h){return upd(one("rooms/_p/"+encodeURIComponent(S.users[id].un),h))}).then(function(){toast("Password reset ho gaya")}).catch(function(){toast("Failed")});
+  }else if(d==="del"){
+    var x=S.users[id];if(!confirm("@"+x.un+" ka account aur uski saari chats delete hongi. Ye wapas nahi hoga. Pakka?"))return;
+    if(prompt('Confirm ke liye username likho: '+x.un)!==x.un)return toast("Username match nahi hua");
+    delUser(id).then(function(){toast("Account delete ho gaya");closeSheet();return loadAll()}).catch(function(){toast("Failed")});
+  }else if(d==="clrchat"){
+    if(!confirm("Is chat ki saari history delete karein?"))return;
+    upd(one("rooms/"+id+"/messages",null)).then(function(){S.chats[id].n=0;S.chats[id].last=0;toast("Chat history delete ho gayi");chatSheet(id);render()}).catch(function(){toast("Failed")});
+  }else if(d==="rmmem"){
+    var u=el.getAttribute("data-u");if(!confirm("Is member ko group se nikaalein?"))return;
+    var o={};o["rooms/_grp/"+id+"/m/"+u]=null;o["rooms/_grp/"+id+"/u/"+u]=null;o["rooms/_grp/"+id+"/a/"+u]=null;o["rooms/_ug/"+u+"/"+id]=null;
+    upd(o).then(function(){delete S.groups[id].m[u];delete S.groups[id].a[u];toast("Member removed");groupSheet(id);render()}).catch(function(){toast("Failed")});
+  }else if(d==="delgrp"){
+    var G=S.groups[id];if(!confirm('Group "'+G.name+'" aur uske messages delete hongi. Pakka?'))return;
+    var o2={};o2["rooms/_grp/"+id]=null;o2["rooms/g_"+id]=null;Object.keys(G.m).forEach(function(u){o2["rooms/_ug/"+u+"/"+id]=null});
+    upd(o2).then(function(){delete S.groups[id];toast("Group delete ho gaya");closeSheet();render()}).catch(function(){toast("Failed")});
+  }
+},true);
+function one(k,v){var o={};o[k]=v;return o}
+function delUser(u){
+  var x=S.users[u],un=encodeURIComponent(x.un),o={};
+  ["_n","_p","_em","_ph"].forEach(function(n){o["rooms/"+n+"/"+un]=null});
+  ["_tok","_con","_on","_ug","_ban"].forEach(function(n){o["rooms/"+n+"/"+u]=null});
+  consOf(u).forEach(function(k){o["rooms/_con/"+k+"/"+u]=null});
+  chatList().forEach(function(c){if(c.a===u||c.b===u)o["rooms/"+c.room]=null});
+  Object.keys(S.groups).forEach(function(g){if(S.groups[g].m[u]){o["rooms/_grp/"+g+"/m/"+u]=null;o["rooms/_grp/"+g+"/u/"+u]=null;o["rooms/_grp/"+g+"/a/"+u]=null}});
+  return upd(o);
+}
+
+// ---------- live presence feed (poll) ----------
+function pollPresence(){
+  if(!S.loaded)return;
+  api("rooms/_on").then(function(n){
+    n=n||{};var prev=JSON.parse(S.prevOn||"{}");
+    Object.keys(n).forEach(function(u){
+      var was=prev[u]===1,now=n[u]===1;
+      if(now&&!was)S.feed.unshift({t:Date.now(),icon:"🟢",name:uname(u),txt:"came online"});
+      else if(!now&&was)S.feed.unshift({t:Date.now(),icon:"⚪",name:uname(u),txt:"went offline"});
+    });
+    S.on=n;S.prevOn=JSON.stringify(n);S.feed=S.feed.slice(0,100);
+    if(TAB==="dash"&&$("feed")){$("feed").innerHTML=feedHtml();}
+  }).catch(function(){});
+}
+
+function start(){
+  $("login").style.display="none";$("app").style.display="flex";
+  loadAll();setInterval(pollPresence,8000);
+}
+if(sessionStorage.getItem("adm")==="1")start();
+</script>
+</body>
+</html>
