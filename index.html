@@ -110,7 +110,7 @@ header .avs{font-size:20px;margin:0 2px;animation:bob 1.6s ease-in-out infinite}
 #emo .none{grid-column:1/-1;text-align:center;color:var(--sub);font-size:13px;padding:20px 0}
 
 /* popups */
-#menu{position:fixed;inset:0;z-index:20;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.45);padding:12px}
+#menu{position:fixed;inset:0;z-index:45;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.45);padding:12px}
 .sheet{width:100%;max-width:380px;border-radius:22px;padding:14px;box-shadow:0 8px 32px rgba(0,0,0,.35)}
 .sheet button{margin-bottom:8px}
 .sheet button:last-child{margin-bottom:0}
@@ -605,20 +605,29 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
 .vu-mine{padding:3px 4px;gap:7px;font-size:13px;min-width:0}
 .vu-ic{width:22px;height:22px;font-size:12px}
 .vu-used{padding:6px 10px;border-radius:10px;font-size:12px}
+#hfil{display:flex;gap:8px;padding:0 2px 10px;overflow-x:auto}
+#hfil button{width:auto;margin:0;padding:7px 18px;border-radius:18px;border:1px solid var(--bd);background:var(--glass2);color:var(--text);font-weight:700;font-size:14px;white-space:nowrap;flex:none}
+#hfil button.on{background:rgba(37,211,102,.22);border-color:#25d366;color:#25d366}
+#gi{z-index:38}
 #ggBanner{display:none;align-items:center;gap:10px;padding:8px 12px;margin:6px 10px 0;border-radius:14px;font-size:14px;font-weight:600}
 #ggBanner span{flex:1;min-width:0}
 #ggBanner button{width:auto;margin:0;padding:6px 16px;border-radius:14px}
-#ggOv .box{max-width:440px;max-height:100%;overflow-y:auto;text-align:center;padding:14px}
+#ggOv .box{width:calc(100% - 16px);max-width:540px;max-height:100%;overflow-y:auto;text-align:center;padding:14px}
 #ggCv{width:100%;aspect-ratio:1/1;background:#fff;border-radius:14px;touch-action:none;display:block;margin:0 auto 8px;box-shadow:0 2px 10px rgba(0,0,0,.3)}
-#ggWord{font-size:26px;font-weight:800;letter-spacing:4px;margin:2px 0 4px;min-height:34px;word-break:break-word}
-#ggS{font-size:13px;color:var(--sub);margin-bottom:8px}
-#ggTools{display:none;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin-bottom:10px}
-#ggTools i{font-style:normal;width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;flex:none;color:#333}
-#ggTools i.on{border-color:#fff;box-shadow:0 0 0 2px var(--acc)}
+#ggWord{font-size:26px;font-weight:800;letter-spacing:4px;margin:2px 0 4px;min-height:38px;word-break:break-word}
+#ggS{font-size:13px;color:var(--sub);margin-bottom:6px;min-height:18px}
+#ggBar{height:6px;border-radius:4px;background:rgba(255,255,255,.14);overflow:hidden;margin:2px 4px 8px}
+#ggBarI{display:block;height:100%;width:100%;background:#25d366;border-radius:4px;transition:width 1s linear,background .3s}
+#ggTools{display:none;flex-direction:column;align-items:center;gap:8px;margin-bottom:10px}
+#ggTools .gtr{display:flex;flex-wrap:wrap;justify-content:center;gap:9px}
+#ggTools i{font-style:normal;width:38px;height:38px;border-radius:50%;border:2px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex:none;color:#333}
+#ggTools i.ers{background:var(--glass2)}
+#ggTools i.sz b{display:block;border-radius:50%;background:var(--text)}
+#ggTools i.on{border-color:#25d366;box-shadow:0 0 0 2px #25d366}
 #ggTools i.sz{background:var(--glass2);color:var(--text)}
 #ggGuess{display:none;gap:8px;margin-bottom:8px}
 #ggGuess input{flex:1;min-width:0;margin:0}#ggGuess button{width:auto;margin:0;padding:0 16px}
-#ggFeed{font-size:13px;text-align:left;min-height:18px;color:var(--sub);margin:4px 0 8px}
+#ggFeed{font-size:13px;text-align:left;min-height:96px;color:var(--sub);margin:4px 0 8px}
 #ggFeed .ok{color:#25d366;font-weight:700}#ggFeed .gs{opacity:.8;font-style:italic}
 #ggLb{margin:6px 0 10px}
 .ggp{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:12px;background:var(--glass2);margin:4px 0;font-size:14px;text-align:left}
@@ -657,6 +666,7 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
   <b id="nm" style="display:none"></b>
   <div class="top"><h1><svg width="28" height="28" viewBox="0 0 64 64" style="vertical-align:-6px;margin-right:8px"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c3aed"/><stop offset="1" stop-color="#25d366"/></linearGradient></defs><rect width="64" height="64" rx="15" fill="url(#lg2)"/><path d="M45.0 19.1A17 17 0 1 0 45.0 40.9" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/><path d="M15 38L10 54L29 47z" fill="#fff"/><circle cx="32" cy="30" r="4.2" fill="#fff"/></svg>Chatly</h1><div class="av" id="meDp"></div></div>
   <div class="sbar"><input id="sq" placeholder="Search by username" maxlength="15" autocomplete="off" autocapitalize="none"></div>
+  <div id="hfil"><button type="button" data-f="all">All</button><button type="button" data-f="chats">Chats</button><button type="button" data-f="groups">Groups</button></div>
   <div id="list">
     <div id="sres"></div><div id="glist"></div><div id="clist"></div><div id="recent"></div>
     <div id="empty">No conversations yet.<br>Search above or tap 👥 to message someone.</div>
@@ -792,19 +802,33 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
 </div></div>
 <div id="gcr" class="ov"><div class="box glass" style="max-height:100%;overflow-y:auto">
   <h3 id="gcT">👥 New group</h3>
+  <div class="av" id="gcDp" style="margin:0 auto 10px;width:76px;height:76px;font-size:30px;cursor:pointer">📷</div>
+  <input type="file" id="gFile" accept="image/*" style="display:none">
   <input id="gcName" placeholder="Group name" maxlength="25" autocomplete="off">
+  <div id="gcHint" style="display:none;font-size:12px;color:var(--sub);margin-top:6px"></div>
   <div class="chip" id="gcSub" style="margin:8px 0 0">0 selected</div>
   <div id="gcList"></div>
   <button id="gcGo">Create group</button>
   <button class="alt" id="gcX" style="margin:8px 0 0">Cancel</button>
 </div></div>
+<div id="gi" class="ov"><div class="box glass" style="max-height:100%;overflow-y:auto;text-align:center">
+  <div class="av" id="giDp" style="margin:0 auto 6px;width:84px;height:84px;font-size:34px"></div>
+  <h3 id="giN" style="margin:4px 0"></h3>
+  <div class="chip" id="giSub"></div>
+  <div id="giAct" style="margin:12px 0 4px"></div>
+  <div id="giRq"></div>
+  <div id="giList" style="text-align:left;margin:6px 0 10px"></div>
+  <button class="alt" id="giLeave">🚪 Leave group</button>
+  <button class="alt" id="giX" style="margin-top:8px">Close</button>
+</div></div>
 <div id="ggOv" class="ov"><div class="box glass">
   <h3>🎨 Draw &amp; Guess · Group</h3>
-  <div class="chip" id="ggInfo" style="margin-bottom:6px"></div>
+  <div class="chip" id="ggInfo" style="margin-bottom:6px;min-width:150px"></div>
+  <div id="ggBar" style="display:none"><i id="ggBarI"></i></div>
   <div id="ggWord"></div><div id="ggS"></div>
   <div id="ggBody"></div>
   <div id="ggPlay" style="display:none">
-    <canvas id="ggCv" width="600" height="600"></canvas>
+    <canvas id="ggCv" width="800" height="800"></canvas>
     <div id="ggTools"></div>
     <div id="ggGuess"><input id="ggIn" placeholder="Type your guess" maxlength="30" autocomplete="off" autocapitalize="none"><button type="button" id="ggGo">Guess</button></div>
     <div id="ggFeed"></div>
@@ -897,7 +921,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   var pend={},me=lsGet("me",null),CON={},dpCache={},dpW={},pvObj=null,conMain=null,conW=null,conSt="",signup=true,tmpDp="",tmpDpF="";
   function ts(){return firebase.database.ServerValue.TIMESTAMP}
   function canSend(){return !isDM||conSt==="ok"}
-  var oldKey="",oldBusy=false,oldDone=false,prepFrag=null;
+  var oldKey="",oldBusy=false,oldDone=false,prepFrag=null,localTried={};
   var els={},info={},sentMark={},presRef=null,pres={},hidden={},bugRef=null,bugSeen={},svOff=0,eating={};
   var typRef=null,typOthers={},typTimer=null,typLast=0;
   if(db)db.ref(".info/serverTimeOffset").on("value",function(s){svOff=s.val()||0});
@@ -1164,7 +1188,9 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   }
   function updHdp(){
     var h=$("hdp");
-    if(isDM&&getC()[curOther]){var c=getC()[curOther];loadDp(c);h.style.display="flex";fillAv(h,c)}else h.style.display="none";
+    if(isDM&&getC()[curOther]){var c=getC()[curOther];loadDp(c);h.style.display="flex";fillAv(h,c)}
+    else if(curGrp&&GRPS[curGrp]){h.style.display="flex";dpEl(h,GRPS[curGrp].dp,GRPS[curGrp].name)}
+    else h.style.display="none";
   }
   // ---- online presence + message notifications ----
   var ONL={},PW={},MW={},UNR={},UK={},LT={},presCb=null,presRefMe=null,nTm=null;
@@ -1372,7 +1398,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     var la=lsGet("la_"+uid,{});
     function ak(k){return Math.max(typeof c[k].t==="number"?c[k].t:0,la[k]||0)}
     ks.sort(function(x,y){return ak(y)-ak(x)});
-    $("empty").style.display=(ks.length||getRecent().length||Object.keys(GRPS).length)?"none":"block";
+    $("empty").style.display=(ks.length||getRecent().length||Object.keys(GRPS).length||HF==="groups")?"none":"block";
     if(!ks.length)return;
     var h=document.createElement("h3");h.textContent="Chats";box.appendChild(h);
     ks.forEach(function(k){
@@ -1505,7 +1531,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       var gg0=curGrp;
       showSheet([
         ["🧹 Clear my chat",askClear],
-        ["👥 Members",function(){grpInfo(gg0).then(function(i){var n=(i&&i.m)?Object.keys(i.m).map(function(k){return i.m[k]}).join(", "):"";confirmBox("👥 "+((i&&i.name)||"Group"),n||"No members","OK",function(){})})}],
+        ["ℹ️ Group info & members",function(){giOpen(gg0)}],
         ["➕ Add members",function(){gcOpen("add",gg0)}],
         ["🚪 Leave group",function(){confirmBox("Leave group?","You will no longer get messages from this group.","Leave",function(){grpLeave(gg0)})},"danger"],
         ["Cancel"]
@@ -1806,7 +1832,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     }).catch(function(){eerr("Action failed. Check your connection.")});
     });
   };
-  $("hT").onclick=function(){if(isDM&&getC()[curOther])showProfile(getC()[curOther])};
+  $("hT").onclick=function(){if(isDM&&getC()[curOther])showProfile(getC()[curOther]);else if(curGrp)giOpen(curGrp)};
 
   // ---- change email / change password ----
   var EMRX=/^[^@\s]+@[^@\s]+\.[^@\s]+$/,PWOLD=/^.{4,20}$/,PWNEW=/^.{6,20}$/;
@@ -2074,8 +2100,8 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     oldBusy=true;oldSpin(true);
     var from=oldKey;
     function showOlder(arr,fromNet){
+      arr.sort(function(a,b){return tOfMsg(a.d,a.k)-tOfMsg(b.d,b.k)});
       if(arr.length){
-        oldKey=arr[0].k;
         if(fromNet){arr.forEach(function(x){if(!hidden[x.k])cachePush(x.k,x.d)});
           if(curClr&&arr.every(function(x){return typeof x.d.t==="number"&&x.d.t<=curClr}))oldDone=true}
         var m=$("msgs"),h0=m.scrollHeight,t0=m.scrollTop;
@@ -2083,6 +2109,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
         prepFrag=frag;lastDay="";quiet=true;
         try{arr.forEach(function(x){if(!info[x.k]&&!hidden[x.k])addMsg(x.d,x.k)})}
         finally{prepFrag=null;quiet=sq}
+        var ks2=Object.keys(info).sort();if(ks2.length)oldKey=ks2[0];
         var oldDay=lastDay;lastDay=sv;
         var first=m.querySelector("[data-day],.m");
         if(first&&first.hasAttribute("data-day")&&oldDay){
@@ -2095,8 +2122,9 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       oldBusy=false;oldSpin(false);
     }
     // pehle device cache (IndexedDB) se purane msgs: network ki zarurat nahi
-    var local=cacheArr.filter(function(x){return x.k<from&&!info[x.k]&&!hidden[x.k]}).sort(function(a,b){return a.k<b.k?-1:a.k>b.k?1:0}).slice(-40);
-    if(local.length){showOlder(local,false);return}
+    var oldT=9e15;Object.keys(info).forEach(function(k){var t=tOfMsg(info[k].d,k);if(t<oldT)oldT=t});
+    var local=cacheArr.filter(function(x){return !info[x.k]&&!hidden[x.k]&&!localTried[x.k]&&tOfMsg(x.d,x.k)<oldT}).sort(function(a,b){return tOfMsg(a.d,a.k)-tOfMsg(b.d,b.k)}).slice(-40);
+    if(local.length){local.forEach(function(x){localTried[x.k]=1});showOlder(local,false);return}
     myRef.orderByKey().endAt(from).limitToLast(41).once("value",function(snap){
       if(ref!==myRef)return;
       var arr=[];snap.forEach(function(c){if(c.key!==from)arr.push({k:c.key,d:c.val()||{}})});
@@ -2193,6 +2221,25 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     return true;
   }
 
+  // push-id (msg key) mein time chhupa hota hai: jin msgs mein "t" nahi unka time yahin se
+  var PUSHCH="-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
+  function keyTime(k){
+    k=String(k||"");if(k.length<8)return 0;
+    var t=0;for(var i=0;i<8;i++){var v=PUSHCH.indexOf(k.charAt(i));if(v<0)return 0;t=t*64+v}
+    return t;
+  }
+  function tOfMsg(d,k){return (d&&typeof d.t==="number")?d.t:(keyTime(k)||9e15)}
+  function lastMsgEl(m){var e=m.lastElementChild;while(e&&e._t===undefined)e=e.previousElementSibling;return e}
+  function putEl(el,tt,late){
+    el._t=tt;
+    if(prepFrag){prepFrag.appendChild(el);return}
+    var m=$("msgs");
+    if(!late){m.appendChild(el);scroll();return}
+    var e=m.lastElementChild;
+    while(e&&!(e._t!==undefined&&e._t<=tt))e=e.previousElementSibling;
+    if(e)m.insertBefore(el,e.nextSibling);
+    else{var f=m.firstElementChild;while(f&&f._t===undefined)f=f.nextElementSibling;m.insertBefore(el,f||null)}
+  }
   function addMsg(d,key){
     if(key&&hidden[key])return;
     if(!okMsg(d))return;
@@ -2204,8 +2251,9 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
         $("who").textContent=dispName(curOther,nn);
       }
     }
-    var dt=new Date(typeof d.t==="number"?d.t:Date.now()),dk=dt.toDateString();
-    if(dk!==lastDay){lastDay=dk;var dsp=document.createElement("div");dsp.className="sys";dsp.setAttribute("data-day",String(dt.getTime()));dsp.textContent=dayLabel(dt);(prepFrag||$("msgs")).appendChild(dsp);if(!prepFrag)scroll()}
+    var tt=tOfMsg(d,key),dt=new Date(tt>8e15?Date.now():tt),dk=dt.toDateString();
+    var lm0=prepFrag?null:lastMsgEl($("msgs")),late=!!(lm0&&lm0._t>tt+1);
+    if(!late&&dk!==lastDay){lastDay=dk;var dsp=document.createElement("div");dsp.className="sys";dsp.setAttribute("data-day",String(dt.getTime()));dsp.textContent=dayLabel(dt);(prepFrag||$("msgs")).appendChild(dsp);if(!prepFrag)scroll()}
     if(d.type==="sys"){
       var sn=document.createElement("div");sn.className="sys"+(d.lv==="i"?"":" scn");
       var stx=String(d.text||"").slice(0,200);
@@ -2215,7 +2263,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       }
       sn.textContent=stx+" · "+dt.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
       if(key){els[key]=sn;info[key]={mine:false,d:d,tick:null,stxt:null,vu:null,sys:1}}
-      (prepFrag||$("msgs")).appendChild(sn);if(!prepFrag)scroll();
+      putEl(sn,tt,late);
       return;
     }
     var el=document.createElement("div");el.className="m glass"+(mine?" me":"");
@@ -2348,7 +2396,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       }
     }
     if(key&&d.eaten)applyEaten(key);
-    (prepFrag||$("msgs")).appendChild(el);if(!prepFrag)scroll();
+    putEl(el,tt,late);
   }
   function applyEaten(key){
     var el=els[key];if(!el||el.classList.contains("eaten"))return;
@@ -2578,7 +2626,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
 
   // ---- chat open / close ----
   function closeChat(){
-    ggStop();curGrp="";
+    ggStop();curGrp="";localTried={};
     cacheFlush();
     $("txt").blur();
     stopTyping();
@@ -2796,7 +2844,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     var myRef=ref;
     cacheId=id;cacheArr=[];
     function tv(d){return typeof d.t==="number"?d.t:9e15}
-    function byT(a,b){return tv(a.d)-tv(b.d)}
+    function byT(a,b){return tOfMsg(a.d,a.k)-tOfMsg(b.d,b.k)}
     var began=false;
     function begin(cached){
       if(began||ref!==myRef)return;began=true;
@@ -3572,7 +3620,10 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   }
   function camStart(){
     camStop();cam.torch=false;$("camFl").classList.remove("on");
-    navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:cam.face},width:{ideal:1280},height:{ideal:1280}},audio:cam.mode==="video"}).then(function(st){
+    // phone ki poori screen jaisa (portrait) frame; pehle 1280x1280 maang rahe the isliye square aata tha
+    var por=window.innerHeight>=window.innerWidth,ph=cam.mode==="photo",CW=ph?1080:720,CH=ph?1920:1280;
+    var vc={facingMode:{ideal:cam.face},width:{ideal:por?CW:CH},height:{ideal:por?CH:CW},aspectRatio:{ideal:por?9/16:16/9}};
+    navigator.mediaDevices.getUserMedia({video:vc,audio:cam.mode==="video"}).then(function(st){
       if($("camScr").style.display!=="flex"){st.getTracks().forEach(function(t){t.stop()});return}
       cam.st=st;var v=$("camV");v.srcObject=st;v.style.transform=cam.face==="user"?"scaleX(-1)":"";
       try{v.play()}catch(x){}
@@ -4240,7 +4291,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
 
   // ---- back button: sirf upar wali screen band ho ----
   (function(){
-    var IDS=["chat","selBar","menu","dlg","pv","us","jd","ep","cr","em","pc","fg","ttOv","dgOv","gcr","ggOv","viewer"],stack=[],depth=0,skip=0,pp=false;
+    var IDS=["chat","selBar","menu","dlg","pv","us","jd","ep","cr","em","pc","fg","ttOv","dgOv","gi","gcr","ggOv","viewer"],stack=[],depth=0,skip=0,pp=false;
     function vis(id){var e=$(id);return !!(e&&e.style.display&&e.style.display!=="none")}
     function reconcile(){
       IDS.forEach(function(id){
@@ -4295,18 +4346,22 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   function renderGroups(){
     var box=$("glist");if(!box)return;box.innerHTML="";
     var ks=Object.keys(GRPS).sort(function(a,b){return (GRPS[b].t||0)-(GRPS[a].t||0)});
-    if(!ks.length)return;
+    if(curGrp&&GRPS[curGrp]){setTxt($("who"),GRPS[curGrp].name||"Group");updHdp()}
+    if(!ks.length){
+      if(HF==="groups"){$("empty").style.display="none";box.innerHTML='<div class="gcn">No groups yet.<br>Tap ＋ then “New group”.</div>'}
+      return;
+    }
     $("empty").style.display="none";
     var h=document.createElement("h3");h.textContent="Groups";box.appendChild(h);
     ks.forEach(function(g){
       var o=GRPS[g]||{};
       var r=document.createElement("div");r.className="rc";
-      var av=document.createElement("div");av.className="av";initialAv(av,o.name||"Group");
+      var av=document.createElement("div");av.className="av";dpEl(av,o.dp,o.name||"Group");
       var aw=document.createElement("div");aw.className="avw";aw.appendChild(av);
       var nn=document.createElement("div");nn.className="nn";
       var nl=document.createElement("div");nl.className="nl";
       var bn=document.createElement("b");bn.textContent=o.name||"Group";nl.appendChild(bn);
-      var sm=document.createElement("small");sm.style.letterSpacing="0";sm.textContent=o.lm||"👥 Group";
+      var sm=document.createElement("small");sm.style.letterSpacing="0";sm.textContent=(o.rqc?"🔔 "+o.rqc+" request"+(o.rqc>1?"s":"")+" · ":"")+(o.lm||"👥 Group");
       nn.appendChild(nl);nn.appendChild(sm);
       r.appendChild(aw);r.appendChild(nn);
       r.onclick=function(){openGroup(g)};
@@ -4316,6 +4371,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   function openGroup(g){
     var o=GRPS[g];if(!o)return;
     delete GINFO[g];grpInfo(g).catch(function(){});
+    if(o.rqc)toast("🔔 "+o.rqc+" add request"+(o.rqc>1?"s":"")+" waiting — open group info");
     enterChat("g_"+g,{dm:false,group:g,title:o.name||"Group"});
   }
   // group ke naye msgs: app khula ho (kisi bhi screen par) to delivered tick + toast
@@ -4338,16 +4394,31 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       q.once("value",function(){ready=true},function(){ready=true});
     });
   }
-  // ---- group banao / members add ----
-  var gcSel={},gcMode="new",gcGid="";
+  // ---- group banao / edit / members add ----
+  var gcSel={},gcMode="new",gcGid="",gcDpT="",giG="";
+  function grpIsAdm(i,u){return !!(i&&((i.a&&i.a[u])||(!i.a&&i.owner===u)))}
+  function grpABase(g,i){var u={};if(i&&!i.a&&i.owner)u["rooms/_grp/"+g+"/a/"+i.owner]=1;return u}
+  function dpEl(el,dp,name){
+    el.innerHTML="";el.style.background="";el.style.color="";
+    if(dp){var im=document.createElement("img");im.src=dp;el.appendChild(im)}else initialAv(el,name||"Group");
+  }
   function gcCnt(){$("gcSub").textContent=Object.keys(gcSel).filter(function(k){return gcSel[k]}).length+" selected"}
   function gcOpen(mode,g){
-    gcMode=mode;gcGid=g||"";gcSel={};
-    $("gcT").textContent=mode==="new"?"👥 New group":"➕ Add members";
-    $("gcName").style.display=mode==="new"?"":"none";$("gcName").value="";
-    $("gcGo").textContent=mode==="new"?"Create group":"Add";
+    gcMode=mode;gcGid=g||"";gcSel={};gcDpT="";
+    var isNew=mode==="new",isEdit=mode==="edit";
+    $("gcT").textContent=isNew?"👥 New group":(isEdit?"✏️ Edit group":"➕ Add members");
+    $("gcName").style.display=(isNew||isEdit)?"":"none";$("gcName").value="";
+    $("gcDp").style.display=(isNew||isEdit)?"flex":"none";
+    $("gcDp").innerHTML="📷";$("gcDp").style.background="";
+    $("gcList").style.display=isEdit?"none":"";$("gcSub").style.display=isEdit?"none":"";
+    $("gcHint").style.display="none";
+    $("gcGo").textContent=isNew?"Create group":(isEdit?"Save":"Add");
     $("gcList").innerHTML="";gcCnt();
     $("gcr").style.display="flex";
+    if(isEdit){
+      grpInfo(g).then(function(i){if(!i)return;$("gcName").value=i.name||"";if(i.dp)dpEl($("gcDp"),i.dp,i.name)}).catch(function(){});
+      return;
+    }
     function fill(have){
       var c=getC(),box=$("gcList");box.innerHTML="";
       var ks=Object.keys(c).filter(function(k){return c[k].st==="ok"&&!have[k]});
@@ -4364,41 +4435,188 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
         box.appendChild(r);
       });
     }
-    if(mode==="add")grpInfo(g).then(function(i){fill((i&&i.m)||{})}).catch(function(){fill({})});else fill({});
-    if(mode==="new")setTimeout(function(){try{$("gcName").focus()}catch(e){}},80);
+    if(mode==="add"){
+      grpInfo(g).then(function(i){
+        var have=Object.assign({},(i&&i.m)||{});
+        Object.keys((i&&i.rq)||{}).forEach(function(k){have[i.rq[k].uid]=1});
+        if(!grpIsAdm(i,uid)){$("gcHint").textContent="Group admin will need to approve new members.";$("gcHint").style.display=""}
+        fill(have);
+      }).catch(function(){fill({})});
+    }else{fill({});setTimeout(function(){try{$("gcName").focus()}catch(e){}},80)}
   }
   function gcGo(){
     var ks=Object.keys(gcSel).filter(function(k){return gcSel[k]});
     if(!db||!uid)return;
+    if(gcMode==="edit"){
+      var nn=$("gcName").value.trim().slice(0,25),g0=gcGid;
+      if(!nn){toast("Enter a group name");return}
+      $("gcr").style.display="none";
+      grpInfo(g0).then(function(i){
+        var u={};u["rooms/_grp/"+g0+"/name"]=nn;
+        if(gcDpT)u["rooms/_grp/"+g0+"/dp"]=gcDpT;
+        Object.keys((i&&i.m)||{}).forEach(function(k){u["rooms/_ug/"+k+"/"+g0+"/name"]=nn;if(gcDpT)u["rooms/_ug/"+k+"/"+g0+"/dp"]=gcDpT});
+        return db.ref().update(u);
+      }).then(function(){delete GINFO[g0];toast("Group updated");if(giG===g0&&$("gi").style.display==="flex")giOpen(g0)}).catch(function(){toast("Could not update group")});
+      return;
+    }
     if(gcMode==="new"){
       var name=$("gcName").value.trim().slice(0,25);
       if(!name){toast("Enter a group name");return}
       if(!ks.length){toast("Select at least 1 member");return}
-      var g=db.ref("rooms/_grp").push().key,m={},t=now(),u={};
-      m[uid]=myName||"Me";ks.forEach(function(k){m[k]=nameOf(k)});
-      u["rooms/_grp/"+g]={name:name,owner:uid,t:t,m:m};
-      Object.keys(m).forEach(function(k){u["rooms/_ug/"+k+"/"+g]={name:name,t:t,lm:"👥 Group created"}});
+      var g=db.ref("rooms/_grp").push().key,m={},un={},t=now(),u={},c0=getC();
+      m[uid]=myName||"Me";un[uid]=(me&&me.un)||"";
+      ks.forEach(function(k){m[k]=nameOf(k);if(c0[k]&&c0[k].un)un[k]=c0[k].un});
+      var a={};a[uid]=1;
+      var go={name:name,owner:uid,t:t,m:m,u:un,a:a};if(gcDpT)go.dp=gcDpT;
+      u["rooms/_grp/"+g]=go;
+      Object.keys(m).forEach(function(k){var e={name:name,t:t,lm:"👥 Group created"};if(gcDpT)e.dp=gcDpT;u["rooms/_ug/"+k+"/"+g]=e});
       $("gcr").style.display="none";
       db.ref().update(u).then(function(){
-        GINFO[g]={name:name,owner:uid,t:t,m:m};
-        if(!GRPS[g])GRPS[g]={name:name,t:t,lm:"👥 Group created"};
+        GINFO[g]=go;
+        if(!GRPS[g])GRPS[g]={name:name,t:t,lm:"👥 Group created",dp:gcDpT||undefined};
         renderGroups();openGroup(g);
       }).catch(function(){toast("Could not create group")});
     }else{
       if(!ks.length){toast("Select at least 1 member");return}
-      var g2=gcGid,t2=now(),u2={};
-      grpInfo(g2).then(function(i){
-        ks.forEach(function(k){u2["rooms/_grp/"+g2+"/m/"+k]=nameOf(k);u2["rooms/_ug/"+k+"/"+g2]={name:(i&&i.name)||"Group",t:t2,lm:"👥 You were added"}});
-        return db.ref().update(u2);
-      }).then(function(){delete GINFO[g2];grpInfo(g2).catch(function(){});toast("Members added")}).catch(function(){toast("Could not add members")});
+      var g2=gcGid,t2=now();
       $("gcr").style.display="none";
+      grpInfo(g2).then(function(i){
+        var u2={},cs=getC(),adm=grpIsAdm(i,uid);
+        ks.forEach(function(k){
+          var un2=(cs[k]&&cs[k].un)||"";
+          if(adm){
+            u2["rooms/_grp/"+g2+"/m/"+k]=nameOf(k);if(un2)u2["rooms/_grp/"+g2+"/u/"+k]=un2;
+            var e={name:(i&&i.name)||"Group",t:t2,lm:"👥 You were added"};if(i&&i.dp)e.dp=i.dp;
+            u2["rooms/_ug/"+k+"/"+g2]=e;
+          }else{
+            var rk=db.ref("rooms/_grp/"+g2+"/rq").push().key;
+            u2["rooms/_grp/"+g2+"/rq/"+rk]={uid:k,n:nameOf(k),un:un2,by:uid,bn:myName||"",t:t2};
+          }
+        });
+        return db.ref().update(u2).then(function(){return adm});
+      }).then(function(adm){
+        delete GINFO[g2];grpInfo(g2).catch(function(){});
+        if(adm)toast("Members added");else{toast("Request sent to group admin");grpSyncRq(g2)}
+      }).catch(function(){toast("Could not add members")});
     }
   }
+  // admin ko pending requests ka count dikhane ke liye
+  function grpSyncRq(g){
+    db.ref("rooms/_grp/"+g).once("value").then(function(s){
+      var i=s.val();if(!i)return;GINFO[g]=i;
+      var n=Object.keys(i.rq||{}).length,u={};
+      var adm=Object.keys(i.a||{});if(!adm.length&&i.owner)adm=[i.owner];
+      adm.forEach(function(k){u["rooms/_ug/"+k+"/"+g+"/rqc"]=n||null});
+      return db.ref().update(u);
+    }).catch(function(){});
+  }
+  function grpApprove(g,i,rk,ok){
+    var r=(i.rq||{})[rk];if(!r)return;
+    var u={};u["rooms/_grp/"+g+"/rq/"+rk]=null;
+    if(ok){
+      u["rooms/_grp/"+g+"/m/"+r.uid]=r.n||"Member";if(r.un)u["rooms/_grp/"+g+"/u/"+r.uid]=r.un;
+      var e={name:i.name||"Group",t:now(),lm:"👥 You were added"};if(i.dp)e.dp=i.dp;
+      u["rooms/_ug/"+r.uid+"/"+g]=e;
+    }
+    db.ref().update(u).then(function(){grpSyncRq(g);giOpen(g);toast(ok?"Member added":"Request rejected")}).catch(function(){toast("Action failed")});
+  }
+  function grpRemove(g,i,k){
+    var u={};
+    u["rooms/_grp/"+g+"/m/"+k]=null;u["rooms/_grp/"+g+"/u/"+k]=null;u["rooms/_grp/"+g+"/a/"+k]=null;u["rooms/_ug/"+k+"/"+g]=null;
+    var b=grpABase(g,i);Object.keys(b).forEach(function(x){u[x]=b[x]});
+    db.ref().update(u).then(function(){giOpen(g);toast("Member removed")}).catch(function(){toast("Action failed")});
+  }
+  function grpSetAdmin(g,i,k,on){
+    var u=grpABase(g,i);u["rooms/_grp/"+g+"/a/"+k]=on?1:null;
+    db.ref().update(u).then(function(){giOpen(g);toast(on?"Made admin":"Admin removed")}).catch(function(){toast("Action failed")});
+  }
   function grpLeave(g){
-    goHome();
-    var u={};u["rooms/_ug/"+uid+"/"+g]=null;u["rooms/_grp/"+g+"/m/"+uid]=null;
-    db.ref().update(u).catch(function(){});
-    toast("You left the group");
+    $("gi").style.display="none";
+    if(curGrp===g)goHome();
+    grpInfo(g).then(function(i){
+      var u={};
+      u["rooms/_ug/"+uid+"/"+g]=null;u["rooms/_grp/"+g+"/m/"+uid]=null;u["rooms/_grp/"+g+"/u/"+uid]=null;
+      if(i&&grpIsAdm(i,uid)){
+        var base=grpABase(g,i);Object.keys(base).forEach(function(x){u[x]=base[x]});
+        var others=Object.keys(i.m||{}).filter(function(k){return k!==uid});
+        var admins=Object.keys(i.a||{}).filter(function(k){return k!==uid&&i.m&&i.m[k]});
+        if(!admins.length&&others.length)u["rooms/_grp/"+g+"/a/"+others[0]]=1;
+        u["rooms/_grp/"+g+"/a/"+uid]=null;
+      }
+      return db.ref().update(u);
+    }).then(function(){toast("You left the group")}).catch(function(){toast("Could not leave group")});
+  }
+  // ---- group info (members, admin, requests) ----
+  function giOpen(g){
+    giG=g;$("gi").style.display="flex";
+    delete GINFO[g];
+    grpInfo(g).then(function(i){if(giG===g)giRender(g,i)}).catch(function(){toast("Could not load group")});
+  }
+  function giRender(g,i){
+    if(!i){$("gi").style.display="none";return}
+    var adm=grpIsAdm(i,uid),m=i.m||{},ids=Object.keys(m);
+    dpEl($("giDp"),i.dp,i.name);
+    setTxt($("giN"),i.name||"Group");
+    $("giSub").textContent=ids.length+" members"+(adm?" · You are admin":"");
+    var act=$("giAct");act.innerHTML="";
+    if(adm)act.appendChild(ttBtn("✏️ Edit name & photo","alt",function(){gcOpen("edit",g)}));
+    act.appendChild(ttBtn("➕ Add members","",function(){gcOpen("add",g)}));
+    // admin: pending requests
+    var rq=$("giRq");rq.innerHTML="";
+    var rks=Object.keys(i.rq||{});
+    if(adm&&rks.length){
+      var h=document.createElement("h3");h.textContent="🔔 Requests ("+rks.length+")";h.style.cssText="margin:8px 0 4px;text-align:left;font-size:15px";rq.appendChild(h);
+      rks.forEach(function(rk){
+        var r=i.rq[rk],row=document.createElement("div");row.className="gcr";row.style.cursor="default";
+        var tx=document.createElement("b");tx.style.cssText="white-space:normal;font-weight:600";
+        tx.textContent=(r.n||"Someone")+" — added by "+(r.bn||"a member");
+        var ok=document.createElement("button");ok.type="button";ok.textContent="✓";ok.style.cssText="width:42px;margin:0;padding:8px 0";
+        ok.onclick=function(){grpApprove(g,i,rk,true)};
+        var no=document.createElement("button");no.type="button";no.className="alt";no.textContent="✕";no.style.cssText="width:42px;margin:0;padding:8px 0";
+        no.onclick=function(){grpApprove(g,i,rk,false)};
+        row.appendChild(tx);row.appendChild(ok);row.appendChild(no);rq.appendChild(row);
+      });
+    }
+    // members
+    var list=$("giList");list.innerHTML="";
+    ids.sort(function(a,b){
+      var x=grpIsAdm(i,a)?0:1,y=grpIsAdm(i,b)?0:1;
+      if(x!==y)return x-y;
+      return String(m[a]).localeCompare(String(m[b]));
+    });
+    ids.forEach(function(k){
+      var row=document.createElement("div");row.className="gcr";
+      var av=document.createElement("div");av.className="av";av.style.cssText="width:40px;height:40px;font-size:18px;flex:none";
+      var c={st:"ok",un:(i.u&&i.u[k])||"",name:m[k]};
+      if(c.un)loadDp(c);
+      fillAv(av,c.un?c:{name:m[k]});
+      var nm=document.createElement("b");nm.textContent=(k===uid?"You":m[k])||"Member";
+      row.appendChild(av);row.appendChild(nm);
+      if(grpIsAdm(i,k)){var ad=document.createElement("span");ad.className="chip";ad.style.cssText="margin:0;padding:2px 10px;font-size:12px;color:#25d366;border-color:#25d366";ad.textContent="Admin";row.appendChild(ad)}
+      row.onclick=function(){giMember(g,i,k)};
+      list.appendChild(row);
+    });
+  }
+  function giMember(g,i,k){
+    var adm=grpIsAdm(i,uid),isA=grpIsAdm(i,k),un=(i.u&&i.u[k])||"",nm=(i.m&&i.m[k])||"Member",l=[];
+    l.push(["👤 View profile",function(){
+      if(!un){toast("Profile not available");return}
+      loadDp({st:"ok",un:un});showProfile({name:nm,un:un,st:"ok"});
+    }]);
+    if(k!==uid){
+      var c=getC()[k];
+      if(c&&c.st==="ok")l.push(["💬 Message",function(){$("gi").style.display="none";openDM(k)}]);
+      else if(!c)l.push(["➕ Add contact",function(){
+        if(!un){toast("Cannot add this user");return}
+        $("gi").style.display="none";sendReq({uid:k,un:un,name:nm});
+      }]);
+    }
+    if(adm&&k!==uid){
+      l.push([isA?"⭐ Remove as admin":"⭐ Make admin",function(){grpSetAdmin(g,i,k,!isA)}]);
+      l.push(["🚫 Remove from group",function(){confirmBox("Remove member?",nm+" will be removed from this group.","Remove",function(){grpRemove(g,i,k)})},"danger"]);
+    }
+    l.push(["Cancel"]);
+    showSheet(l);
   }
   // group msg ka notification (sab members ko) + list update
   function pushGroup(o,k,g){
@@ -4420,10 +4638,25 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(GINFO[g])go(GINFO[g]);else grpInfo(g).then(go).catch(function(){});
   }
 
+  // ---- home: All / Chats / Groups ----
+  var HF=lsGet("hfil","all");
+  if(HF!=="chats"&&HF!=="groups")HF="all";
+  function applyFil(){
+    $("glist").style.display=HF==="chats"?"none":"";
+    $("clist").style.display=HF==="groups"?"none":"";
+    $("recent").style.display=HF==="groups"?"none":"";
+    Array.prototype.forEach.call($("hfil").children,function(b){b.classList.toggle("on",b.getAttribute("data-f")===HF)});
+  }
+  Array.prototype.forEach.call($("hfil").children,function(b){
+    b.onclick=function(){HF=b.getAttribute("data-f");lsSet("hfil",HF);applyFil();renderGroups();renderContacts()};
+  });
+  applyFil();
   // ---- group Draw & Guess (max 6) ----
   var GG=null,ggRefV=null,ggW=null,ggTick=null,ggGid="",ggTurn=-1,ggStR=null,ggStW=null,ggFdR=null,ggFdW=null,ggInvFor="",ggAdvT=0;
   var ggCol="#111111",ggSz=8,ggPts=[],ggSentN=0,ggDown=false,ggFT=null,ggToolFor="";
-  var GGCOL=["#111111","#e53935","#fb8c00","#fdd835","#43a047","#1e88e5","#8e24aa","#ffffff"];
+  var GGCOL=["#111111","#e53935","#1e88e5","#43a047","#fdd835","#8e24aa","#fb8c00"],ggEraser=false,ggCur={c:"#111111",w:8};
+  function setTxt(el,t){if(el.textContent!==t)el.textContent=t}
+  function ggEff(){return ggEraser?{c:"#ffffff",w:Math.max(ggSz*2,16)}:{c:ggCol,w:ggSz}}
   var ggCv=$("ggCv"),ggCx=ggCv.getContext("2d");
   var GG_MAX=6;
   function ggNorm(s){return String(s||"").toLowerCase().replace(/[^a-z0-9\u0600-\u06ff ]/g,"").replace(/\s+/g," ").trim()}
@@ -4571,7 +4804,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     var n=ggPts.length;
     if(n>ggSentN&&GG&&GG.st==="play"&&GG.d===uid){
       var chunk=ggSentN>=2?ggPts.slice(ggSentN-2):ggPts.slice();
-      db.ref("rooms/g_"+ggGid+"/gs/"+GG.tn).push({u:uid,c:ggCol,w:ggSz,p:chunk}).catch(function(){});
+      db.ref("rooms/g_"+ggGid+"/gs/"+GG.tn).push({u:uid,c:ggCur.c,w:ggCur.w,p:chunk}).catch(function(){});
       ggSentN=n;
     }
     if(!ggDown){if(ggFT){clearInterval(ggFT);ggFT=null}ggPts=[];ggSentN=0}
@@ -4579,35 +4812,39 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   ggCv.addEventListener("pointerdown",function(e){
     if(!ggCanDraw())return;
     e.preventDefault();try{ggCv.setPointerCapture(e.pointerId)}catch(x){}
-    ggDown=true;var p=ggPt(e);ggPts=[p[0],p[1]];ggSentN=0;ggLine(ggPts,ggCol,ggSz);
+    ggDown=true;ggCur=ggEff();var p=ggPt(e);ggPts=[p[0],p[1]];ggSentN=0;ggLine(ggPts,ggCur.c,ggCur.w);
     if(!ggFT)ggFT=setInterval(ggSend,90);
   });
   ggCv.addEventListener("pointermove",function(e){
     if(!ggDown)return;e.preventDefault();
     var p=ggPt(e),n=ggPts.length;
     if(Math.abs(p[0]-ggPts[n-2])+Math.abs(p[1]-ggPts[n-1])<3)return;
-    ggLine([ggPts[n-2],ggPts[n-1],p[0],p[1]],ggCol,ggSz);
+    ggLine([ggPts[n-2],ggPts[n-1],p[0],p[1]],ggCur.c,ggCur.w);
     ggPts.push(p[0],p[1]);
   });
   function ggUp(){if(!ggDown)return;ggDown=false;ggSend()}
   ggCv.addEventListener("pointerup",ggUp);ggCv.addEventListener("pointercancel",ggUp);
   function ggTools(){
     var t=$("ggTools");t.innerHTML="";
+    var r1=document.createElement("div"),r2=document.createElement("div");r1.className="gtr";r2.className="gtr";
     GGCOL.forEach(function(c){
-      var i=document.createElement("i");i.style.background=c;if(c===ggCol)i.className="on";
-      if(c==="#ffffff")i.textContent="⌫";
-      i.onclick=function(){ggCol=c;ggTools()};t.appendChild(i);
+      var i=document.createElement("i");i.style.background=c;if(!ggEraser&&c===ggCol)i.className="on";
+      i.onclick=function(){ggCol=c;ggEraser=false;ggTools()};r1.appendChild(i);
     });
-    [["S",4],["M",9],["L",18]].forEach(function(s){
-      var i=document.createElement("i");i.className="sz"+(ggSz===s[1]?" on":"");i.textContent=s[0];
-      i.onclick=function(){ggSz=s[1];ggTools()};t.appendChild(i);
+    var er=document.createElement("i");er.className="ers"+(ggEraser?" on":"");er.textContent="🧽";
+    er.onclick=function(){ggEraser=!ggEraser;ggTools()};r1.appendChild(er);
+    [4,9,16,26].forEach(function(w){
+      var i=document.createElement("i");i.className="sz"+(ggSz===w?" on":"");
+      var d=document.createElement("b");d.style.width=d.style.height=Math.max(5,Math.round(w*.8))+"px";i.appendChild(d);
+      i.onclick=function(){ggSz=w;ggTools()};r2.appendChild(i);
     });
-    var cl=document.createElement("i");cl.className="sz";cl.textContent="🗑";
+    var cl=document.createElement("i");cl.textContent="🗑";cl.style.background="var(--glass2)";
     cl.onclick=function(){
       if(!ggCanDraw())return;
       ggClear();db.ref("rooms/g_"+ggGid+"/gs/"+GG.tn).push({u:uid,x:1}).catch(function(){});
     };
-    t.appendChild(cl);
+    r2.appendChild(cl);
+    t.appendChild(r1);t.appendChild(r2);
   }
   // ---- actions ----
   function ggCreate(){
@@ -4688,6 +4925,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     $("ggPlay").style.display=play?"block":"none";
     $("ggWord").style.display=play?"":"none";$("ggS").style.display=play?"":"none";
     var body=$("ggBody"),act=$("ggAct");body.innerHTML="";act.innerHTML="";
+    if(g.st!=="play")$("ggBar").style.display="none";
     if(g.st==="lobby"){
       $("ggInfo").textContent="Players "+ggCount(g)+"/"+GG_MAX;
       var tp=document.createElement("p");tp.style.cssText="margin:4px 0 8px;font-size:14px";
@@ -4729,12 +4967,15 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   }
   function ggTickUi(){
     var g=GG;if(!g||g.st!=="play")return;
-    var du=g.du||70,el=Math.max(0,(now()-(g.t0||now()))/1000),left=Math.max(0,Math.ceil(du-el));
+    var du=g.du||70,el=Math.max(0,(now()-(g.t0||now()))/1000);
     var pl=ggPl(g),drawer=g.d===uid,solved=!!(g.sv&&g.sv[uid]);
-    $("ggInfo").textContent="Turn "+((g.tn||0)+1)+"/"+g.tt+" · ⏱ "+left+"s";
+    setTxt($("ggInfo"),"Turn "+((g.tn||0)+1)+" of "+g.tt);
+    $("ggBar").style.display="";
+    var pct=Math.max(0,Math.min(100,(du-el)/du*100)),bi=$("ggBarI");
+    bi.style.width=pct+"%";bi.style.background=pct<25?"#ff5252":"#25d366";
     var w=String(g.w||"");
-    $("ggWord").textContent=drawer?("✏️ "+w.toUpperCase()):(solved?("✅ "+w.toUpperCase()):ggMask(w,el/du));
-    $("ggS").textContent=drawer?"Draw this word — others are guessing":((pl[g.d]&&pl[g.d].n)||"Someone")+" is drawing";
+    setTxt($("ggWord"),drawer?("✏️ "+w.toUpperCase()):(solved?("✅ "+w.toUpperCase()):ggMask(w,el/du)));
+    setTxt($("ggS"),drawer?"Draw this word — others are guessing":((pl[g.d]&&pl[g.d].n)||"Someone")+" is drawing");
   }
   function ggTickFn(){
     var g=GG;if(!g||g.st!=="play"){return}
@@ -4756,6 +4997,13 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     else ggCreate();
   };
   $("gcGo").onclick=gcGo;$("gcX").onclick=function(){$("gcr").style.display="none"};
+  $("gcDp").onclick=function(){$("gFile").click()};
+  $("gFile").onchange=function(){
+    var f=this.files&&this.files[0];this.value="";if(!f)return;
+    squareDp(f).then(function(d){if(!d)return;gcDpT=d.t;dpEl($("gcDp"),d.t)}).catch(function(){toast("Could not open photo")});
+  };
+  $("giX").onclick=function(){$("gi").style.display="none"};
+  $("giLeave").onclick=function(){var g=giG;confirmBox("Leave group?","You will no longer get messages from this group.","Leave",function(){grpLeave(g)})};
 
   // ---- invites: chat band ho tab bhi popup ----
   var INVW={};
