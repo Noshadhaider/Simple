@@ -3634,8 +3634,8 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   function camStart(){
     camStop();cam.torch=false;$("camFl").classList.remove("on");
     // phone ki poori screen jaisa (portrait) frame; pehle 1280x1280 maang rahe the isliye square aata tha
-    var por=window.innerHeight>=window.innerWidth,ph=cam.mode==="photo",CW=ph?1080:720,CH=ph?1920:1280;
-    var vc={facingMode:{ideal:cam.face},width:{ideal:por?CW:CH},height:{ideal:por?CH:CW},aspectRatio:{ideal:por?9/16:16/9}};
+    var por=window.innerHeight>=window.innerWidth,ph=cam.mode==="photo",CW=ph?1080:720,CH=ph?1440:960;
+    var vc={facingMode:{ideal:cam.face},width:{ideal:por?CW:CH},height:{ideal:por?CH:CW},aspectRatio:{ideal:por?3/4:4/3}};
     navigator.mediaDevices.getUserMedia({video:vc,audio:cam.mode==="video"}).then(function(st){
       if($("camScr").style.display!=="flex"){st.getTracks().forEach(function(t){t.stop()});return}
       cam.st=st;var v=$("camV");v.srcObject=st;v.style.transform=cam.face==="user"?"scaleX(-1)":"";
@@ -3645,9 +3645,11 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       v.onloadedmetadata=function(){
         var sp=window.innerHeight>=window.innerWidth;
         if(tr&&tr.applyConstraints&&v.videoWidth&&((v.videoWidth>v.videoHeight)===sp)){
-          tr.applyConstraints({aspectRatio:{ideal:sp?9/16:16/9}}).catch(function(){});
+          tr.applyConstraints({aspectRatio:{ideal:sp?3/4:4/3}}).catch(function(){});
         }
       };
+      // zoom kam se kam (poora view) rakho
+      try{if(cp.zoom&&tr.applyConstraints)tr.applyConstraints({advanced:[{zoom:cp.zoom.min}]}).catch(function(){})}catch(e){}
       $("camFl").style.display=cp.torch?"flex":"none";
     }).catch(function(){camClose();toast("Camera permission denied")});
   }
