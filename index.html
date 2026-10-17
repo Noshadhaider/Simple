@@ -428,6 +428,12 @@ html .sys{font-size:calc(12px*var(--fs,1))}
 .m .n .gav{width:24px;height:24px;border-radius:50%;overflow:hidden;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1}
 .m .n .gav img{width:100%;height:100%;object-fit:cover}
 .m .n .gn{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* group: DP bubble ke bahar left me, name andar */
+.m.gm{margin-left:36px;max-width:calc(80% - 36px)}
+.m.gm>.gav{position:absolute;left:-36px;top:0;width:30px;height:30px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1;cursor:pointer}
+.m.gm>.gav img{width:100%;height:100%;object-fit:cover}
+.m.gm .n{display:block;cursor:pointer}
+.m.gm .n .gn{display:block}
 .srw{display:flex;align-items:center;justify-content:space-between;margin:0 0 14px;font-size:15px;color:var(--text)}
 .sw{width:50px;height:28px;border-radius:14px;background:var(--glass2);border:1px solid var(--bd);position:relative;cursor:pointer;flex:none;transition:background .2s}
 .sw:after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);transition:transform .2s}
@@ -2528,11 +2534,17 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(!mine&&!isDM){
       var n=document.createElement("div");n.className="n";
       var nmx=dispName(d.uid,String(d.name||"Guest").slice(0,20)),su=d.uid;
+      el.classList.add("gm");
+      // DP bubble ke bahar (left), name bubble ke andar (upar, member ke rang me)
       var gav=document.createElement("span");gav.className="gav";initialAv(gav,nmx);
       var gn=document.createElement("span");gn.className="gn";gn.textContent=nmx;
-      n.appendChild(gav);n.appendChild(gn);el.appendChild(n);
+      var gh=0,gs=String(su||nmx);for(var gi_=0;gi_<gs.length;gi_++)gh=(gh*31+gs.charCodeAt(gi_))>>>0;
+      var GPAL=["#b388ff","#4fc3f7","#ff8a65","#4dd0a1","#f06292","#ffd54f","#81c784","#ba68c8","#4db6ac","#ff7043"];
+      gn.style.color=GPAL[gh%GPAL.length];
+      n.appendChild(gn);el.appendChild(n);el.appendChild(gav);
       grpMemAv(gav,su,nmx);
       n.addEventListener("click",function(e){e.stopPropagation();grpMemMenu(su,nmx)});
+      gav.addEventListener("click",function(e){e.stopPropagation();grpMemMenu(su,nmx)});
     }
     if(d.rp&&typeof d.rp==="object"){
       var q=document.createElement("div");q.className="rq";
@@ -5292,6 +5304,12 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     delete c.sv;delete c.ls;
     return c;
   }
+  function txSkip(c,u,tn){
+    if(!c||c.st!=="play"||c.tn!==tn||c.d!==u)return;
+    if(c.sv&&Object.keys(c.sv).length)return;
+    c.w=pickWord(c.w,"mix");c.t0=now();
+    return c;
+  }
   function txSolve(c,u,tn){
     if(!c||c.st!=="play"||c.tn!==tn||c.d===u||!c.p||!c.p[u])return;
     c.sv=c.sv||{};if(c.sv[u])return;
@@ -5468,6 +5486,18 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     ggRef().transaction(function(c){return txLeave(c,uid)},null,false);
     $("ggOv").style.display="none";
   }
+  function ggSkip(){
+    var g=GG;
+    if(!g||g.st!=="play"||g.d!==uid||(g.sv&&Object.keys(g.sv).length))return;
+    var tn=g.tn;
+    ggRef().transaction(function(c){return txSkip(c,uid,tn)},function(e,ok){
+      if(e||!ok)return;
+      ggClear();
+      var b="rooms/g_"+ggGid+"/";
+      db.ref(b+"gs/"+tn).push({u:uid,x:1}).catch(function(){});
+      db.ref(b+"gf/"+tn).push({s:1,x:(myName||"Drawer")+" skipped the word"}).catch(function(){});
+    },false);
+  }
   function ggAdvance(tn){ggAdvT=now();ggRef().transaction(function(c){return txAdvance(c,tn)},null,false)}
   function ggSubmit(){
     var inp=$("ggIn"),t=inp.value.trim();inp.value="";
@@ -5532,6 +5562,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       $("ggTools").style.display=drawer?"flex":"none";
       $("ggCv").style.cursor=drawer?"crosshair":"default";
       if(drawer){var key=g.id+"_"+g.tn;if(ggToolFor!==key){ggToolFor=key;ggTools()}}
+      if(drawer&&inG2&&!(g.sv&&Object.keys(g.sv).length))act.appendChild(ttBtn("⏭ Skip word","alt",ggSkip));
       if(!inG2&&ggCount(g)<GG_MAX)act.appendChild(ttBtn("Join game","",function(){ggJoin(false)}));
       ggTickUi();
     }
@@ -5743,6 +5774,69 @@ function end(){if(p>0&&p<1)set(p>.4?1:0,1)}
 L.addEventListener('touchend',end);L.addEventListener('touchcancel',end);
 L.addEventListener('wheel',function(e){if(e.deltaY>0&&p<1){set(1,1);e.preventDefault()}else if(e.deltaY<0&&L.scrollTop<=0&&p>0)set(0,1)},{passive:false});
 sq.addEventListener('focus',function(){set(0,1)});
+})();
+</script>
+<script>
+/* ===== Chatly forced auto-update (Capgo) ===== */
+(function(){
+  var C=window.Capacitor;
+  if(!(C&&C.isNativePlatform&&C.isNativePlatform()))return;
+  var U=C.Plugins&&C.Plugins.CapacitorUpdater;
+  if(!U)return;
+  // zaroori: har launch par batao ke app theek chali, warna Capgo purane version par rollback kar deta hai
+  try{U.notifyAppReady()}catch(e){}
+  var busy=false,lastChk=0,ov=null,bar=null,txt=null,btn=null;
+  function ui(){
+    if(ov)return;
+    var st=document.createElement("style");
+    st.textContent="#upOv{position:fixed;inset:0;z-index:2147483647;background:rgba(10,10,20,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px}"+
+      "#upOv .upb{width:100%;max-width:320px;background:var(--card,#1d1b2e);color:var(--text,#fff);border-radius:22px;padding:24px 20px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.45)}"+
+      "#upOv h3{margin:0 0 6px;font-size:19px}#upOv p{margin:0 0 16px;font-size:14px;color:var(--sub,#aaa);line-height:1.4}"+
+      "#upOv .upt{height:8px;border-radius:6px;background:var(--glass2,#2a2842);overflow:hidden}"+
+      "#upOv .upf{height:100%;width:0;background:var(--pu,#25d366);border-radius:6px;transition:width .25s}"+
+      "#upOv button{margin-top:16px;width:100%;padding:12px;border:0;border-radius:14px;background:var(--pu,#25d366);color:var(--on,#063);font-size:15px;font-weight:700;display:none}";
+    document.head.appendChild(st);
+    ov=document.createElement("div");ov.id="upOv";
+    ov.innerHTML='<div class="upb"><h3>🔄 New update</h3><p id="upTx">Downloading…</p><div class="upt"><div class="upf" id="upBar"></div></div><button type="button" id="upBtn">Retry</button></div>';
+    document.body.appendChild(ov);
+    bar=document.getElementById("upBar");txt=document.getElementById("upTx");btn=document.getElementById("upBtn");
+    // popup band nahi hota: koi close button / outside-tap nahi
+    ov.addEventListener("click",function(e){e.stopPropagation()},true);
+    ov.addEventListener("touchmove",function(e){e.preventDefault()},{passive:false});
+  }
+  function prog(p){if(bar)bar.style.width=Math.max(3,Math.min(100,p))+"%"}
+  function fail(l){
+    busy=false;
+    if(txt)txt.textContent="Update failed. Check your internet…";
+    if(btn){btn.style.display="block";btn.onclick=function(){btn.style.display="none";run(l)}}
+    setTimeout(function(){if(ov&&ov.style.display!=="none"&&btn&&btn.style.display==="block")btn.click()},6000);
+  }
+  function run(l){
+    if(busy)return;busy=true;ui();ov.style.display="flex";
+    txt.textContent="Downloading new update…";prog(3);
+    var o={url:l.url,version:l.version};
+    if(l.sessionKey)o.sessionKey=l.sessionKey;
+    if(l.checksum)o.checksum=l.checksum;
+    if(l.manifest)o.manifest=l.manifest;
+    U.download(o).then(function(b){
+      prog(100);txt.textContent="Installing…";
+      return U.set(b); // app khud reload hoke naye version par khulti hai, popup tabhi khatam
+    }).catch(function(){fail(l)});
+  }
+  try{U.addListener("download",function(e){if(e&&typeof e.percent==="number"&&busy)prog(e.percent)})}catch(e){}
+  function check(){
+    if(busy)return;
+    var n=Date.now();if(n-lastChk<30000)return;lastChk=n;
+    Promise.all([U.getLatest(),U.current()]).then(function(r){
+      var l=r[0],cur=r[1];
+      if(!l||!l.url||!l.version||l.error)return;
+      var cv=cur&&cur.bundle&&cur.bundle.version;
+      if(l.version===cv)return;
+      run(l);
+    }).catch(function(){/* offline ya koi update nahi — app normal chale */});
+  }
+  setTimeout(check,1500);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)check()});
 })();
 </script>
 </body>
