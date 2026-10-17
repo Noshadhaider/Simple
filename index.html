@@ -669,6 +669,22 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
 .gcr.on{background:rgba(37,211,102,.2)}.gck{width:22px;flex:none;color:#25d366;font-weight:800}
 .gcn{padding:14px;text-align:center;color:var(--sub);font-size:14px}
 </style>
+<style id="vm-css">
+.vm{display:flex;align-items:center;gap:10px;width:250px;max-width:100%;padding:2px 0 0}
+.vm-p{flex:none;width:34px;height:34px;margin:0;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;display:flex;align-items:center;justify-content:center;opacity:.8}
+.vm-p svg{width:30px;height:30px;fill:currentColor}
+.vm-m{flex:1;min-width:0}
+.vm-w{position:relative;height:30px;display:flex;align-items:center;justify-content:space-between;gap:2px;touch-action:none;cursor:pointer}
+.vm-w b{flex:1;min-width:2px;max-width:4px;border-radius:2px;background:currentColor;opacity:.32;height:30%;transition:opacity .15s}
+.vm-w b.on{opacity:.9}
+.vm-d{position:absolute;top:50%;width:13px;height:13px;margin:-6.5px 0 0 -6px;border-radius:50%;background:#53bdeb;left:0;transition:left .25s linear;pointer-events:none}
+.vm-t{font-size:12px;opacity:.7;margin-top:1px}
+.vm-a{position:relative;flex:none;width:44px;height:44px}
+.vm-av{width:44px;height:44px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:19px}
+.vm-av img{width:100%;height:100%;object-fit:cover;display:block}
+.vm-mic{position:absolute;left:-7px;bottom:-3px;width:18px;height:18px;fill:none;stroke:#8d98a0;stroke-width:2;stroke-linecap:round}
+.vm.pl .vm-mic{stroke:#53bdeb}
+</style>
 </head>
 <body>
 
@@ -2382,6 +2398,74 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(e)m.insertBefore(el,e.nextSibling);
     else{var f=m.firstElementChild;while(f&&f._t===undefined)f=f.nextElementSibling;m.insertBefore(el,f||null)}
   }
+  var vmCur=null,vmAC=null;
+  function fmtVm(x){x=Math.max(0,Math.round(x||0));return Math.floor(x/60)+":"+("0"+(x%60)).slice(-2)}
+  function mkVoice(data,d,mine){
+    var N=38,box=document.createElement("div");box.className="vm";
+    var PL='<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',PA='<svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+    var pb=document.createElement("button");pb.type="button";pb.className="vm-p";pb.innerHTML=PL;pb.setAttribute("aria-label","Play voice message");
+    var mid=document.createElement("div");mid.className="vm-m";
+    var wv=document.createElement("div");wv.className="vm-w";
+    var bars=[],sd=(data.length*2654435761)>>>0;
+    for(var i=0;i<N;i++){
+      sd=(sd*1664525+1013904223)>>>0;
+      var b=document.createElement("b");b.style.height=(22+Math.round((sd/4294967296)*70))+"%";
+      wv.appendChild(b);bars.push(b);
+    }
+    var dot=document.createElement("span");dot.className="vm-d";wv.appendChild(dot);
+    var tm=document.createElement("div");tm.className="vm-t";tm.textContent=fmtVm(d.dur);
+    mid.appendChild(wv);mid.appendChild(tm);
+    var aw=document.createElement("div");aw.className="vm-a";
+    var av=document.createElement("div");av.className="av vm-av";
+    if(mine&&me)fillAv(av,{name:myName,un:me.un,st:"ok"});
+    else if(isDM&&getC()[curOther]){var cc=getC()[curOther];loadDp(cc);fillAv(av,cc)}
+    else{initialAv(av,d.name||"Guest");if(d.uid)grpMemAv(av,d.uid,d.name||"Guest")}
+    aw.appendChild(av);
+    aw.insertAdjacentHTML("beforeend",'<svg class="vm-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor" style="fill:#0000"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>');
+    box.appendChild(pb);box.appendChild(mid);box.appendChild(aw);
+    var au=new Audio();au.preload="metadata";au.src=data;
+    function tot(){return d.dur||(isFinite(au.duration)?au.duration:0)}
+    function upd(){
+      var t=tot(),c=au.currentTime||0,p=t?Math.min(1,c/t):0;
+      bars.forEach(function(x,k){x.classList.toggle("on",(k+.5)/N<=p)});
+      dot.style.left=(p*100)+"%";
+      tm.textContent=fmtVm(c>0?c:t);
+    }
+    au.ontimeupdate=upd;
+    au.onplay=function(){pb.innerHTML=PA;box.classList.add("pl")};
+    au.onpause=function(){pb.innerHTML=PL};
+    au.onended=function(){au.currentTime=0;pb.innerHTML=PL;upd()};
+    au.onloadedmetadata=upd;
+    pb.onclick=function(e){
+      e.stopPropagation();
+      if(au.paused){
+        if(vmCur&&vmCur!==au)try{vmCur.pause()}catch(x){}
+        vmCur=au;var pr=au.play();if(pr&&pr.catch)pr.catch(function(){toast("Could not play voice message")});
+      }else au.pause();
+    };
+    function seek(e){
+      var r=wv.getBoundingClientRect(),t=tot();if(!t)return;
+      au.currentTime=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*t;upd();
+    }
+    var dn=false;
+    wv.addEventListener("pointerdown",function(e){e.stopPropagation();dn=true;try{wv.setPointerCapture(e.pointerId)}catch(x){}seek(e)});
+    wv.addEventListener("pointermove",function(e){if(dn)seek(e)});
+    ["pointerup","pointercancel"].forEach(function(n){wv.addEventListener(n,function(){dn=false})});
+    // asli awaaz ke hisaab se waveform (agar browser decode kar sake)
+    try{
+      var AC=window.AudioContext||window.webkitAudioContext;
+      if(AC&&data.length<4e6){
+        vmAC=vmAC||new AC();
+        fetch(data).then(function(r){return r.arrayBuffer()}).then(function(buf){return vmAC.decodeAudioData(buf)}).then(function(ab){
+          var ch=ab.getChannelData(0),step=Math.max(1,Math.floor(ch.length/N)),skip=Math.max(1,Math.floor(step/150)),pk=[],mx=0;
+          for(var i=0;i<N;i++){var m=0;for(var j=i*step;j<(i+1)*step&&j<ch.length;j+=skip){var v=Math.abs(ch[j]);if(v>m)m=v}pk.push(m);if(m>mx)mx=m}
+          if(mx>0)bars.forEach(function(x,k){x.style.height=Math.max(14,Math.round(pk[k]/mx*100))+"%"});
+          if(!d.dur&&ab.duration){d.dur=ab.duration;upd()}
+        }).catch(function(){});
+      }
+    }catch(e){}
+    return box;
+  }
   function addMsg(d,key){
     if(key&&hidden[key])return;
     if(!okMsg(d))return;
@@ -2472,7 +2556,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       var sk=document.createElement("img");sk.className="media stk";sk.src=data;sk.alt="sticker";
       el.appendChild(sk);el.classList.add("big");
     }else if(d.type==="audio"&&data.indexOf("data:audio/")===0){
-      var au=document.createElement("audio");au.src=data;au.controls=true;au.preload="metadata";el.appendChild(au);
+      el.appendChild(mkVoice(data,d,mine));
     }else if(d.type==="file"&&data.indexOf("data:")===0){
       var fb=document.createElement("div");fb.className="fbox";
       var fi=document.createElement("span");fi.className="fi";fi.textContent="📄";
@@ -2520,7 +2604,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       };
       el.addEventListener("pointerdown",function(e){
         px=e.clientX;py=e.clientY;sw=false;dx=0;lpF=false;mv=false;cancelPress();
-        skipSw=!!(e.target.closest&&e.target.closest("video,audio"));
+        skipSw=!!(e.target.closest&&e.target.closest("video,audio,.vm"));
         pt=setTimeout(function(){pt=null;lpF=true;if(selMode)return;if(navigator.vibrate)try{navigator.vibrate(15)}catch(x){}enterSel(key)},450);
       });
       el.addEventListener("pointermove",function(e){
@@ -2779,6 +2863,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
 
   // ---- chat open / close ----
   function closeChat(){
+    if(vmCur){try{vmCur.pause()}catch(e){}}
     ggStop();curGrp="";localTried={};
     cacheFlush();
     $("txt").blur();
