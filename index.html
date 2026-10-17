@@ -685,6 +685,11 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
 .vm-mic{position:absolute;left:-7px;bottom:-3px;width:18px;height:18px;fill:none;stroke:#8d98a0;stroke-width:2;stroke-linecap:round}
 .vm.pl .vm-mic{stroke:#53bdeb}
 </style>
+<style id="dl-css">
+.mdw{position:relative;display:block}
+.mdl{position:absolute;top:8px;right:8px;width:34px;height:34px;margin:0;padding:0;border:0;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:2}
+.mdl svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+</style>
 </head>
 <body>
 
@@ -2222,6 +2227,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     if(f.mine&&f.d&&!f.d.eaten&&!f.d.viewOnce&&(!f.d.type||f.d.type==="text")&&typeof f.d.text==="string"&&f.d.text&&(typeof f.d.t!=="number"||now()-f.d.t<EDIT_MS))l.push(["✏️ Edit",function(){startEdit(key)}]);
     if(!(f.d&&f.d.eaten))l.push(["🐛 Feed to insect",function(){sendEat(key)}]);
     if(f.mine&&f.d&&f.d.type!=="sys")l.push(["ℹ️ Info",function(){msgInfo(key)}]);
+    if(f.d&&!f.d.viewOnce&&!f.d.eaten&&(f.d.type==="image"||f.d.type==="video")&&typeof f.d.data==="string"&&f.d.data.indexOf("data:")===0)l.push(["⬇️ Download",function(){dlMedia(f.d.data,f.d.type)}]);
     l.push(["🗑 Delete for me",function(){hideKey(key);removeEl(key)}]);
     if(f.mine)l.push(["🗑 Delete for everyone",function(){if(ref)ref.child(key).remove()},"danger"]);
     if(f.d&&(f.d.type==="sticker"||f.d.type==="image")&&typeof f.d.data==="string")l.push(["⭐ Save as sticker",function(){saveStk(f.d.data,f.d.type==="sticker")}]);
@@ -2466,6 +2472,32 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     }catch(e){}
     return box;
   }
+  function dlMedia(data,kind){
+    try{
+      var m=/^data:([^;,]+)/.exec(data),mime=m?m[1]:(kind==="video"?"video/webm":"image/jpeg");
+      var ex={"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif","video/mp4":"mp4","video/webm":"webm","video/quicktime":"mov"}[mime]||String(mime).split("/")[1]||"bin";
+      var name="Chatly_"+kind+"_"+Date.now()+"."+ex;
+      var bin=atob(data.slice(data.indexOf(",")+1)),u=new Uint8Array(bin.length);
+      for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+      var blob=new Blob([u],{type:mime});
+      if(NATIVE&&window.File&&navigator.canShare){
+        var file=new File([blob],name,{type:mime});
+        if(navigator.canShare({files:[file]})){navigator.share({files:[file]}).catch(function(){});return}
+      }
+      var url=URL.createObjectURL(blob),a=document.createElement("a");
+      a.href=url;a.download=name;a.style.display="none";document.body.appendChild(a);a.click();document.body.removeChild(a);
+      setTimeout(function(){URL.revokeObjectURL(url)},4000);
+      toast("⬇ Downloading…");
+    }catch(e){toast("Could not download")}
+  }
+  function mdWrap(media,data,kind){
+    var w=document.createElement("div");w.className="mdw";
+    var b=document.createElement("button");b.type="button";b.className="mdl";b.setAttribute("aria-label","Download");
+    b.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>';
+    b.onclick=function(e){e.stopPropagation();dlMedia(data,kind)};
+    b.addEventListener("pointerdown",function(e){e.stopPropagation()});
+    w.appendChild(media);w.appendChild(b);return w;
+  }
   function addMsg(d,key){
     if(key&&hidden[key])return;
     if(!okMsg(d))return;
@@ -2548,10 +2580,10 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     }else if(d.type==="image"&&data.indexOf("data:image/")===0){
       var im=document.createElement("img");im.className="media";im.src=data;im.alt="photo";
       im.onclick=function(e){e.stopPropagation();$("vimg").style.cssText="";$("vimg").src=data;$("viewer").style.display="flex"};
-      el.appendChild(im);
+      el.appendChild(mdWrap(im,data,"image"));
     }else if(d.type==="video"&&data.indexOf("data:video/")===0){
       var vd=document.createElement("video");vd.className="media";vd.src=data;vd.controls=true;
-      vd.setAttribute("playsinline","");vd.preload="metadata";el.appendChild(vd);
+      vd.setAttribute("playsinline","");vd.preload="metadata";el.appendChild(mdWrap(vd,data,"video"));
     }else if(d.type==="sticker"&&data.indexOf("data:image/")===0){
       var sk=document.createElement("img");sk.className="media stk";sk.src=data;sk.alt="sticker";
       el.appendChild(sk);el.classList.add("big");
