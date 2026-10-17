@@ -4357,8 +4357,11 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   var GRPS={},GW=null,GINFO={},curGrp="",GRW={};
   function startGroups(){
     stopGroups();if(!db||!uid)return;
+    // pehle saved list turant dikhao (offline / slow net par bhi), phir Firebase se update
+    var gu=uid,gc=lsGet("grps_"+gu,null);
+    if(gc&&typeof gc==="object"){GRPS=gc;renderGroups()}
     GW=db.ref("rooms/_ug/"+uid);
-    GW.on("value",function(s){GRPS=s.val()||{};renderGroups();grpWatchAll()},function(){});
+    GW.on("value",function(s){GRPS=s.val()||{};lsSet("grps_"+gu,GRPS);renderGroups();grpWatchAll()},function(){});
   }
   function stopGroups(){
     if(GW){try{GW.off()}catch(e){}GW=null}
@@ -4368,7 +4371,8 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   }
   function grpInfo(g){
     if(GINFO[g])return Promise.resolve(GINFO[g]);
-    return db.ref("rooms/_grp/"+g).once("value").then(function(s){var v=s.val();if(v)GINFO[g]=v;return v});
+    var ck="ginfo_"+g,old=lsGet(ck,null);
+    return db.ref("rooms/_grp/"+g).once("value").then(function(s){var v=s.val();if(v){GINFO[g]=v;lsSet(ck,v)}return v||old}).catch(function(){if(old){GINFO[g]=old;return old}throw 0});
   }
   function renderGroups(){
     var box=$("glist");if(box)box.innerHTML="";
