@@ -3218,7 +3218,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   }
   function booHide(){booOn=false;booK="";var el=$("boo");if(el)el.classList.remove("go")}
   function booChk(ids){
-    var on=isDM&&!isBlocked()&&(ids.length>0||ONL[curOther]===1);
+    var on=isDM&&!isBlocked()&&ids.length>0; // cat sirf tab jab samne wala isi chat ke andar ho (sirf online hona kaafi nahi)
     if(booK!==curOther){booHide();booK=curOther}
     if(on&&!booOn){booOn=true;booPlay(curOther)}
     else if(!on&&booOn){booHide();booK=curOther}
@@ -3766,6 +3766,8 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
   }
   function fixVid(d,ty){var b=String(ty||"video/webm").split(";")[0]||"video/webm";d=String(d);return "data:"+b+";base64,"+d.slice(d.lastIndexOf(",")+1)}
   function imgToData(file){
+    // GIF ko JPEG me badalne se animation ruk jati hai: chhota GIF (<=1.5MB) original hi bhejo
+    if(file&&file.type==="image/gif"&&file.size<=1500000)return blobToData(file);
     return new Promise(function(res,rej){
       var u=URL.createObjectURL(file),im=new Image();
       im.onload=function(){
