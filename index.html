@@ -998,7 +998,7 @@ html[data-style=glass][data-mode=light] .rc .nn small{color:#5d5a7e}
   <div id="camModes"><button type="button" data-m="video">Video</button><button type="button" data-m="photo" class="on">Photo</button></div></div></div>
 <div id="viewer"><img id="vimg" alt=""><div id="vld">⏳ Loading HD photo...</div></div>
 <div id="galV"><div class="gtop"><span id="gCnt"></span><span style="flex:1"></span><button id="gDl" type="button" aria-label="Download">⬇</button><button id="gX" type="button" aria-label="Close">✕</button></div><div id="gTrack"></div></div>
-<div id="mgScr"><div class="mgTop"><button id="mgX" type="button" aria-label="Back">←</button><b>Media</b><span id="mgN"></span></div><div id="mgGrid"></div><button class="alt" id="mgMore" type="button">⬆ Purane photos / videos load karo</button></div>
+<div id="mgScr"><div class="mgTop"><button id="mgX" type="button" aria-label="Back">←</button><b>Media</b><span id="mgN"></span></div><div id="mgGrid"></div><button class="alt" id="mgMore" type="button">⬆ Load older photos / videos</button></div>
 <div id="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -2727,6 +2727,27 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     });
     return out;
   }
+  // data: URI ko ek hi baar Blob URL me badal kar cache karte hain -> swipe/reopen par dobara decode/load nahi hota
+  var bUrlC={},bUrlN=0;
+  function bSig(s){var n=s.length,h=n>>1;return n+":"+s.slice(h,h+48)+s.slice(-48)}
+  function blobUrl(data){
+    if(typeof data!=="string"||data.indexOf("data:")!==0)return data;
+    var k=bSig(data),u=bUrlC[k];if(u)return u;
+    try{
+      var c=data.indexOf(","),head=data.slice(5,c);
+      if(head.indexOf("base64")<0)return data;
+      var mime=head.split(";")[0]||"application/octet-stream";
+      var bin=atob(data.slice(c+1)),n=bin.length,a=new Uint8Array(n);
+      for(var i=0;i<n;i++)a[i]=bin.charCodeAt(i);
+      u=URL.createObjectURL(new Blob([a],{type:mime}));
+      bUrlC[k]=u;bUrlN++;return u;
+    }catch(e){return data}
+  }
+  function bUrlTrim(list){
+    if(bUrlN<250)return;
+    var keep={};(list||[]).forEach(function(it){keep[bSig(it.data)]=1});
+    Object.keys(bUrlC).forEach(function(k){if(!keep[k]){try{URL.revokeObjectURL(bUrlC[k])}catch(e){}delete bUrlC[k];bUrlN--}});
+  }
   function mkAlbum(d){
     var its=albItems(d),n=its.length,w=document.createElement("div");
     w.className="alb a"+Math.min(n,4);
@@ -2746,25 +2767,43 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     return w;
   }
   var galList=[],galI=0;
+  function gSrc(m){if(!m._src)m._src=blobUrl(m._d);return m._src}
+  var galPT=null;
+  // baaki sari photos peeche background me ek-ek karke load ho jati hain (sirf ek baar)
+  function galPre(){
+    clearTimeout(galPT);
+    galPT=setTimeout(function step(){
+      var sl=$("gTrack").children;
+      for(var i=0;i<sl.length;i++){
+        var m=sl[i].firstChild;
+        if(m&&m.tagName!=="VIDEO"&&!m.getAttribute("src")){m.src=gSrc(m);galPT=setTimeout(step,90);return}
+      }
+    },250);
+  }
   function galSync(){
     var sl=$("gTrack").children;
     $("gCnt").textContent=(galI+1)+" / "+galList.length;
     for(var k=0;k<sl.length;k++){
-      var m=sl[k].firstChild,near=Math.abs(k-galI)<=1;
-      if(near){if(!m.getAttribute("src")&&m._src)m.src=m._src}
-      else if(m.getAttribute("src")){if(m.tagName==="VIDEO"){try{m.pause()}catch(e){}}m.removeAttribute("src");if(m.tagName==="VIDEO")try{m.load()}catch(e){}}
-      if(k!==galI&&m.tagName==="VIDEO"){try{m.pause()}catch(e){}}
+      var m=sl[k].firstChild;if(!m)continue;
+      var near=Math.abs(k-galI)<=2;
+      if(m.tagName==="VIDEO"){
+        if(near){if(!m.getAttribute("src"))m.src=gSrc(m)}
+        else if(m.getAttribute("src")){try{m.pause()}catch(e){}m.removeAttribute("src");try{m.load()}catch(e){}}
+        if(k!==galI){try{m.pause()}catch(e){}}
+      }else if(near&&!m.getAttribute("src")){m.src=gSrc(m)}
     }
+    galPre();
   }
   function openGal(list,i){
     if(!list||!list.length)return;
     galList=list;galI=Math.max(0,Math.min(i||0,list.length-1));
+    bUrlTrim(list);
     var tr=$("gTrack");tr.innerHTML="";
     list.forEach(function(it){
       var sl=document.createElement("div");sl.className="gs";
       var m=document.createElement(it.type==="video"?"video":"img");
-      if(it.type==="video"){m.controls=true;m.setAttribute("playsinline","");m.preload="metadata"}else m.alt="photo";
-      m._src=it.data;sl.appendChild(m);tr.appendChild(sl);
+      if(it.type==="video"){m.controls=true;m.setAttribute("playsinline","");m.preload="metadata"}else{m.alt="photo";m.decoding="async"}
+      m._d=it.data;sl.appendChild(m);tr.appendChild(sl);
     });
     $("galV").style.display="flex";
     tr.scrollLeft=galI*tr.clientWidth;
@@ -2793,25 +2832,50 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
     arr.sort(function(a,b){return (b.t-a.t)||(a.o-b.o)});
     return arr;
   }
+  var mgEls={},mgT=null,mgIdle=0,mgLastN=-1;
   function renderMg(){
-    var list=chatMedia(),g=$("mgGrid");g.innerHTML="";
-    $("mgN").textContent=list.length?list.length+" items":"";
-    if(!list.length){var e=document.createElement("div");e.className="mge";e.textContent="Abhi koi photo ya video nahi";g.appendChild(e)}
+    var list=chatMedia(),g=$("mgGrid"),keep={};
+    $("mgN").textContent=list.length?list.length+" items"+(oldDone?"":" · loading…"):"";
+    var emp=g.querySelector(".mge");if(emp)g.removeChild(emp);
+    if(!list.length){
+      if(oldDone){var e=document.createElement("div");e.className="mge";e.textContent="No photos or videos yet";g.appendChild(e)}
+    }
     list.forEach(function(it,i){
-      var c=document.createElement("div");c.className="mgc";
-      if(it.type==="video"){
-        var m=document.createElement("video");m.muted=true;m.preload="metadata";m.setAttribute("playsinline","");m.src=it.data;
-        m.addEventListener("loadedmetadata",function(){try{m.currentTime=0.1}catch(e){}});
-        var p=document.createElement("span");p.className="apl";p.textContent="▶";c.appendChild(m);c.appendChild(p);
-      }else{var im=document.createElement("img");im.src=it.data;im.alt="";im.loading="lazy";im.decoding="async";c.appendChild(im)}
+      var key=it.type+"|"+bSig(it.data),c=mgEls[key];
+      if(!c){
+        c=document.createElement("div");c.className="mgc";
+        if(it.type==="video"){
+          var m=document.createElement("video");m.muted=true;m.preload="metadata";m.setAttribute("playsinline","");m.src=it.data;
+          m.addEventListener("loadedmetadata",function(){try{m.currentTime=0.1}catch(e){}});
+          var p=document.createElement("span");p.className="apl";p.textContent="▶";c.appendChild(m);c.appendChild(p);
+        }else{var im=document.createElement("img");im.src=it.data;im.alt="";im.loading="lazy";im.decoding="async";c.appendChild(im)}
+        mgEls[key]=c;
+      }
       c.onclick=function(){openGal(list,i)};
-      g.appendChild(c);
+      keep[key]=1;
+      if(g.children[i]!==c)g.insertBefore(c,g.children[i]||null);
     });
-    $("mgMore").style.display=oldDone?"none":"block";
+    Object.keys(mgEls).forEach(function(k){if(!keep[k]){var c=mgEls[k];if(c.parentNode)c.parentNode.removeChild(c);delete mgEls[k]}});
+    return list.length;
   }
-  function openMediaScr(){$("mgScr").style.display="flex";renderMg()}
-  $("mgX").onclick=function(){$("mgScr").style.display="none"};
-  $("mgMore").onclick=function(){if(oldDone||oldBusy)return;toast("Purane load ho rahe hain…");loadOlder();setTimeout(function(){if($("mgScr").style.display==="flex")renderMg()},1400)};
+  // media screen khulte hi purane photos/videos khud load hote rahte hain (button dabane ki zarurat nahi)
+  function mgAuto(){
+    clearTimeout(mgT);
+    if($("mgScr").style.display!=="flex")return;
+    var n=renderMg();
+    if(oldDone||!ref){$("mgMore").style.display="none";$("mgN").textContent=n?n+" items":"";return}
+    if(!oldBusy){
+      var before=Object.keys(info).length;
+      loadOlder();
+      if(Object.keys(info).length===before&&!oldBusy)mgIdle++;else mgIdle=0;
+    }
+    if(mgIdle>=4){$("mgMore").style.display="block";$("mgN").textContent=n?n+" items":"";return}
+    $("mgMore").style.display="none";
+    mgT=setTimeout(mgAuto,700);
+  }
+  function openMediaScr(){$("mgScr").style.display="flex";mgIdle=0;mgAuto()}
+  $("mgX").onclick=function(){clearTimeout(mgT);$("mgScr").style.display="none"};
+  $("mgMore").onclick=function(){mgIdle=0;mgAuto()};
   $("pvMedia").onclick=function(){$("pv").style.display="none";openMediaScr()};
 
   function addMsg(d,key){
@@ -2883,7 +2947,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
         e.stopPropagation();
         if(d.opened||d.eaten){vo.disabled=true;return}
         if(d.type==="image"){
-          $("vimg").style.cssText="";$("vimg").src=data;$("viewer").style.display="flex";
+          $("vimg").style.cssText="";$("vimg").src=blobUrl(data);$("viewer").style.display="flex";
         }else{
           var wrap=document.createElement("div");wrap.style.cssText="position:fixed;inset:0;z-index:99999;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:16px";
           var v=document.createElement("video");v.src=data;v.controls=true;v.autoplay=true;v.playsInline=true;v.style.cssText="max-width:100%;max-height:82vh";
@@ -2901,7 +2965,7 @@ var PUSH_KEY   = "";  // Same password you set as PUSH_KEY secret in the Worker
       el.appendChild(vo);
     }else if(d.type==="image"&&data.indexOf("data:image/")===0){
       var im=document.createElement("img");im.className="media";im.src=data;im.alt="photo";
-      im.onclick=function(e){e.stopPropagation();$("vimg").style.cssText="";$("vimg").src=data;$("viewer").style.display="flex"};
+      im.onclick=function(e){e.stopPropagation();$("vimg").style.cssText="";$("vimg").src=blobUrl(data);$("viewer").style.display="flex"};
       el.appendChild(mdWrap(im,data,"image"));
     }else if(d.type==="video"&&data.indexOf("data:video/")===0){
       var vd=document.createElement("video");vd.className="media";vd.src=data;vd.controls=true;
