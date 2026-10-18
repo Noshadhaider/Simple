@@ -132,7 +132,7 @@ var COLS=["#4d8dff","#a855f7","#ec4899","#f97316","#14b8a6","#84cc16","#eab308",
 function colr(s){var h=0;s=String(s||"");for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return COLS[h%COLS.length]}
 
 // ---------- state ----------
-var S={users:{},byUn:{},on:{},con:{},tok:{},ban:{},groups:{},chats:{},gstat:{},feed:[],prevOn:null,loaded:false,statDone:false,statTotal:0,statN:0,dp:{}};
+var S={rep:{},users:{},byUn:{},on:{},con:{},tok:{},ban:{},groups:{},chats:{},gstat:{},feed:[],prevOn:null,loaded:false,statDone:false,statTotal:0,statN:0,dp:{}};
 var TAB="dash",SEG="chats",UF="all",Q="";
 
 function uname(u){var x=S.users[u];return x?x.name:"Deleted user"}
@@ -162,9 +162,9 @@ function loadAll(){
       })
     });
   }).then(function(){
-    return Promise.all([api("rooms/_on"),api("rooms/_con"),api("rooms/_tok"),api("rooms/_ban"),api("rooms/_grp","shallow=true")]);
+    return Promise.all([api("rooms/_on"),api("rooms/_con"),api("rooms/_tok"),api("rooms/_ban"),api("rooms/_grp","shallow=true"),api("rooms/_rep").catch(function(){return {}})]);
   }).then(function(r){
-    S.on=r[0]||{};S.con=r[1]||{};S.tok=r[2]||{};S.ban=r[3]||{};
+    S.on=r[0]||{};S.con=r[1]||{};S.tok=r[2]||{};S.ban=r[3]||{};S.rep=r[5]||{};
     var gids=Object.keys(r[4]||{});S.groups={};
     return pool(gids,8,function(g){
       return Promise.all([api("rooms/_grp/"+g+"/name"),api("rooms/_grp/"+g+"/m"),api("rooms/_grp/"+g+"/a")]).then(function(x){
@@ -206,6 +206,7 @@ function consOf(u){var c=S.con[u]||{};return Object.keys(c)}
 function devices(u){return S.tok[u]?Object.keys(S.tok[u]).length:0}
 function chatList(){return Object.keys(S.chats).map(function(k){return Object.assign({room:k},S.chats[k])})}
 function totalMsgs(){var n=0;Object.keys(S.chats).forEach(function(k){n+=S.chats[k].n});Object.keys(S.gstat).forEach(function(k){n+=S.gstat[k].n});return n}
+function openReps(){return Object.keys(S.rep).filter(function(k){return !(S.rep[k]||{}).st})}
 function pendingReqs(){
   var out=[];Object.keys(S.con).forEach(function(a){Object.keys(S.con[a]||{}).forEach(function(b){var c=S.con[a][b];if(c&&c.st==="sent")out.push({from:a,to:b,t:c.t})})});
   return out;
@@ -275,10 +276,13 @@ function chatRow(c){
 }
 function rChats(){
   var q=Q.toLowerCase();
-  var h='<div class="seg"><button data-s="chats" class="'+(SEG==="chats"?"on":"")+'">Chats</button><button data-s="reqs" class="'+(SEG==="reqs"?"on":"")+'">Requests ('+pendingReqs().length+')</button></div>';
+  var h='<div class="seg"><button data-s="chats" class="'+(SEG==="chats"?"on":"")+'">Chats</button><button data-s="reqs" class="'+(SEG==="reqs"?"on":"")+'">Requests ('+pendingReqs().length+')</button><button data-s="reps" class="'+(SEG==="reps"?"on":"")+'">🚩 Reports ('+openReps().length+')</button></div>';
   if(SEG==="chats"){
     var l=chatList().filter(function(c){return !q||(uname(c.a)+" "+uname(c.b)+" "+uun(c.a)+" "+uun(c.b)).toLowerCase().indexOf(q)>=0}).sort(function(a,b){return (b.last||0)-(a.last||0)});
     h+='<input class="t" id="q" placeholder="🔍 Search by name" value="'+esc(Q)+'" style="margin-bottom:10px">'+(S.statDone?"":'<div class="progress">Activity load ho rahi hai… '+S.statN+'/'+S.statTotal+'</div>')+'<div class="list">'+(l.length?l.slice(0,300).map(chatRow).join(""):'<div class="empty">No chats</div>')+'</div>';
+  }else if(SEG==="reps"){
+    var rl=Object.keys(S.rep).map(function(k){return Object.assign({id:k},S.rep[k])}).sort(function(x,y){return (x.st?1:0)-(y.st?1:0)||(y.t||0)-(x.t||0)});
+    h+='<div class="list">'+(rl.length?rl.map(function(x){return '<div class="row" data-a="rep" data-id="'+esc(x.id)+'"><div class="av" style="background:'+(x.st?'#555':'#ff5a6a')+'">🚩</div><div class="mid"><b>'+esc(uname(x.by))+' ne report kiya '+esc(uname(x.on))+' ko</b><small>'+ago(x.t)+' · '+(x.st?'resolved':'open')+'</small></div></div>'}).join(""):'<div class="empty">Koi report nahi</div>')+'</div>';
   }else{
     var r=pendingReqs().sort(function(a,b){return (b.t||0)-(a.t||0)});
     h+='<div class="list">'+(r.length?r.map(function(x){return '<div class="row" data-a="user" data-id="'+x.from+'">'+avatar(x.from)+'<div class="mid"><b>'+esc(uname(x.from))+' → '+esc(uname(x.to))+'</b><small>request pending · '+ago(x.t)+'</small></div></div>'}).join(""):'<div class="empty">Koi pending request nahi</div>')+'</div>';
@@ -304,7 +308,7 @@ function rTools(){
    '<h3>📤 Export</h3><div class="acts"><button class="btn alt" id="csv">Users CSV download</button></div>'+
    '<h3>🔑 Change admin password</h3><input class="t" id="npw" type="text" placeholder="Naya admin password"><div class="acts"><button class="btn alt" id="mk">Hash banao</button></div><div class="sub" id="hout" style="word-break:break-all"></div>'+
    '<div class="sub" style="margin-top:6px">Hash ko is file me <code>ADMIN_HASH</code> me paste karo aur file dobara upload karo.</div>'+
-   '<h3>ℹ️ Note</h3><div class="sub">Privacy: panel me chat ke message text nahi dikhte, sirf kaun kis se connected hai, kitne messages hain aur last activity. Is page ka link sirf apne paas rakho.</div>';
+   '<h3>ℹ️ Note</h3><div class="sub">Chats tab me kisi bhi chat ya group par tap karo to uske messages dikhte hain. Users ko privacy policy me batana behtar hai ke admin moderation ke liye chats dekh sakta hai. Is page ka link sirf apne paas rakho.</div>';
   $("annSend").onclick=function(){
     var t=$("ann").value.trim();if(!t)return toast("Message likho");
     if(!confirm("Ye sab users ko dikhega. Send karein?"))return;
@@ -334,7 +338,7 @@ function userSheet(u){
   var ban=!!S.ban[u];
   var h='<div style="display:flex;gap:12px;align-items:center">'+avatar(u,56)+'<div><b style="font-size:17px">'+esc(x.name)+'</b><div class="sub">@'+esc(x.un)+'</div>'+(ban?'<span class="chip bad">banned</span>':'')+'</div></div>'+
    '<div style="margin-top:10px"><div class="kv"><span>Status</span><span>'+esc(lastSeen(u))+'</span></div>'+
-   '<div class="kv"><span>User ID</span><span>'+esc(u)+'</span></div>'+
+   '<div class="kv"><span>User ID</span><span>'+esc(u)+'</span></div>'+'<div class="kv"><span>Email</span><span id="uEm">…</span></div><div class="kv"><span>Mobile</span><span id="uPh">…</span></div>'+
    '<div class="kv"><span>Notification devices</span><span>'+devices(u)+'</span></div>'+
    '<div class="kv"><span>Contacts</span><span>'+cons.filter(function(c){return c.c.st==="ok"}).length+' accepted · '+cons.filter(function(c){return c.c.st!=="ok"}).length+' pending</span></div>'+
    '<div class="kv"><span>Groups</span><span>'+gs.length+'</span></div></div>'+
@@ -345,15 +349,77 @@ function userSheet(u){
     return '<div class="row" '+(S.users[o.k]?'data-a="user" data-id="'+o.k+'"':'')+'>'+avatar(o.k)+'<div class="mid"><b>'+esc(nm)+'</b><small>@'+esc((o.c&&o.c.un)||"")+' · since '+fdate(o.c&&o.c.t)+'</small></div>'+lab+'</div>'}).join(""):'<div class="empty">No contacts</div>')+'</div>';
   h+='<h3>Chat activity</h3><div class="list">'+(chats.length?chats.map(function(c){var o=c.a===u?c.b:c.a;return '<div class="row" data-a="chat" data-id="'+esc(c.room)+'">'+avatar(o)+'<div class="mid"><b>with '+esc(uname(o))+'</b><small>'+c.n+' messages · last '+ago(c.last)+'</small></div></div>'}).join(""):'<div class="empty">'+(S.statDone?"No chats":"Loading…")+'</div>')+'</div>';
   h+='<h3>Groups</h3><div class="list">'+(gs.length?gs.map(function(g){var G=S.groups[g];return '<div class="row" data-a="group" data-id="'+g+'"><div class="av" style="background:'+colr(g)+'">👪</div><div class="mid"><b>'+esc(G.name)+'</b><small>'+(G.a[u]?"admin · ":"")+Object.keys(G.m).length+' members</small></div></div>'}).join(""):'<div class="empty">No groups</div>')+'</div>';
+  openSheet(h);fillContact(u);
+}
+function fillContact(u){
+  var x=S.users[u];if(!x)return;var q=encodeURIComponent(x.un);
+  api("rooms/_em/"+q).then(function(v){var e=$("uEm");if(e)e.textContent=v||"—"}).catch(function(){var e=$("uEm");if(e)e.textContent="—"});
+  api("rooms/_ph/"+q).then(function(v){var e=$("uPh");if(e)e.textContent=v||"—"}).catch(function(){var e=$("uPh");if(e)e.textContent="—"});
+}
+function repSheet(id){
+  var R=S.rep[id];if(!R)return;
+  var h='<b style="font-size:17px">🚩 Report</b><div class="sub" style="margin:4px 0 8px">'+fdate(R.t)+' · '+(R.st?'resolved':'open')+'</div>'+
+   '<h3>Report karne wala</h3><div class="list">'+userRow(R.by,"")+'</div>'+
+   '<h3>Jis ko report kiya</h3><div class="list">'+userRow(R.on,"")+'</div>'+
+   '<div class="kv"><span>Email</span><span id="rEm">…</span></div><div class="kv"><span>Mobile</span><span id="rPh">…</span></div>'+
+   '<div class="acts"><button class="btn bad sm" data-do="ban" data-id="'+esc(R.on)+'">🚫 Ban reported user</button>'+
+   '<button class="btn ok sm" data-do="repdone" data-id="'+esc(id)+'">'+(R.st?'Reopen':'✔ Mark resolved')+'</button>'+
+   '<button class="btn alt sm" data-do="repdel" data-id="'+esc(id)+'">Delete report</button></div>'+
+   '<h3>Chat ke saare messages</h3><div class="feed" id="repMsgs" style="max-height:50vh"><div class="sub" style="padding:8px 0">Loading…</div></div>';
   openSheet(h);
+  var x=S.users[R.on];
+  if(x){var q=encodeURIComponent(x.un);
+    api("rooms/_em/"+q).then(function(v){var e=$("rEm");if(e)e.textContent=v||"—"}).catch(function(){});
+    api("rooms/_ph/"+q).then(function(v){var e=$("rPh");if(e)e.textContent=v||"—"}).catch(function(){});
+  }
+  loadMsgs(R.room,"repMsgs",0,R.on);
+}
+function bodyHtml(d){
+  var dt=typeof d.data==="string"?d.data:"",cap=d.caption?'<div>'+esc(d.caption)+'</div>':"";
+  if(d.type==="sys")return '<i class="sub">[system] '+esc(d.text||"")+'</i>';
+  if(d.type==="image"){
+    if(/^data:image\//.test(dt))return '<div><img loading="lazy" src="'+dt+'" style="max-width:100%;max-height:260px;border-radius:12px;margin-top:4px;cursor:pointer" onclick="openMedia(this.src,\'image\')"></div>'+cap;
+    return '<i class="sub">[photo'+(d.viewOnce?' · view once, khul chuki / data hat gaya':' · data nahi mila')+']</i>'+cap;
+  }
+  if(d.type==="video"){
+    if(/^data:video\//.test(dt))return '<div><video src="'+dt+'" controls preload="none" playsinline style="max-width:100%;max-height:260px;border-radius:12px;margin-top:4px"></video></div>'+cap;
+    return '<i class="sub">[video'+(d.viewOnce?' · view once, khul chuki / data hat gaya':' · bada video, Firebase me nahi')+']</i>'+cap;
+  }
+  if(d.type==="file"){
+    var nm=esc(d.fname||"file");
+    if(/^data:/.test(dt))return '📄 <a href="'+dt+'" download="'+nm+'" style="color:var(--acc)">'+nm+'</a> <span class="sub">'+(d.fsize?Math.round(d.fsize/1024)+' KB':'')+'</span>';
+    return '<i class="sub">[file '+nm+']</i>';
+  }
+  if(d.text)return esc(d.text)+cap;
+  return '<i class="sub">['+esc(d.type||"media")+']</i>'+cap;
+}
+function openMedia(src,kind){
+  var w=document.createElement("div");w.style.cssText="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;padding:12px";
+  w.onclick=function(){w.remove()};
+  var i=document.createElement("img");i.src=src;i.style.cssText="max-width:100%;max-height:100%;object-fit:contain";w.appendChild(i);document.body.appendChild(w);
+}
+function msgsHtml(m,hl){
+  var ks=Object.keys(m||{}).sort(function(x,y){return ((m[x]||{}).t||0)-((m[y]||{}).t||0)});
+  if(!ks.length)return '<div class="sub" style="padding:8px 0">Koi message nahi</div>';
+  return ks.map(function(k){var d=m[k]||{};
+    var who=(hl&&d.uid===hl)?'<b style="color:var(--bad)">'+esc(uname(d.uid))+'</b>':'<b>'+esc(d.uid?uname(d.uid):(d.name||"?"))+'</b>';
+    var t=bodyHtml(d);
+    return '<div style="display:block"><div>'+who+': '+t+'</div><span style="display:block">'+fdate(d.t)+'</span></div>'}).join("");
+}
+function loadMsgs(room,boxId,n,hl){
+  var box=$(boxId);if(!box)return;
+  api("rooms/"+encodeURIComponent(room)+"/messages",n?'orderBy="$key"&limitToLast='+n:"").then(function(m){
+    box=$(boxId);if(!box)return;box.innerHTML=msgsHtml(m,hl);box.scrollTop=box.scrollHeight;
+  }).catch(function(){var b=$(boxId);if(b)b.innerHTML='<div class="sub">Load nahi hue</div>'});
 }
 function chatSheet(room){
   var c=S.chats[room];if(!c)return;
   var h='<b style="font-size:17px">Chat</b><div class="list" style="margin-top:10px">'+userRow(c.a,"")+userRow(c.b,"")+'</div>'+
    '<div class="kv"><span>Messages</span><span>'+c.n+'</span></div><div class="kv"><span>Last activity</span><span>'+fdate(c.last)+' ('+ago(c.last)+')</span></div>'+
    '<div class="kv"><span>Room</span><span>'+esc(room)+'</span></div>'+
-   '<div class="acts"><button class="btn bad sm" data-do="clrchat" data-id="'+esc(room)+'">🧹 Delete chat history</button></div>';
-  openSheet(h);
+   '<div class="acts"><button class="btn bad sm" data-do="clrchat" data-id="'+esc(room)+'">🧹 Delete chat history</button></div>'+
+   '<h3>💬 Messages</h3><div class="feed" id="cMsgs" style="max-height:60vh"><div class="sub" style="padding:8px 0">Loading…</div></div>';
+  openSheet(h);loadMsgs(room,"cMsgs",0);
 }
 function groupSheet(g){
   var G=S.groups[g];if(!G)return;var st=S.gstat[g]||{n:0,last:0};
@@ -361,15 +427,16 @@ function groupSheet(g){
   var h='<b style="font-size:17px">'+esc(G.name)+'</b><div class="kv"><span>Members</span><span>'+mem.length+'</span></div><div class="kv"><span>Admins</span><span>'+Object.keys(G.a).length+'</span></div><div class="kv"><span>Messages</span><span>'+st.n+'</span></div><div class="kv"><span>Last activity</span><span>'+ago(st.last)+'</span></div>'+
    '<h3>Members</h3><div class="list">'+mem.map(function(u){
      return '<div class="row" '+(S.users[u]?'data-a="user" data-id="'+u+'"':'')+'>'+avatar(u)+'<div class="mid"><b>'+esc(S.users[u]?S.users[u].name:G.m[u]||"Deleted user")+'</b><small>'+(G.a[u]?"admin":"member")+' · '+esc(lastSeen(u))+'</small></div><button class="btn alt sm" data-do="rmmem" data-id="'+g+'" data-u="'+u+'">Remove</button></div>'}).join("")+'</div>'+
-   '<div class="acts"><button class="btn bad sm" data-do="delgrp" data-id="'+g+'">🗑 Delete group</button></div>';
-  openSheet(h);
+   '<div class="acts"><button class="btn bad sm" data-do="delgrp" data-id="'+g+'">🗑 Delete group</button></div>'+
+   '<h3>💬 Messages</h3><div class="feed" id="gMsgs" style="max-height:60vh"><div class="sub" style="padding:8px 0">Loading…</div></div>';
+  openSheet(h);loadMsgs("g_"+g,"gMsgs",0);
 }
 
 // ---------- actions ----------
 document.addEventListener("click",function(e){
   var el=e.target.closest("[data-a],[data-do]");if(!el)return;
   var a=el.getAttribute("data-a"),d=el.getAttribute("data-do"),id=el.getAttribute("data-id");
-  if(a){e.stopPropagation();if(a==="user")userSheet(id);else if(a==="chat")chatSheet(id);else if(a==="group")groupSheet(id);return}
+  if(a){e.stopPropagation();if(a==="user")userSheet(id);else if(a==="chat")chatSheet(id);else if(a==="group")groupSheet(id);else if(a==="rep")repSheet(id);return}
   e.stopPropagation();
   if(d==="ban"){
     var on=!S.ban[id];
@@ -382,6 +449,14 @@ document.addEventListener("click",function(e){
     var x=S.users[id];if(!confirm("@"+x.un+" ka account aur uski saari chats delete hongi. Ye wapas nahi hoga. Pakka?"))return;
     if(prompt('Confirm ke liye username likho: '+x.un)!==x.un)return toast("Username match nahi hua");
     delUser(id).then(function(){toast("Account delete ho gaya");closeSheet();return loadAll()}).catch(function(){toast("Failed")});
+  }else if(d==="more"){
+    var bx=el.getAttribute("data-b");loadMsgs(id,bx,300);
+  }else if(d==="repdone"){
+    var RR=S.rep[id],nv=RR.st?0:1;
+    upd(one("rooms/_rep/"+id+"/st",nv)).then(function(){RR.st=nv;toast(nv?"Resolved":"Reopened");repSheet(id);render()}).catch(function(){toast("Failed")});
+  }else if(d==="repdel"){
+    if(!confirm("Report delete karein?"))return;
+    upd(one("rooms/_rep/"+id,null)).then(function(){delete S.rep[id];toast("Report delete");closeSheet();render()}).catch(function(){toast("Failed")});
   }else if(d==="clrchat"){
     if(!confirm("Is chat ki saari history delete karein?"))return;
     upd(one("rooms/"+id+"/messages",null)).then(function(){S.chats[id].n=0;S.chats[id].last=0;toast("Chat history delete ho gayi");chatSheet(id);render()}).catch(function(){toast("Failed")});
